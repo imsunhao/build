@@ -1,0 +1,42 @@
+{
+  "defaultSeverity": "warning",
+  "extends": ["tslint:latest", "tslint-config-prettier"],
+  "linterOptions": {
+    "exclude": ["node_modules/**"]
+  },
+  "rules": {
+    "object-literal-sort-keys": false,
+    "curly": false,
+    "no-submodule-imports": false,
+    "no-object-literal-type-assertion": false,
+    "no-console": false,
+    "ordered-imports": false,
+    "one-variable-per-declaration": false,
+    "interface-over-type-literal": false,
+    "interface-name": false,
+    "max-classes-per-file": false,
+    "no-shadowed-variable": false,
+    "no-empty": false,
+    "prefer-object-spread": false,
+    "prefer-for-of": false,
+    "prefer-conditional-expression": false,
+    "no-namespace": false,
+    "no-empty-interface": false,
+    "no-var-requires": false,
+    "no-implicit-dependencies": false,
+    "no-bitwise": false,
+    "no-unused-expression": true,
+    "no-this-assignment": false,
+    "only-arrow-functions": false,
+    "variable-name": false,
+    "class-name": false,
+    "member-access": false,
+    "radix": false,
+    "member-ordering": [
+      true,
+      {
+        "order": ["public-static-field", "public-static-method"]
+      }
+    ]
+  }
+}
