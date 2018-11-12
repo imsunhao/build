@@ -1,7 +1,7 @@
 import merge from 'webpack-merge'
 import { getBaseConfig } from './webpack.base.config'
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin'
-import { getStyle } from './utils/style.webpack'
+import { getStyle } from 'src/utils/style.webpack'
 
 import { ConfigOptions } from 'types/build'
 
