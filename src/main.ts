@@ -1,5 +1,5 @@
 export function dev() {
-  console.log('build')
+  console.log('dev')
 }
 
 export function build() {
