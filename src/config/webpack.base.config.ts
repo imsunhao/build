@@ -13,10 +13,10 @@ export function getBaseConfig(options: ConfigOptions.options): Configuration {
   return merge(
     {
       mode: isProd ? 'production' : 'development',
+      context: options.rootDir,
       devtool: isProd ? false : '#cheap-module-source-map',
       output: {
         path: './dist',
-        publicPath: '/dist/',
         filename: '[chunkhash].js'
       },
       resolve: {

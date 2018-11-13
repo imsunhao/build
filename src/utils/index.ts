@@ -33,7 +33,6 @@ export function getConfig(argv: BuildService.parsedArgs): ConfigOptions.options 
   let options: any = {}
 
   if (existsSync(configFile)) {
-    console.log(configFile)
     delete require.cache[configFile]
     options = readFileSync(configFile, {
       encoding: 'utf-8'

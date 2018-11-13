@@ -7,18 +7,22 @@ import { ConfigOptions } from 'types/build'
 
 export function getServerConfig(options: ConfigOptions.options) {
   const server = options.webpack ? options.webpack.server || {} : {}
-  return merge(getBaseConfig(options), {
-    target: 'node',
-    devtool: '#source-map',
-    entry: './src/entry-server.js',
-    output: {
-      filename: 'server-bundle.js',
-      libraryTarget: 'commonjs2'
+  return merge(
+    getBaseConfig(options),
+    {
+      target: 'node',
+      devtool: '#source-map',
+      entry: './src/entry-server.js',
+      output: {
+        filename: 'server-bundle.js',
+        libraryTarget: 'commonjs2'
+      },
+      externals: nodeExternals({
+        // whitelist: /\.css$/
+        whitelist: [/\.css$/, /\?vue&type=style/]
+      }),
+      plugins: [new VueSSRServerPlugin()]
     },
-    externals: nodeExternals({
-      // whitelist: /\.css$/
-      whitelist: [/\.css$/, /\?vue&type=style/]
-    }),
-    plugins: [new VueSSRServerPlugin()]
-  }, server)
+    server
+  )
 }

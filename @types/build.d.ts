@@ -35,6 +35,10 @@ declare module 'types/build' {
      * build 通用 webpack 配置
      */
     interface options {
+      /**
+       * 根目录 地址
+       */
+      rootDir?: string
       sass?: sass
       webpack?: {
         mode?: 'development' | 'production' | 'none'

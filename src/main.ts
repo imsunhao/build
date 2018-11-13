@@ -7,10 +7,14 @@ export function dev(argv: BuildService.parsedArgs) {
   const options = getConfig(argv)
   options.webpack = options.webpack || {}
   options.webpack.mode = 'development'
+  const clientConfig = getClientConfig(options)
+  const serverConfig = getServerConfig(options)
   console.log('-------------------------------------')
-  console.log('getClientConfig', JSON.stringify(getClientConfig(options), null, 2))
+  console.log('clientConfig', JSON.stringify(clientConfig, null, 2))
   console.log('-------------------------------------')
-  console.log('getServerConfig', JSON.stringify(getServerConfig(options), null, 2))
+  console.log('getServerConfig', JSON.stringify(serverConfig, null, 2))
+  console.log('-------------------------------------')
+  console.log('options', options)
   console.log('-------------------------------------')
 }
 
