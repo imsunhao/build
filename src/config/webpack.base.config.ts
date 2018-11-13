@@ -4,11 +4,11 @@ import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin'
 import { VueLoaderPlugin } from 'vue-loader'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 
-const isProd = process.env.NODE_ENV === 'production'
-
 import { ConfigOptions } from 'types/build'
 
 export function getBaseConfig(options: ConfigOptions.options): Configuration {
+  const mode = options.webpack ? options.webpack.mode || 'production': 'production'
+  const isProd = mode === 'production'
   const base = options.webpack ? options.webpack.base || {} : {}
   return merge(
     {

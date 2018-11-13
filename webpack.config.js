@@ -1,11 +1,12 @@
 const path = require('path')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const nodeExternals = require('webpack-node-externals')
 
 const resolve = p => path.resolve(__dirname, p)
 
 module.exports = {
   mode: 'production',
   devtool: false,
+  target: 'node',
   entry: {
     build: './src/bin/build.ts',
     start: './src/bin/start.ts',
@@ -13,7 +14,8 @@ module.exports = {
   },
   output: {
     path: resolve('./dist'),
-    filename: '[name].js'
+    filename: '[name].js',
+    libraryTarget: 'commonjs2'
   },
   resolve: {
     extensions: ['.ts', '.js'],
@@ -21,26 +23,16 @@ module.exports = {
       src: resolve('./src')
     }
   },
-  // optimization: {
-  //   minimizer: [
-  //     new UglifyJsPlugin({
-  //       uglifyOptions: {
-  //         compress: {
-  //           warnings: false
-  //         },
-  //         output: {
-  //           comments: false
-  //         }
-  //       }
-  //     })
-  //   ]
-  // },
+  externals: nodeExternals({
+    // whitelist: /\.css$/
+    whitelist: [/\.css$/, /\?vue&type=style/]
+  }),
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
-        use: ['babel-loader', 'ts-loader']
+        use: [ 'ts-loader']
       }
     ]
   },

@@ -1,0 +1,9 @@
+{
+  "sass": {
+    "data": "asdg"
+  },
+  "babelrc": true,
+  "webpack": {
+    "mode": "dev"
+  }
+}

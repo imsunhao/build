@@ -1,3 +1,5 @@
 import { dev } from 'src/main'
 
-dev()
+export {
+  dev as start
+}

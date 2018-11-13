@@ -1,6 +1,10 @@
 declare module 'types/build' {
   import minimist from 'minimist'
   import { Configuration } from 'webpack'
+
+  /**
+   * build 服务
+   */
   namespace BuildService {
     /**
      * BuildService 通用 启动参数
@@ -24,17 +28,25 @@ declare module 'types/build' {
   }
 
   /**
-   * ConfigOptions 通用配置参数
+   * build 配置
    */
   namespace ConfigOptions {
+    /**
+     * build 通用 webpack 配置
+     */
     interface options {
       sass?: sass
       webpack?: {
+        mode?: 'development' | 'production' | 'none'
         base?: Configuration
         client?: Configuration
         server?: Configuration
       }
     }
+
+    /**
+     * build 通用 webpack 配置 - sass 配置
+     */
     interface sass {
       data?: string
       sourceMap?: boolean
