@@ -1,4 +1,6 @@
 declare module 'types/build' {
+  import serveStatic from 'serve-static'
+  import proxy from 'http-proxy-middleware'
   import minimist from 'minimist'
   import { Configuration } from 'webpack'
 
@@ -14,6 +16,10 @@ declare module 'types/build' {
        * 配置文件名称
        */
       'config-file': string
+      /**
+       * 当前运行版本
+       */
+      version: string
     }
 
     /**
@@ -25,16 +31,48 @@ declare module 'types/build' {
      * BuildService 通用 启动参数 + dev专用 启动参数
      */
     interface devParsedArgs extends parsedArgs {}
+
+    /**
+     * nodeJS 转发列表
+     */
+    interface proxyTable {
+      [key: string]: proxy.Config;
+    }
+
+    /**
+     * nodeJS 静态文件配置
+     */
+    interface statics {
+      [key: string]: ServeStaticOptions;
+    }
+
+    interface ServeStaticOptions extends serveStatic.ServeStaticOptions{
+      path: string
+    }
+
+    /**
+     * 初始化 服务器 参数集合
+     */
+    interface serverInitOptions {
+      statics?: statics
+      proxyTable?: proxyTable
+    }
   }
 
   /**
    * build 配置
    */
   namespace ConfigOptions {
+
+    type webpackMode = 'development' | 'production' | 'none'
     /**
      * build 通用 webpack 配置
      */
-    interface options {
+    interface options extends BuildService.serverInitOptions {
+      /**
+       * 当前运行版本
+       */
+      version?: string
       /**
        * 根目录 地址
        */
@@ -45,7 +83,7 @@ declare module 'types/build' {
       template?: string
       sass?: sass
       webpack?: {
-        mode?: 'development' | 'production' | 'none'
+        mode?: webpackMode
         base?: Configuration
         client?: Configuration
         server?: Configuration

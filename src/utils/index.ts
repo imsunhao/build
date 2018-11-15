@@ -1,11 +1,15 @@
 import { resolve } from 'path'
+import { ConfigOptions, BuildService } from 'types/build'
+
+import { getClientConfig, getServerConfig } from 'src/config'
 import { existsSync, readFileSync } from 'fs'
-
-import { BuildService } from 'types/build'
-
 import consola from 'consola'
 
-import { ConfigOptions } from 'types/build'
+import express, { Express } from 'express'
+import compression from 'compression'
+import proxyMiddleware from 'http-proxy-middleware'
+
+
 /**
  * 获取 根目录 地址
  * @param argv BuildService 通用 启动参数
@@ -26,7 +30,7 @@ function getConfigFile(argv: BuildService.parsedArgs) {
  * 获取 BuildService 配置
  * @param argv BuildService 通用 启动参数
  */
-export function getConfig(argv: BuildService.parsedArgs): ConfigOptions.options {
+export function getConfig(argv: BuildService.parsedArgs, mode: ConfigOptions.webpackMode): ConfigOptions.options {
   const rootDir = getRootDir(argv)
   const configFile = getConfigFile(argv)
 
@@ -56,5 +60,64 @@ export function getConfig(argv: BuildService.parsedArgs): ConfigOptions.options 
     options.rootDir = rootDir
   }
 
+  options.webpack = options.webpack || {}
+  options.webpack.mode = 'development'
+  options.webpack.client = getClientConfig(options)
+  options.webpack.server = getServerConfig(options)
+
+  options.version = argv.version
+
   return options
+}
+
+
+
+/**
+ * 初始化 服务器
+ * @param {*} BuildService.serverInitOptions
+ * @return express实例: app
+ */
+export function serverInit({ statics, proxyTable }: BuildService.serverInitOptions) {
+  const app = express()
+
+  app.use(compression({ threshold: 0 }))
+
+  serverStatics(app, statics)
+
+  serverProxy(app, proxyTable)
+
+  return app
+}
+
+export function serverStart(app: Express, { port } = { port: 7001 }) {
+  app.listen(port, () => {
+    console.log(`server started at localhost:${port}`)
+  })
+}
+
+function serverStatics(app: Express, statics?: BuildService.statics) {
+  if (!statics) return
+
+  Object.keys(statics).forEach(eStaticKey => {
+    const eStatic = statics[eStaticKey]
+    console.log('serverStatics', eStaticKey, eStatic.path, eStatic.maxAge)
+    app.use(
+      eStaticKey,
+      express.static(eStatic.path, {
+        maxAge: eStatic.maxAge || 0,
+      }),
+    )
+  })
+}
+
+function serverProxy(app: Express, proxyTable?: BuildService.proxyTable) {
+  if (!proxyTable) return
+  // proxy api requests
+  Object.keys(proxyTable).forEach(function(proxyKey) {
+    let options = proxyTable[proxyKey]
+    if (typeof options === 'string') {
+      options = { target: options }
+    }
+    app.use(proxyMiddleware(proxyKey, options))
+  })
 }

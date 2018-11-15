@@ -1,6 +1,6 @@
 {
   "name": "@bestminr/build",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "scripts": {
     "publish": "npm publish --access=public",
@@ -40,8 +40,10 @@
     "@babel/core": "^7.1.5",
     "@babel/preset-env": "^7.1.5",
     "@types/chokidar": "^1.7.5",
+    "@types/compression": "^0.0.36",
     "@types/express": "^4.16.0",
     "@types/friendly-errors-webpack-plugin": "^0.1.1",
+    "@types/http-proxy-middleware": "^0.17.6",
     "@types/memory-fs": "^0.3.2",
     "@types/mini-css-extract-plugin": "^0.2.0",
     "@types/minimist": "^1.2.0",
@@ -56,8 +58,11 @@
     "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
+    "compression": "^1.7.3",
     "consola": "^2.2.4",
+    "express": "^4.16.4",
     "friendly-errors-webpack-plugin": "^1.7.0",
+    "http-proxy-middleware": "^0.19.0",
     "mini-css-extract-plugin": "^0.4.4",
     "minimist": "^1.2.0",
     "vue-loader": "^15.4.2",
