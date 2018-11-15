@@ -39,6 +39,10 @@ declare module 'types/build' {
        * 根目录 地址
        */
       rootDir?: string
+      /**
+       * HTML template 地址
+       */
+      template?: string
       sass?: sass
       webpack?: {
         mode?: 'development' | 'production' | 'none'
