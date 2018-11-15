@@ -1,4 +1,9 @@
 declare module 'types/build' {
+  import {
+    Response as expressResponse,
+    Request as expressRequest,
+    NextFunction
+  } from 'express'
   import serveStatic from 'serve-static'
   import proxy from 'http-proxy-middleware'
   import minimist from 'minimist'
@@ -36,17 +41,17 @@ declare module 'types/build' {
      * nodeJS 转发列表
      */
     interface proxyTable {
-      [key: string]: proxy.Config;
+      [key: string]: proxy.Config
     }
 
     /**
      * nodeJS 静态文件配置
      */
     interface statics {
-      [key: string]: ServeStaticOptions;
+      [key: string]: ServeStaticOptions
     }
 
-    interface ServeStaticOptions extends serveStatic.ServeStaticOptions{
+    interface ServeStaticOptions extends serveStatic.ServeStaticOptions {
       path: string
     }
 
@@ -54,8 +59,29 @@ declare module 'types/build' {
      * 初始化 服务器 参数集合
      */
     interface serverInitOptions {
+      staticFileExts?: string[]
       statics?: statics
       proxyTable?: proxyTable
+    }
+
+    /**
+     * 服务器 Rander 中间件 Request
+     */
+    interface Request extends expressRequest {
+      /**
+       * 当前 rander 设备上下文
+       */
+      renderContext: any
+    }
+
+    namespace getRender {
+      interface opts {}
+      type renderFn = (
+        req: BuildService.Request,
+        res: expressResponse,
+        next: NextFunction
+      ) => void
+      type updateType = 'bundle' | 'clientManifest' | 'template'
     }
   }
 
@@ -63,8 +89,41 @@ declare module 'types/build' {
    * build 配置
    */
   namespace ConfigOptions {
-
     type webpackMode = 'development' | 'production' | 'none'
+
+    /**
+     * getStyle 额外参数
+     */
+    interface getStyleOptions {
+      isServer?: boolean
+    }
+
+    /**
+     * render 配置
+     */
+    interface render {
+      bundle: string
+      options: renderOptions
+    }
+    interface renderOptions {
+      templatePath: string
+      clientManifestPath: string
+
+      /**
+       * 根路径
+       */
+      basedir: string
+    }
+
+    /**
+     * webpack 配置
+     */
+    interface webpack {
+      mode?: webpackMode
+      base?: Configuration
+      client?: Configuration
+      server?: Configuration
+    }
     /**
      * build 通用 webpack 配置
      */
@@ -73,21 +132,36 @@ declare module 'types/build' {
        * 当前运行版本
        */
       version?: string
+
       /**
        * 根目录 地址
        */
       rootDir?: string
+
       /**
-       * HTML template 地址
+       * 当前 站点信息
        */
-      template?: string
+      siteInfo?: any
+
+      /**
+       * render 配置
+       */
+      render?: render
+
+      /**
+       * sass 配置
+       */
       sass?: sass
-      webpack?: {
-        mode?: webpackMode
-        base?: Configuration
-        client?: Configuration
-        server?: Configuration
-      }
+
+      /**
+       * babele 配置
+       */
+      babelrc?: any
+
+      /**
+       * webpack 配置
+       */
+      webpack?: webpack
     }
 
     /**

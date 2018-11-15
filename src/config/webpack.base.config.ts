@@ -7,9 +7,17 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import { ConfigOptions } from 'types/build'
 
 export function getBaseConfig(options: ConfigOptions.options): Configuration {
-  const mode = options.webpack ? options.webpack.mode || 'production': 'production'
+  const mode = options.webpack
+    ? options.webpack.mode || 'production'
+    : 'production'
   const isProd = mode === 'production'
   const base = options.webpack ? options.webpack.base || {} : {}
+
+  const babelLoder = {
+    loader: 'babel-loader',
+    options: options.babelrc
+  }
+
   return merge(
     {
       mode: isProd ? 'production' : 'development',
@@ -37,14 +45,14 @@ export function getBaseConfig(options: ConfigOptions.options): Configuration {
           },
           {
             test: /\.js$/,
-            loader: 'babel-loader',
+            use: babelLoder,
             exclude: /node_modules/
           },
           {
             test: /\.tsx?$/,
             exclude: /node_modules/,
             use: [
-              'babel-loader',
+              babelLoder,
               {
                 loader: 'ts-loader',
                 options: { appendTsxSuffixTo: [/\.vue$/] }

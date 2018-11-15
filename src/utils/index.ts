@@ -8,7 +8,7 @@ import consola from 'consola'
 import express, { Express } from 'express'
 import compression from 'compression'
 import proxyMiddleware from 'http-proxy-middleware'
-
+import LRU from 'lru-cache'
 
 /**
  * 获取 根目录 地址
@@ -26,11 +26,20 @@ function getConfigFile(argv: BuildService.parsedArgs) {
   return resolve(getRootDir(argv), argv['config-file'])
 }
 
+function getDefaultStaticFileExts() {
+  return ['.ico', '.png', '.jpg', '.js', '.css', '.json']
+}
+
+let buildServiceConfig: ConfigOptions.options
+
 /**
- * 获取 BuildService 配置
+ * 初始化并获取 BuildService 配置
  * @param argv BuildService 通用 启动参数
  */
-export function getConfig(argv: BuildService.parsedArgs, mode: ConfigOptions.webpackMode): ConfigOptions.options {
+export function initConfig(
+  argv: BuildService.parsedArgs,
+  mode: ConfigOptions.webpackMode
+): ConfigOptions.options {
   const rootDir = getRootDir(argv)
   const configFile = getConfigFile(argv)
 
@@ -65,19 +74,38 @@ export function getConfig(argv: BuildService.parsedArgs, mode: ConfigOptions.web
   options.webpack.client = getClientConfig(options)
   options.webpack.server = getServerConfig(options)
 
+  if (!options.staticFileExts || options.staticFileExts.constructor !== Array) {
+    options.staticFileExts = []
+  }
+
+  options.staticFileExts.concat(getDefaultStaticFileExts())
+
   options.version = argv.version
+
+  buildServiceConfig = options
 
   return options
 }
 
-
+/**
+ * 获取 BuildService 配置
+ */
+export function getConfig() {
+  if (!buildServiceConfig) {
+    consola.error('getConfig', 'config not init')
+  }
+  return buildServiceConfig
+}
 
 /**
  * 初始化 服务器
  * @param {*} BuildService.serverInitOptions
  * @return express实例: app
  */
-export function serverInit({ statics, proxyTable }: BuildService.serverInitOptions) {
+export function serverInit({
+  statics,
+  proxyTable
+}: BuildService.serverInitOptions) {
   const app = express()
 
   app.use(compression({ threshold: 0 }))
@@ -104,8 +132,8 @@ function serverStatics(app: Express, statics?: BuildService.statics) {
     app.use(
       eStaticKey,
       express.static(eStatic.path, {
-        maxAge: eStatic.maxAge || 0,
-      }),
+        maxAge: eStatic.maxAge || 0
+      })
     )
   })
 }
@@ -120,4 +148,16 @@ function serverProxy(app: Express, proxyTable?: BuildService.proxyTable) {
     }
     app.use(proxyMiddleware(proxyKey, options))
   })
+}
+
+export const BASE_RENDER_OPTIONS = {
+  // for component caching
+  cache: LRU({
+    max: 1000,
+    maxAge: 1000 * 60 * 15
+  }),
+  // this is only needed when vue-server-renderer is npm-linked
+  // basedir: resolve(config.assetRoot),
+  // recommended for performance
+  runInNewContext: 'once'
 }

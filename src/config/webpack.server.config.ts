@@ -2,6 +2,7 @@ import merge from 'webpack-merge'
 import { getBaseConfig } from './webpack.base.config'
 import nodeExternals from 'webpack-node-externals'
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin'
+import { getStyle } from 'src/utils/style.webpack'
 
 import { ConfigOptions } from 'types/build'
 
@@ -23,6 +24,7 @@ export function getServerConfig(options: ConfigOptions.options) {
       }),
       plugins: [new VueSSRServerPlugin()]
     },
+    getStyle(options, { isServer: true }),
     server
   )
 }

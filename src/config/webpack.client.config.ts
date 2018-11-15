@@ -15,7 +15,7 @@ export function getClientConfig(options: ConfigOptions.options) {
       },
       plugins: [new VueSSRClientPlugin()]
     },
-    getStyle(options),
+    getStyle(options, { isServer: false }),
     client
   )
 }

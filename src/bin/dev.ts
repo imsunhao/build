@@ -1,19 +1,25 @@
-import { getConfig, serverInit, serverStart } from 'src/utils'
+import { initConfig, serverInit, serverStart } from 'src/utils'
 
 import { BuildService } from 'types/build'
 import consola from 'consola'
+import { serverRender } from 'src/render'
 
 function devMain(argv: BuildService.parsedArgs) {
-  const options = getConfig(argv, 'development')
+  const options = initConfig(argv, 'development')
   consola.start(`@bestminr/build v${argv.version}`)
   consola.info('development mode')
+
   const app = serverInit({
     statics: options.statics,
     proxyTable: options.proxyTable
   })
+
+  serverRender(app)
+
   serverStart(app)
-  // const clientConfig = getClientConfig(options)
-  // const serverConfig = getServerConfig(options)
+  // const webpack: any = options.webpack
+  // const clientConfig = webpack.client
+  // const serverConfig = webpack.client
   // console.log('-------------------------------------')
   // console.log('clientConfig', JSON.stringify(clientConfig, null, 2))
   // console.log('-------------------------------------')

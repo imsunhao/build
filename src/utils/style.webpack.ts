@@ -1,5 +1,4 @@
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
-const isProd = process.env.NODE_ENV === 'production'
 import { Configuration } from 'webpack'
 
 import { ConfigOptions } from 'types/build'
@@ -15,26 +14,45 @@ function getSassLoader(sassOptions: ConfigOptions.sass = {}) {
   }
 }
 
-export function getStyle({ sass }: ConfigOptions.options = {}): Configuration {
+export function getStyle(
+  { sass, webpack }: ConfigOptions.options = {},
+  { isServer }: ConfigOptions.getStyleOptions
+): Configuration {
+  const isProd = webpack ? webpack.mode === 'production' : false
   return {
     module: {
-      rules: [
-        {
-          test: /\.scss$/,
-          use: [
-            isProd ? MiniCssExtractPlugin.loader : 'vue-style-loader',
-            'css-loader',
-            getSassLoader(sass)
+      rules: isServer
+        ? [
+            {
+              test: /\.scss$/,
+              use: !isProd
+                ? ['vue-style-loader', 'css-loader', getSassLoader(sass)]
+                : ['null-loader']
+            },
+            {
+              test: /\.css$/,
+              use: !isProd
+                ? ['vue-style-loader', 'css-loader']
+                : ['null-loader']
+            }
           ]
-        },
-        {
-          test: /\.css$/,
-          use: [
-            isProd ? MiniCssExtractPlugin.loader : 'vue-style-loader',
-            'css-loader'
+        : [
+            {
+              test: /\.scss$/,
+              use: [
+                isProd ? MiniCssExtractPlugin.loader : 'vue-style-loader',
+                'css-loader',
+                getSassLoader(sass)
+              ]
+            },
+            {
+              test: /\.css$/,
+              use: [
+                isProd ? MiniCssExtractPlugin.loader : 'vue-style-loader',
+                'css-loader'
+              ]
+            }
           ]
-        }
-      ]
     },
     optimization: {
       splitChunks: {
