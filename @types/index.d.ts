@@ -105,6 +105,15 @@ declare namespace build {
     }
 
     /**
+     * 获取 依赖注入的参数
+     */
+    interface getOptionsInject {
+      argv: BuildService.parsedArgs
+      mode: ConfigOptions.webpackMode
+      resolve: (path?: string) => string
+    }
+
+    /**
      * build 通用 webpack 配置
      */
     interface options extends BuildService.serverInitOptions {

@@ -8,6 +8,7 @@ import webpack, { Configuration } from 'webpack'
 import webpackConfig from 'config/webpack.config'
 import MFS from 'memory-fs'
 import compile from 'eval'
+import { createResolve } from 'src/utils/path.ts'
 
 import express, { Express } from 'express'
 import compression from 'compression'
@@ -85,23 +86,34 @@ function compilerConfig(configFile: string): Promise<() => Configuration> {
  * 设置 Babelrc
  * @param configFile build 通用 webpack 配置
  */
-function setBabelrc (options: ConfigOptions.options) {
+function setBabelrc(options: ConfigOptions.options) {
+  const babelPlugins = [
+    [
+      '@babel/plugin-transform-runtime',
+      {
+        helpers: false
+      }
+    ],
+    '@babel/plugin-syntax-flow',
+    '@babel/plugin-transform-modules-commonjs',
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-syntax-dynamic-import',
+    '@babel/plugin-transform-flow-strip-types',
+    [
+      '@babel/plugin-proposal-decorators',
+      {
+        legacy: true
+      }
+    ]
+  ]
   if (!options.babelrc) {
     options.babelrc = {}
   }
   if (!options.babelrc.plugins) {
-    options.babelrc.plugins = []
+    options.babelrc.plugins = babelPlugins
+  } else {
+    options.babelrc.plugins = options.babelrc.plugins.concat(babelPlugins)
   }
-  options.babelrc.plugins.concat([
-    '@babel/plugin-proposal-class-properties',
-    '@babel/plugin-proposal-decorators',
-    '@babel/plugin-syntax-dynamic-import',
-    '@babel/plugin-syntax-flow',
-    '@babel/plugin-transform-flow-strip-types',
-    '@babel/plugin-transform-modules-commonjs',
-    '@babel/plugin-transform-runtime',
-    '@babel/polyfill'
-  ])
   return options
 }
 
@@ -110,7 +122,10 @@ function setBabelrc (options: ConfigOptions.options) {
  * @param configFile build 通用 webpack 配置
  * @param mode webpack 环境
  */
-function setWebpack (options: ConfigOptions.options, mode: ConfigOptions.webpackMode) {
+function setWebpack(
+  options: ConfigOptions.options,
+  mode: ConfigOptions.webpackMode
+) {
   options.webpack = options.webpack || {}
   options.webpack.mode = mode
   options.webpack.client = getClientConfig(options)
@@ -121,11 +136,13 @@ function setWebpack (options: ConfigOptions.options, mode: ConfigOptions.webpack
  * 设置 静态文件后缀
  * @param configFile build 通用 webpack 配置
  */
-function setStaticFileExts (options: ConfigOptions.options) {
+function setStaticFileExts(options: ConfigOptions.options) {
   if (!options.staticFileExts || options.staticFileExts.constructor !== Array) {
     options.staticFileExts = []
   }
-  options.staticFileExts.concat(getDefaultStaticFileExts())
+  options.staticFileExts = options.staticFileExts.concat(
+    getDefaultStaticFileExts()
+  )
   return options
 }
 
@@ -147,7 +164,12 @@ export async function initConfig(
     if (!options) {
       options = {}
     } else {
-      options = options.default({ argv, mode })
+      const args: ConfigOptions.getOptionsInject = {
+        argv,
+        mode,
+        resolve: createResolve(rootDir)
+      }
+      options = options.default(args)
     }
     if (options.default) {
       options = options.default
@@ -160,11 +182,12 @@ export async function initConfig(
     options.rootDir = rootDir
   }
 
-  options = setWebpack(options, mode)
 
   options = setStaticFileExts(options)
 
   options = setBabelrc(options)
+
+  options = setWebpack(options, mode)
 
   options.version = argv.version
 
