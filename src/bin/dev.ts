@@ -1,6 +1,6 @@
 import { initConfig, serverInit, serverStart } from 'src/utils'
 
-import { BuildService } from 'types/build'
+import { BuildService } from '@types'
 import consola from 'consola'
 import { serverRender } from 'src/render'
 

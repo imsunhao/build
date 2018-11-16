@@ -583,6 +583,11 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@types/anymatch@*":
+  version "1.3.0"
+  resolved "http://registry.npm.taobao.org/@types/anymatch/download/@types/anymatch-1.3.0.tgz#d1d55958d1fccc5527d4aba29fc9c4b942f563ff"
+  integrity sha1-0dVZWNH8zFUn1Kuin8nEuUL1Y/8=
+
 "@types/body-parser@*":
   version "1.17.0"
   resolved "http://registry.npm.taobao.org/@types/body-parser/download/@types/body-parser-1.17.0.tgz#9f5c9d9bd04bb54be32d5eb9fc0d8c974e6cf58c"
@@ -753,6 +758,17 @@
   resolved "http://registry.npm.taobao.org/@types/webpack/download/@types/webpack-4.4.18.tgz#e3e04725ce1289b31b365e92058320706f502a08"
   integrity sha1-4+BHJc4SibMbNl6SBYMgcG9QKgg=
   dependencies:
+    "@types/node" "*"
+    "@types/tapable" "*"
+    "@types/uglify-js" "*"
+    source-map "^0.6.0"
+
+"@types/webpack@^4.4.19":
+  version "4.4.19"
+  resolved "http://registry.npm.taobao.org/@types/webpack/download/@types/webpack-4.4.19.tgz#6019c1825af582219011eaa6cdc179f2d57835f0"
+  integrity sha1-YBnBglr1giGQEeqmzcF58tV4NfA=
+  dependencies:
+    "@types/anymatch" "*"
     "@types/node" "*"
     "@types/tapable" "*"
     "@types/uglify-js" "*"

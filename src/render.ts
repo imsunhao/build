@@ -1,4 +1,4 @@
-import { ConfigOptions, BuildService } from 'types/build'
+import { ConfigOptions, BuildService } from '@types'
 import { Express } from 'express'
 import { getRender } from 'src/utils/render'
 import { createBundleRenderer } from 'vue-server-renderer'

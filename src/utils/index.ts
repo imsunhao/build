@@ -1,5 +1,5 @@
 import { resolve } from 'path'
-import { ConfigOptions, BuildService } from 'types/build'
+import { ConfigOptions, BuildService } from '@types'
 
 import { getClientConfig, getServerConfig } from 'src/config'
 import { existsSync, readFileSync } from 'fs'
@@ -70,7 +70,7 @@ export function initConfig(
   }
 
   options.webpack = options.webpack || {}
-  options.webpack.mode = 'development'
+  options.webpack.mode = mode
   options.webpack.client = getClientConfig(options)
   options.webpack.server = getServerConfig(options)
 

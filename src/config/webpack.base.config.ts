@@ -4,7 +4,7 @@ import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin'
 import { VueLoaderPlugin } from 'vue-loader'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 
-import { ConfigOptions } from 'types/build'
+import { ConfigOptions } from '@types'
 
 export function getBaseConfig(options: ConfigOptions.options): Configuration {
   const mode = options.webpack

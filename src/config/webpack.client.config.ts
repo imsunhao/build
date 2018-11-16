@@ -3,7 +3,7 @@ import { getBaseConfig } from './webpack.base.config'
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin'
 import { getStyle } from 'src/utils/style.webpack'
 
-import { ConfigOptions } from 'types/build'
+import { ConfigOptions } from '@types'
 
 export function getClientConfig(options: ConfigOptions.options) {
   const client = options.webpack ? options.webpack.client || {} : {}

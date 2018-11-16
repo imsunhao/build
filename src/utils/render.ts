@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express'
-import { BuildService } from 'types/build'
-import { Renderer } from 'vue-server-renderer'
+import { BuildService } from '@types'
+import { BundleRenderer } from 'vue-server-renderer'
 
 import path from 'path'
 import { getConfig } from 'src/utils'
@@ -26,7 +26,7 @@ const serverInfo =
   `vue-server-renderer/${require('vue-server-renderer/package.json').version}`
 
 export function getRender(
-  renderer: Renderer,
+  renderer: BundleRenderer,
   opts: BuildService.getRender.opts
 ) {
   return function render(

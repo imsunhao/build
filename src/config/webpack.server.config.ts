@@ -4,7 +4,7 @@ import nodeExternals from 'webpack-node-externals'
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin'
 import { getStyle } from 'src/utils/style.webpack'
 
-import { ConfigOptions } from 'types/build'
+import { ConfigOptions } from '@types'
 
 export function getServerConfig(options: ConfigOptions.options) {
   const server = options.webpack ? options.webpack.server || {} : {}

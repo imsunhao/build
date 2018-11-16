@@ -1,7 +1,7 @@
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import { Configuration } from 'webpack'
 
-import { ConfigOptions } from 'types/build'
+import { ConfigOptions } from '@types'
 
 function getSassLoader(sassOptions: ConfigOptions.sass = {}) {
   return {
