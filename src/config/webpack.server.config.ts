@@ -8,7 +8,7 @@ import { ConfigOptions } from '@types'
 
 export function getServerConfig(options: ConfigOptions.options) {
   const server = options.webpack ? options.webpack.server || {} : {}
-  return merge(
+  return (merge as any)(
     getBaseConfig(options),
     {
       target: 'node',

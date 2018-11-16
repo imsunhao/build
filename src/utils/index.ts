@@ -4,6 +4,7 @@ import { ConfigOptions, BuildService } from '@types'
 import { getClientConfig, getServerConfig } from 'src/config'
 import { existsSync, readFileSync } from 'fs'
 import consola from 'consola'
+import webpack from 'webpack'
 
 import express, { Express } from 'express'
 import compression from 'compression'
@@ -46,10 +47,11 @@ export function initConfig(
   let options: any = {}
 
   if (existsSync(configFile)) {
-    delete require.cache[configFile]
-    options = readFileSync(configFile, {
-      encoding: 'utf-8'
-    })
+    // delete require.cache[configFile]
+    // options = readFileSync(configFile, {
+    //   encoding: 'utf-8'
+    // })
+    webpack()
     try {
       options = JSON.parse(options)
     } catch (error) {

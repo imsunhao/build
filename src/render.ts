@@ -70,12 +70,11 @@ export function serverRender(app: Express) {
     }
   }
   // modify client config to work with hot middleware
-  clientConfig.entry.app = ['webpack-hot-middleware/client'].concat(
-    clientConfig.entry.app
-  )
-  // clientConfig.entry.browser_detection = [
-  //   'webpack-hot-middleware/client'
-  // ].concat(clientConfig.entry.browser_detection)
+  const entry = clientConfig.entry
+  Object.keys(entry).forEach(key => {
+    entry[key] = ['webpack-hot-middleware/client'].concat(entry[key])
+  })
+
   clientConfig.output.filename = '[name].js'
   clientConfig.plugins.push(
     new webpack.HotModuleReplacementPlugin(),
@@ -105,7 +104,7 @@ export function serverRender(app: Express) {
   })
 
   // hot middleware
-  app.use(webpackHotMiddleware(clientCompiler, { heartbeat: 5000 }))
+  app.use(webpackHotMiddleware((clientCompiler as any), { heartbeat: 5000 }))
 
   // watch and update server renderer
   const serverCompiler = webpack(serverConfig)

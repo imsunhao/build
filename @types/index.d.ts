@@ -7,6 +7,7 @@ import serveStatic from 'serve-static'
 import proxy from 'http-proxy-middleware'
 import minimist from 'minimist'
 import { Configuration } from 'webpack'
+import { TransformOptions } from 'babel-core'
 
 export = build
 
@@ -104,12 +105,12 @@ declare namespace build {
      * render 配置
      */
     interface render {
-      bundle: string
+      bundle?: string
       options: renderOptions
     }
     interface renderOptions {
       templatePath: string
-      clientManifestPath: string
+      clientManifestPath?: string
 
       /**
        * 根路径
@@ -158,7 +159,7 @@ declare namespace build {
       /**
        * babele 配置
        */
-      babelrc?: any
+      babelrc?: TransformOptions
 
       /**
        * webpack 配置

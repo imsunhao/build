@@ -17,7 +17,7 @@ function getSassLoader(sassOptions: ConfigOptions.sass = {}) {
 export function getStyle(
   { sass, webpack }: ConfigOptions.options = {},
   { isServer }: ConfigOptions.getStyleOptions
-): Configuration {
+) {
   const isProd = webpack ? webpack.mode === 'production' : false
   return {
     module: {

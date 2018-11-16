@@ -6,7 +6,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 
 import { ConfigOptions } from '@types'
 
-export function getBaseConfig(options: ConfigOptions.options): Configuration {
+export function getBaseConfig(options: ConfigOptions.options) {
   const mode = options.webpack
     ? options.webpack.mode || 'production'
     : 'production'
@@ -18,7 +18,7 @@ export function getBaseConfig(options: ConfigOptions.options): Configuration {
     options: options.babelrc
   }
 
-  return merge(
+  return (merge as any)(
     {
       mode: isProd ? 'production' : 'development',
       context: options.rootDir,

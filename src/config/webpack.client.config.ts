@@ -7,7 +7,7 @@ import { ConfigOptions } from '@types'
 
 export function getClientConfig(options: ConfigOptions.options) {
   const client = options.webpack ? options.webpack.client || {} : {}
-  return merge(
+  return (merge as any)(
     getBaseConfig(options),
     {
       entry: {
