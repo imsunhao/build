@@ -2,9 +2,12 @@ import { resolve } from 'path'
 import { ConfigOptions, BuildService } from '@types'
 
 import { getClientConfig, getServerConfig } from 'src/config'
-import { existsSync, readFileSync } from 'fs'
+import { existsSync } from 'fs'
 import consola from 'consola'
-import webpack from 'webpack'
+import webpack, { Configuration } from 'webpack'
+import webpackConfig from 'config/webpack.config'
+import MFS from 'memory-fs'
+import compile from 'eval'
 
 import express, { Express } from 'express'
 import compression from 'compression'
@@ -34,31 +37,69 @@ function getDefaultStaticFileExts() {
 let buildServiceConfig: ConfigOptions.options
 
 /**
+ * 编译 配置文件
+ * @param configFile 配置文件路径
+ */
+function compilerConfig(configFile: string): Promise<() => Configuration> {
+  return new Promise(function(done) {
+    webpackConfig.entry = {
+      config: configFile
+    }
+
+    const outputPath = '/cache'
+
+    if (webpackConfig.output) {
+      webpackConfig.output.path = outputPath
+    } else {
+      consola.error('webpackConfig.output is undefined!')
+      return {}
+    }
+
+    const configCompiler = webpack(webpackConfig)
+    const memoryFs = new MFS()
+    configCompiler.outputFileSystem = memoryFs
+    configCompiler.plugin('done', stats => {
+      stats = stats.toJson()
+      stats.errors.forEach((err: any) => consola.error(err))
+      stats.warnings.forEach((err: any) => consola.info(err))
+      if (stats.errors.length) return
+
+      let config: any = {}
+      try {
+        config = memoryFs.readFileSync(
+          resolve(outputPath, 'config.js'),
+          'utf-8'
+        )
+        config = compile(config)
+      } catch (e) {
+        consola.error(e)
+      } finally {
+        done(config)
+      }
+    })
+    configCompiler.run((err, stats) => {})
+  })
+}
+
+/**
  * 初始化并获取 BuildService 配置
  * @param argv BuildService 通用 启动参数
  */
-export function initConfig(
+export async function initConfig(
   argv: BuildService.parsedArgs,
   mode: ConfigOptions.webpackMode
-): ConfigOptions.options {
+): Promise<ConfigOptions.options> {
   const rootDir = getRootDir(argv)
   const configFile = getConfigFile(argv)
 
   let options: any = {}
 
   if (existsSync(configFile)) {
-    // delete require.cache[configFile]
-    // options = readFileSync(configFile, {
-    //   encoding: 'utf-8'
-    // })
-    webpack()
-    try {
-      options = JSON.parse(options)
-    } catch (error) {
-      consola.fatal('Could not JSON.parse config file: ' + argv['config-file'])
-    }
+    options = await compilerConfig(configFile)
     if (!options) {
       options = {}
+    } else {
+      options = options.default({ argv, mode })
     }
     if (options.default) {
       options = options.default
@@ -119,7 +160,7 @@ export function serverInit({
   return app
 }
 
-export function serverStart(app: Express, { port } = { port: 7001 }) {
+export function serverStart(app: Express, { port } = { port: 8080 }) {
   app.listen(port, () => {
     console.log(`server started at localhost:${port}`)
   })
@@ -130,7 +171,7 @@ function serverStatics(app: Express, statics?: BuildService.statics) {
 
   Object.keys(statics).forEach(eStaticKey => {
     const eStatic = statics[eStaticKey]
-    console.log('serverStatics', eStaticKey, eStatic.path, eStatic.maxAge)
+    consola.info('serverStatics', eStaticKey, eStatic.path, eStatic.maxAge)
     app.use(
       eStaticKey,
       express.static(eStatic.path, {

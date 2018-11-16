@@ -1,5 +1,4 @@
 import merge from 'webpack-merge'
-import { Configuration } from 'webpack'
 import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin'
 import { VueLoaderPlugin } from 'vue-loader'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'

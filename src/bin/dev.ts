@@ -4,10 +4,10 @@ import { BuildService } from '@types'
 import consola from 'consola'
 import { serverRender } from 'src/render'
 
-function devMain(argv: BuildService.parsedArgs) {
-  const options = initConfig(argv, 'development')
-  consola.start(`@bestminr/build v${argv.version}`)
-  consola.info('development mode')
+async function devMain(argv: BuildService.parsedArgs) {
+  consola.ready(`@bestminr/build v${argv.version}`)
+  consola.start('development mode')
+  const options = await initConfig(argv, 'development')
 
   const app = serverInit({
     statics: options.statics,
@@ -17,6 +17,7 @@ function devMain(argv: BuildService.parsedArgs) {
   serverRender(app)
 
   serverStart(app)
+
   // const webpack: any = options.webpack
   // const clientConfig = webpack.client
   // const serverConfig = webpack.client
@@ -25,7 +26,8 @@ function devMain(argv: BuildService.parsedArgs) {
   // console.log('-------------------------------------')
   // console.log('getServerConfig', JSON.stringify(serverConfig, null, 2))
   // console.log('-------------------------------------')
-  // console.log('options', options)
+  // delete options.webpack
+  // console.log('options', JSON.stringify(options, null, 2))
   // console.log('-------------------------------------')
 }
 
