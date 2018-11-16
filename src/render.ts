@@ -34,7 +34,7 @@ export function serverRender(app: Express) {
     clientManifest: ''
   }
 
-  const renderConfigOptions: ConfigOptions.renderOptions = config.render
+  const renderConfigOptions: ConfigOptions.options.renderOptions = config.render
     ? config.render.options
     : ({} as any)
 

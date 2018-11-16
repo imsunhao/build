@@ -4,7 +4,7 @@ module.exports = {
   mode: 'production',
   devtool: false,
   target: 'node',
-  stats: 'errors-only',
+  // stats: 'errors-only',
   output: {
     filename: '[name].js',
     libraryTarget: 'commonjs2'

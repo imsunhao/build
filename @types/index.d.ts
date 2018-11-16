@@ -62,6 +62,9 @@ declare namespace build {
      * 初始化 服务器 参数集合
      */
     interface serverInitOptions {
+      /**
+       * 静态文件后缀
+       */
       staticFileExts?: string[]
       statics?: statics
       proxyTable?: proxyTable
@@ -102,32 +105,6 @@ declare namespace build {
     }
 
     /**
-     * render 配置
-     */
-    interface render {
-      bundle?: string
-      options: renderOptions
-    }
-    interface renderOptions {
-      templatePath: string
-      clientManifestPath?: string
-
-      /**
-       * 根路径
-       */
-      basedir: string
-    }
-
-    /**
-     * webpack 配置
-     */
-    interface webpack {
-      mode?: webpackMode
-      base?: Configuration
-      client?: Configuration
-      server?: Configuration
-    }
-    /**
      * build 通用 webpack 配置
      */
     interface options extends BuildService.serverInitOptions {
@@ -149,12 +126,12 @@ declare namespace build {
       /**
        * render 配置
        */
-      render?: render
+      render?: options.render
 
       /**
        * sass 配置
        */
-      sass?: sass
+      sass?: options.sass
 
       /**
        * babele 配置
@@ -164,15 +141,43 @@ declare namespace build {
       /**
        * webpack 配置
        */
-      webpack?: webpack
+      webpack?: options.webpack
     }
+    namespace options {
+      /**
+       * render 配置
+       */
+      interface render {
+        bundle?: string
+        options: renderOptions
+      }
+      interface renderOptions {
+        templatePath: string
+        clientManifestPath?: string
 
-    /**
-     * build 通用 webpack 配置 - sass 配置
-     */
-    interface sass {
-      data?: string
-      sourceMap?: boolean
+        /**
+         * 根路径
+         */
+        basedir: string
+      }
+
+      /**
+       * webpack 配置
+       */
+      interface webpack {
+        mode?: webpackMode
+        base?: Configuration
+        client?: Configuration
+        server?: Configuration
+      }
+
+      /**
+       * build 通用 webpack 配置 - sass 配置
+       */
+      interface sass {
+        data?: string
+        sourceMap?: boolean
+      }
     }
   }
 }

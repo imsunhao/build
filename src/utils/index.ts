@@ -82,6 +82,54 @@ function compilerConfig(configFile: string): Promise<() => Configuration> {
 }
 
 /**
+ * 设置 Babelrc
+ * @param configFile build 通用 webpack 配置
+ */
+function setBabelrc (options: ConfigOptions.options) {
+  if (!options.babelrc) {
+    options.babelrc = {}
+  }
+  if (!options.babelrc.plugins) {
+    options.babelrc.plugins = []
+  }
+  options.babelrc.plugins.concat([
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-proposal-decorators',
+    '@babel/plugin-syntax-dynamic-import',
+    '@babel/plugin-syntax-flow',
+    '@babel/plugin-transform-flow-strip-types',
+    '@babel/plugin-transform-modules-commonjs',
+    '@babel/plugin-transform-runtime',
+    '@babel/polyfill'
+  ])
+  return options
+}
+
+/**
+ * 设置 webpack
+ * @param configFile build 通用 webpack 配置
+ * @param mode webpack 环境
+ */
+function setWebpack (options: ConfigOptions.options, mode: ConfigOptions.webpackMode) {
+  options.webpack = options.webpack || {}
+  options.webpack.mode = mode
+  options.webpack.client = getClientConfig(options)
+  options.webpack.server = getServerConfig(options)
+  return options
+}
+/**
+ * 设置 静态文件后缀
+ * @param configFile build 通用 webpack 配置
+ */
+function setStaticFileExts (options: ConfigOptions.options) {
+  if (!options.staticFileExts || options.staticFileExts.constructor !== Array) {
+    options.staticFileExts = []
+  }
+  options.staticFileExts.concat(getDefaultStaticFileExts())
+  return options
+}
+
+/**
  * 初始化并获取 BuildService 配置
  * @param argv BuildService 通用 启动参数
  */
@@ -112,16 +160,11 @@ export async function initConfig(
     options.rootDir = rootDir
   }
 
-  options.webpack = options.webpack || {}
-  options.webpack.mode = mode
-  options.webpack.client = getClientConfig(options)
-  options.webpack.server = getServerConfig(options)
+  options = setWebpack(options, mode)
 
-  if (!options.staticFileExts || options.staticFileExts.constructor !== Array) {
-    options.staticFileExts = []
-  }
+  options = setStaticFileExts(options)
 
-  options.staticFileExts.concat(getDefaultStaticFileExts())
+  options = setBabelrc(options)
 
   options.version = argv.version
 
