@@ -1,13 +1,15 @@
 import {
   Response as expressResponse,
   Request as expressRequest,
-  NextFunction
+  NextFunction,
+  Express
 } from 'express'
 import serveStatic from 'serve-static'
 import proxy from 'http-proxy-middleware'
 import minimist from 'minimist'
-import { Configuration } from 'webpack'
+import webpack, { Configuration } from 'webpack'
 import { TransformOptions } from 'babel-core'
+import MFS from 'memory-fs'
 
 export = build
 
@@ -89,6 +91,47 @@ declare namespace build {
       ) => void
       type updateType = 'bundle' | 'clientManifest' | 'template'
     }
+
+    /**
+     * compiler.webpack namespace
+     */
+    namespace compiler {
+      /**
+       * compiler 参数
+       */
+      type compilerOptions = prodCompilerOptions | devCompilerOptions
+
+      /**
+       * compiler 基础 参数
+       */
+      interface compilerBaseOptions {
+        clientConfig: Configuration
+        serverConfig: Configuration
+        clientCompilerDone: any
+        serverCompilerDone: any
+      }
+
+      /**
+       * dev compiler 参数
+       */
+      interface devCompilerOptions extends compilerBaseOptions {
+        clientCompilerDone: (
+          { devMiddleware, stats }: { devMiddleware: any; stats: webpack.Stats }
+        ) => void
+        serverCompilerDone: (
+          { err, stats, mfs }: { err: any; stats: webpack.Stats; mfs: MFS }
+        ) => void
+        app: Express
+      }
+
+      /**
+       * prod compiler 参数
+       */
+      interface prodCompilerOptions extends compilerBaseOptions {
+        clientCompilerDone: ({ stats }: { stats: webpack.Stats }) => void
+        serverCompilerDone: ({ stats }: { stats: webpack.Stats }) => void
+      }
+    }
   }
 
   /**
@@ -110,6 +153,10 @@ declare namespace build {
     interface getOptionsInject {
       argv: BuildService.parsedArgs
       mode: ConfigOptions.webpackMode
+      /**
+       * 获取 正确的路径
+       * @param path 相对root路径
+       */
       resolve: (path?: string) => string
     }
 

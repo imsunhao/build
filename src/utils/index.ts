@@ -8,7 +8,7 @@ import webpack, { Configuration } from 'webpack'
 import webpackConfig from 'config/webpack.config'
 import MFS from 'memory-fs'
 import compile from 'eval'
-import { createResolve } from 'src/utils/path.ts'
+import { createResolve } from 'src/utils/path'
 
 import express, { Express } from 'express'
 import compression from 'compression'
@@ -226,12 +226,22 @@ export function serverInit({
   return app
 }
 
+/**
+ * 服务器启动
+ * @param app Express 实例
+ * @param param1 服务器启动参数
+ */
 export function serverStart(app: Express, { port } = { port: 8080 }) {
   app.listen(port, () => {
     console.log(`server started at localhost:${port}`)
   })
 }
 
+/**
+ * 服务器 静态文件服务
+ * @param app Express 实例
+ * @param statics 静态文件配置集合
+ */
 function serverStatics(app: Express, statics?: BuildService.statics) {
   if (!statics) return
 
@@ -247,6 +257,11 @@ function serverStatics(app: Express, statics?: BuildService.statics) {
   })
 }
 
+/**
+ * 服务器 接口转发服务
+ * @param app Express 实例
+ * @param proxyTable 转发列表集合
+ */
 function serverProxy(app: Express, proxyTable?: BuildService.proxyTable) {
   if (!proxyTable) return
   // proxy api requests
@@ -259,6 +274,9 @@ function serverProxy(app: Express, proxyTable?: BuildService.proxyTable) {
   })
 }
 
+/**
+ * 基础 渲染 配置
+ */
 export const BASE_RENDER_OPTIONS = {
   // for component caching
   cache: LRU({

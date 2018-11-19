@@ -2,11 +2,11 @@ import { initConfig, serverInit, serverStart } from 'src/utils'
 
 import { BuildService } from '@types'
 import consola from 'consola'
-import { serverRender } from 'src/render'
+import { serverDevRender } from 'src/render'
 
 async function devMain(argv: BuildService.parsedArgs) {
   consola.ready(`@bestminr/build v${argv.version}`)
-  consola.start('development mode')
+  consola.start('dev with development mode')
   const options = await initConfig(argv, 'development')
 
   const app = serverInit({
@@ -14,7 +14,7 @@ async function devMain(argv: BuildService.parsedArgs) {
     proxyTable: options.proxyTable
   })
 
-  serverRender(app)
+  serverDevRender(app)
 
   serverStart(app)
 

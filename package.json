@@ -1,6 +1,6 @@
 {
   "name": "@bestminr/build",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "license": "MIT",
   "scripts": {
     "publish": "npm publish --access=public",
@@ -81,6 +81,7 @@
     "mini-css-extract-plugin": "^0.4.4",
     "minimist": "^1.2.0",
     "node-sass": "^4.10.0",
+    "null-loader": "^0.1.1",
     "rimraf": "^2.6.2",
     "sass-loader": "^7.1.0",
     "ts-loader": "^5.3.0",

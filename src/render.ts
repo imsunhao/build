@@ -3,16 +3,18 @@ import { Express } from 'express'
 import { getRender } from 'src/utils/render'
 import { createBundleRenderer } from 'vue-server-renderer'
 import path from 'path'
-import webpack from 'webpack'
-import MFS from 'memory-fs'
 import { readFileSync } from 'fs'
 import chokidar from 'chokidar'
 import cookieParser from 'cookie-parser'
-import webpackHotMiddleware from 'webpack-hot-middleware'
 import { getConfig, BASE_RENDER_OPTIONS } from 'src/utils'
+import { compiler } from 'src/utils/compiler.webpack.ts'
 import consola from 'consola'
 
-export function serverRender(app: Express) {
+/**
+ * dev 服务器渲染 服务
+ * @param app Express 实例
+ */
+export function serverDevRender(app: Express) {
   const config = getConfig()
   const clientConfig: any = config.webpack ? config.webpack.client || {} : {}
   const serverConfig: any = config.webpack ? config.webpack.server || {} : {}
@@ -69,29 +71,8 @@ export function serverRender(app: Express) {
       ready(render)
     }
   }
-  // modify client config to work with hot middleware
-  const entry = clientConfig.entry
-  Object.keys(entry).forEach(key => {
-    entry[key] = ['webpack-hot-middleware/client'].concat(entry[key])
-  })
 
-  clientConfig.output.filename = '[name].js'
-  clientConfig.plugins.push(
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
-  )
-
-  // dev middleware
-  const clientCompiler = webpack(clientConfig)
-  const devMiddleware = require('webpack-dev-middleware')(clientCompiler, {
-    publicPath: clientConfig.output.publicPath,
-    noInfo: true,
-    writeToDisk: false
-  })
-
-  app.use(devMiddleware)
-
-  clientCompiler.plugin('done', stats => {
+  function clientCompilerDone({ devMiddleware, stats }: any) {
     stats = stats.toJson()
     stats.errors.forEach((err: any) => consola.error(err))
     stats.warnings.forEach((err: any) => consola.info(err))
@@ -101,16 +82,9 @@ export function serverRender(app: Express) {
       readFile(devMiddleware.fileSystem, 'vue-ssr-client-manifest.json')
     )
     update('clientManifest')
-  })
+  }
 
-  // hot middleware
-  app.use(webpackHotMiddleware((clientCompiler as any), { heartbeat: 5000 }))
-
-  // watch and update server renderer
-  const serverCompiler = webpack(serverConfig)
-  const mfs = new MFS()
-  serverCompiler.outputFileSystem = mfs
-  serverCompiler.watch({}, (err, stats) => {
+  function serverCompilerDone({ err, mfs, stats }: any) {
     if (err) throw err
 
     stats = stats.toJson()
@@ -119,7 +93,18 @@ export function serverRender(app: Express) {
       readFile(mfs, 'vue-ssr-server-bundle.json')
     )
     update('bundle')
-  })
+  }
+
+  compiler(
+    {
+      app,
+      serverConfig,
+      clientConfig,
+      clientCompilerDone,
+      serverCompilerDone
+    },
+    'development'
+  )
 
   renderOptions.template = readFileSync(
     renderConfigOptions.templatePath,
@@ -140,4 +125,47 @@ export function serverRender(app: Express) {
       render(req, res, next)
     })
   })
+}
+
+/**
+ * prod 服务器渲染 服务
+ * @param app Express 实例
+ */
+export function serverRender(app: Express) {
+  const config = getConfig()
+
+  try {
+    if (
+      config.render &&
+      config.render.bundle &&
+      config.render.options.clientManifestPath
+    ) {
+      const bundle = JSON.parse(readFileSync(config.render.bundle, 'utf-8'))
+      const template = readFileSync(config.render.options.templatePath, 'utf-8')
+      const clientManifest = JSON.parse(
+        readFileSync(config.render.options.clientManifestPath, 'utf-8')
+      )
+      const options = Object.assign(
+        {
+          ...BASE_RENDER_OPTIONS,
+          template,
+          clientManifest
+        },
+        config.render.options
+      )
+
+      const renderer = createBundleRenderer(bundle, options)
+
+      const render: any = getRender(renderer, {
+        siteInfo: config.siteInfo
+      })
+
+      app.get('*', render)
+    } else {
+      throw new Error('config error')
+    }
+  } catch (error) {
+    consola.fatal('config.render config error!')
+    process.exit(0)
+  }
 }
