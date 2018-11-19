@@ -8,7 +8,9 @@ async function buildMain(argv: BuildService.parsedArgs) {
   consola.ready(`@bestminr/build v${argv.version}`)
   consola.start('start with production mode')
 
-  const options = await initConfig(argv, 'production')
+  const options = await initConfig(argv, 'production', {
+    clear: true
+  })
 
   serverBuild()
 

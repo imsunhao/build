@@ -13,6 +13,8 @@ import MFS from 'memory-fs'
 
 export = build
 
+type DictOf<T> = {[key: string]: T}
+
 declare namespace build {
   /**
    * build 服务
@@ -26,10 +28,16 @@ declare namespace build {
        * 配置文件名称
        */
       'config-file': string
+
       /**
        * 当前运行版本
        */
       version: string
+
+      /**
+       * 是否使用 webpack dll
+       */
+      dll: boolean
     }
 
     /**
@@ -221,10 +229,27 @@ declare namespace build {
        * webpack 配置
        */
       interface webpack {
+        /**
+         * webpack构建 dll配置
+         */
+        dll?: webpackDll
         mode?: webpackMode
         base?: Configuration
         client?: Configuration
         server?: Configuration
+      }
+
+      interface webpackDll {
+        /**
+         * dll配置 覆盖 webpack构建
+         */
+        webpack?: Configuration
+        entry: DictOf<string[]>
+        template: string
+        templateOutput: string
+        path: string
+        publicPath: string,
+        define: DictOf<string>
       }
 
       /**
@@ -233,6 +258,16 @@ declare namespace build {
       interface sass {
         data?: string
         sourceMap?: boolean
+      }
+
+      /**
+       * build initConfig 可选配置
+       */
+      interface initConfigOptions {
+        /**
+         * initConfig 获取配置后 是否 清空dist
+         */
+        clear?: boolean
       }
     }
   }

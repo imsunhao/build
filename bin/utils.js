@@ -8,10 +8,11 @@ function getArgv() {
       H: 'hostname',
       p: 'port',
       h: 'help',
+      d: 'dll',
       c: 'config-file',
       v: 'version'
     },
-    boolean: ['h', 'v'],
+    boolean: ['h', 'd', 'v'],
     string: ['H', 'c'],
     default: {
       c: 'build.config.ts'
@@ -31,15 +32,13 @@ function getArgv() {
     process.stderr.write(`
       Description
         Starts the application in ${process.env.NODE_ENV} mode
-      Usage
-        $ service:dev <dir> -p <port number> -H <hostname>
       Options
         --port, -p          A port number on which to start the application
         --hostname, -H      Hostname on which to start the application
+        --dll, -d           build webpack dll
         --version, -v       look over version
         --config-file, -c   Path to config file (default: build.config.ts)
         --help, -h          Displays this message
-
   `)
     process.exit(0)
   }

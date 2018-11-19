@@ -3,6 +3,24 @@ import MFS from 'memory-fs'
 import webpackHotMiddleware from 'webpack-hot-middleware'
 import webpack from 'webpack'
 import consola from 'consola'
+import { getConfigConfig } from 'src/config/webpack.config.config'
+import { getDllConfig } from 'src/config/webpack.dll.config'
+import compile from 'eval'
+import { resolve } from 'path'
+import rimraf from 'rimraf'
+
+function showError(stats: webpack.Stats) {
+  if (stats.hasWarnings()) {
+    stats.compilation.warnings.forEach(warning => {
+      consola.info(warning)
+    })
+  }
+  if (stats.hasErrors()) {
+    stats.compilation.errors.forEach(error => {
+      consola.fatal(error)
+    })
+  }
+}
 
 /**
  * webpack 编译 mode production 编译
@@ -34,16 +52,7 @@ function prodCompiler({
         warnings: false
       })
     )
-    if (stats.hasWarnings()) {
-      stats.compilation.warnings.forEach(warning => {
-        consola.info(warning)
-      })
-    }
-    if (stats.hasErrors()) {
-      stats.compilation.errors.forEach(error => {
-        consola.fatal(error)
-      })
-    }
+    showError(stats)
   })
 }
 
@@ -116,4 +125,90 @@ export function compiler(
   } else {
     devCompiler(options as BuildService.compiler.devCompilerOptions)
   }
+}
+
+/**
+ * webpack 编译 配置文件
+ * @param configFile 配置文件路径
+ */
+export function compilerConfig(
+  configFile: string
+): Promise<() => webpack.Configuration> {
+  return new Promise(function(done) {
+    const webpackConfig = getConfigConfig()
+    webpackConfig.entry = {
+      config: configFile
+    }
+
+    const outputPath = '/cache'
+
+    if (webpackConfig.output) {
+      webpackConfig.output.path = outputPath
+    } else {
+      consola.error('webpackConfig.output is undefined!')
+      return {}
+    }
+
+    const compiler = webpack(webpackConfig)
+    const memoryFs = new MFS()
+    compiler.outputFileSystem = memoryFs
+    compiler.plugin('done', stats => {
+      stats = stats.toJson()
+      stats.errors.forEach((err: any) => consola.error(err))
+      stats.warnings.forEach((err: any) => consola.info(err))
+      if (stats.errors.length) return
+
+      let config: any = {}
+      try {
+        config = memoryFs.readFileSync(
+          resolve(outputPath, 'config.js'),
+          'utf-8'
+        )
+        config = compile(config)
+      } catch (e) {
+        consola.error(e)
+      } finally {
+        done(config)
+      }
+    })
+    compiler.run((err, stats) => {})
+  })
+}
+
+/**
+ * webpack 编译 dll
+ * @param configFile 配置文件路径
+ */
+export function compilerDll(options: ConfigOptions.options): Promise<any> {
+  return new Promise(function(done) {
+    const webpackConfig = getDllConfig(options)
+
+    if (webpackConfig && webpackConfig.output) {
+      rimraf.sync(webpackConfig.output.path || '')
+    }
+
+    const compiler = webpack(webpackConfig)
+    compiler.plugin('done', stats => {
+      stats = stats.toJson()
+      stats.errors.forEach((err: any) => consola.error(err))
+      stats.warnings.forEach((err: any) => consola.info(err))
+      if (stats.errors.length) {
+        consola.fatal('build dll fail!')
+        return process.exit(0)
+      }
+      done()
+    })
+
+    compiler.run((err, stats) => {
+      {
+        consola.log(
+          stats.toString({
+            all: false,
+            assets: true
+          })
+        )
+        showError(stats)
+      }
+    })
+  })
 }

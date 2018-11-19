@@ -4,16 +4,14 @@ import { ConfigOptions, BuildService } from '@types'
 import { getClientConfig, getServerConfig } from 'src/config'
 import { existsSync } from 'fs'
 import consola from 'consola'
-import webpack, { Configuration } from 'webpack'
-import webpackConfig from 'config/webpack.config'
-import MFS from 'memory-fs'
-import compile from 'eval'
 import { createResolve } from 'src/utils/path'
+import rimraf from 'rimraf'
 
 import express, { Express } from 'express'
 import compression from 'compression'
 import proxyMiddleware from 'http-proxy-middleware'
 import LRU from 'lru-cache'
+import { compilerConfig, compilerDll } from 'src/utils/compiler.webpack'
 
 /**
  * 获取 根目录 地址
@@ -36,51 +34,6 @@ function getDefaultStaticFileExts() {
 }
 
 let buildServiceConfig: ConfigOptions.options
-
-/**
- * 编译 配置文件
- * @param configFile 配置文件路径
- */
-function compilerConfig(configFile: string): Promise<() => Configuration> {
-  return new Promise(function(done) {
-    webpackConfig.entry = {
-      config: configFile
-    }
-
-    const outputPath = '/cache'
-
-    if (webpackConfig.output) {
-      webpackConfig.output.path = outputPath
-    } else {
-      consola.error('webpackConfig.output is undefined!')
-      return {}
-    }
-
-    const configCompiler = webpack(webpackConfig)
-    const memoryFs = new MFS()
-    configCompiler.outputFileSystem = memoryFs
-    configCompiler.plugin('done', stats => {
-      stats = stats.toJson()
-      stats.errors.forEach((err: any) => consola.error(err))
-      stats.warnings.forEach((err: any) => consola.info(err))
-      if (stats.errors.length) return
-
-      let config: any = {}
-      try {
-        config = memoryFs.readFileSync(
-          resolve(outputPath, 'config.js'),
-          'utf-8'
-        )
-        config = compile(config)
-      } catch (e) {
-        consola.error(e)
-      } finally {
-        done(config)
-      }
-    })
-    configCompiler.run((err, stats) => {})
-  })
-}
 
 /**
  * 设置 Babelrc
@@ -122,13 +75,13 @@ function setBabelrc(options: ConfigOptions.options) {
  * @param configFile build 通用 webpack 配置
  * @param mode webpack 环境
  */
-function setWebpack(
+async function setWebpack(
   options: ConfigOptions.options,
   mode: ConfigOptions.webpackMode
 ) {
   options.webpack = options.webpack || {}
   options.webpack.mode = mode
-  options.webpack.client = getClientConfig(options)
+  options.webpack.client = await getClientConfig(options)
   options.webpack.server = getServerConfig(options)
   return options
 }
@@ -152,7 +105,8 @@ function setStaticFileExts(options: ConfigOptions.options) {
  */
 export async function initConfig(
   argv: BuildService.parsedArgs,
-  mode: ConfigOptions.webpackMode
+  mode: ConfigOptions.webpackMode,
+  opt?: ConfigOptions.options.initConfigOptions
 ): Promise<ConfigOptions.options> {
   const rootDir = getRootDir(argv)
   const configFile = getConfigFile(argv)
@@ -182,18 +136,49 @@ export async function initConfig(
     options.rootDir = rootDir
   }
 
+  if (opt && opt.clear) {
+    if (options.webpack && options.webpack.base && options.webpack.base.output) {
+      rimraf.sync(options.webpack.base.output.path || '')
+    } else {
+      consola.fatal('options.webpack.base.output is undefined!')
+      return process.exit(0)
+    }
+  }
 
   options = setStaticFileExts(options)
 
   options = setBabelrc(options)
 
-  options = setWebpack(options, mode)
+  await checkDll(argv, options)
+
+  options = await setWebpack(options, mode)
 
   options.version = argv.version
 
   buildServiceConfig = options
 
   return options
+}
+/**
+ * 检测 是否启用 dll 启动
+ *  * **必须** 放置在 **setWebpack** 设置webpack **之前**
+ * @param argv BuildService 通用 启动参数
+ * @param options build 通用 webpack 配置
+ */
+async function checkDll(
+  argv: BuildService.parsedArgs,
+  options: ConfigOptions.options
+) {
+  if (argv.dll) {
+    if (!(options.webpack && options.webpack.dll)) {
+      consola.fatal('options.webpack.dll is undefined')
+      return process.exit(0)
+    }
+
+    await compilerDll(options)
+
+    return process.exit(0)
+  }
 }
 
 /**

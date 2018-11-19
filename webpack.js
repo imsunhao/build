@@ -1,16 +1,28 @@
+const path = require('path')
 const nodeExternals = require('webpack-node-externals')
+
+const resolve = p => path.resolve(__dirname, '.', p)
 
 module.exports = {
   mode: 'production',
   devtool: false,
   target: 'node',
-  // stats: 'errors-only',
+  entry: {
+    build: resolve('./src/bin/build.ts'),
+    start: resolve('./src/bin/start.ts'),
+    dev: resolve('./src/bin/dev.ts')
+  },
   output: {
+    path: resolve('./dist'),
     filename: '[name].js',
     libraryTarget: 'commonjs2'
   },
   resolve: {
-    extensions: ['.ts'],
+    extensions: ['.ts', '.js'],
+    alias: {
+      src: resolve('./src'),
+      config: resolve('./config')
+    }
   },
   externals: nodeExternals({
     // whitelist: /\.css$/
@@ -21,7 +33,7 @@ module.exports = {
       {
         test: /\.tsx?$/,
         exclude: /node_modules/,
-        use: [ 'ts-loader']
+        use: ['ts-loader']
       }
     ]
   },
