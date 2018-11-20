@@ -1,6 +1,5 @@
 import { ConfigOptions, BuildService } from '@types'
 import MFS from 'memory-fs'
-import webpackHotMiddleware from 'webpack-hot-middleware'
 import webpack from 'webpack'
 import consola from 'consola'
 import { getConfigConfig } from 'src/config/webpack.config.config'
@@ -78,6 +77,7 @@ function devCompiler({
   })
 
   clientConfig.output.filename = '[name].js'
+  clientConfig.output.publicPath = '/webpack-hot-middleware'
   clientConfig.plugins.push(
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin()
@@ -98,7 +98,7 @@ function devCompiler({
   })
 
   // hot middleware
-  app.use(webpackHotMiddleware(clientCompiler as any, { heartbeat: 5000 }))
+  app.use(require('webpack-hot-middleware')(clientCompiler as any, { heartbeat: 5000 }))
 
   // watch and update server renderer
   const serverCompiler = webpack(serverConfig)
