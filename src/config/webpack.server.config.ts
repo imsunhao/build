@@ -1,6 +1,7 @@
 import merge from 'webpack-merge'
 import { getBaseConfig } from './webpack.base.config'
 import nodeExternals from 'webpack-node-externals'
+import webpack from 'webpack'
 import VueSSRServerPlugin from 'vue-server-renderer/server-plugin'
 import { getStyle } from 'src/utils/style.webpack'
 
@@ -22,7 +23,12 @@ export function getServerConfig(options: ConfigOptions.options) {
         // whitelist: /\.css$/
         whitelist: [/\.css$/, /\?vue&type=style/]
       }),
-      plugins: [new VueSSRServerPlugin()]
+      plugins: [
+        new VueSSRServerPlugin(),
+        new webpack.DefinePlugin({
+          'process.env.VUE_ENV': '"server"'
+        })
+      ]
     },
     getStyle(options, { isServer: true }),
     server

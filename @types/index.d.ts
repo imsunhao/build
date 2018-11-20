@@ -13,7 +13,7 @@ import MFS from 'memory-fs'
 
 export = build
 
-type DictOf<T> = {[key: string]: T}
+type DictOf<T> = { [key: string]: T }
 
 declare namespace build {
   /**
@@ -206,6 +206,13 @@ declare namespace build {
        * webpack 配置
        */
       webpack?: options.webpack
+
+      /**
+       * 服务器端 插件 配置
+       * * 中间件
+       * * 路由
+       */
+      extensions?: options.extensions
     }
     namespace options {
       /**
@@ -239,6 +246,29 @@ declare namespace build {
         server?: Configuration
       }
 
+      /**
+       * server 插件 配置
+       */
+      interface extensions {
+        /**
+         * server 插件 覆盖 webpack构建
+         */
+        webpack?: Configuration
+
+        /**
+         * server 插件 入口文件
+         */
+        entry: DictOf<string>
+
+        /**
+         * server 插件 打包output路径
+         */
+        path: string
+      }
+
+      /**
+       * webpack dll 配置
+       */
       interface webpackDll {
         /**
          * dll配置 覆盖 webpack构建
@@ -248,7 +278,7 @@ declare namespace build {
         template: string
         templateOutput: string
         path: string
-        publicPath: string,
+        publicPath: string
         define: DictOf<string>
       }
 
@@ -269,6 +299,19 @@ declare namespace build {
          */
         clear?: boolean
       }
+    }
+  }
+
+  namespace utils {
+    /**
+     * Express 路由 栈管理中心
+     */
+    class RouterStackManagement {
+      /**
+       * 热更新 中间件
+       * @param middlewares 中间件
+       */
+      unpdate: (middlewares: any[]) => void
     }
   }
 }

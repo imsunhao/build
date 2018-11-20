@@ -4,9 +4,12 @@ import webpack from 'webpack'
 import consola from 'consola'
 import { getConfigConfig } from 'src/config/webpack.config.config'
 import { getDllConfig } from 'src/config/webpack.dll.config'
+import { getExtensionsConfig } from 'src/config/webpack.extensions.config'
 import compile from 'eval'
 import { resolve } from 'path'
 import rimraf from 'rimraf'
+import { Express } from 'express'
+import { routerStackManagement } from 'src/utils'
 
 function showError(stats: webpack.Stats) {
   if (stats.hasWarnings()) {
@@ -98,7 +101,11 @@ function devCompiler({
   })
 
   // hot middleware
-  app.use(require('webpack-hot-middleware')(clientCompiler as any, { heartbeat: 5000 }))
+  app.use(
+    require('webpack-hot-middleware')(clientCompiler as any, {
+      heartbeat: 5000
+    })
+  )
 
   // watch and update server renderer
   const serverCompiler = webpack(serverConfig)
@@ -210,5 +217,119 @@ export function compilerDll(options: ConfigOptions.options): Promise<any> {
         showError(stats)
       }
     })
+  })
+}
+
+/**
+ * webpack 编译 dll
+ * @param configFile 配置文件路径
+ */
+export async function compilerExtensions(
+  options: ConfigOptions.options,
+  app?: Express
+) {
+  if (!(options.webpack && options.extensions && options.webpack.mode)) {
+    consola.fatal('options.extensions or options.webpack.mode is undefined')
+    return process.exit(0)
+  }
+
+  const isProd = options.webpack.mode === 'production'
+
+  if (isProd) {
+    await prodCompilerExtensions(options)
+  } else {
+    await devCompilerExtensions(options, app)
+  }
+}
+
+function prodCompilerExtensions(options: ConfigOptions.options) {
+  return new Promise(function(done) {
+    const webpackConfig = getExtensionsConfig(options)
+
+    if (webpackConfig && webpackConfig.output) {
+      rimraf.sync(webpackConfig.output.path || '')
+    }
+
+    const compiler = webpack(webpackConfig)
+    compiler.plugin('done', stats => {
+      stats = stats.toJson()
+      stats.errors.forEach((err: any) => consola.error(err))
+      stats.warnings.forEach((err: any) => consola.info(err))
+      if (stats.errors.length) {
+        consola.fatal('build dll fail!')
+        return process.exit(0)
+      }
+      done()
+    })
+
+    compiler.run((err, stats) => {
+      {
+        consola.log(
+          stats.toString({
+            all: false,
+            assets: true
+          })
+        )
+        showError(stats)
+      }
+    })
+  })
+}
+function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
+  if (!(app && options.extensions && options.extensions.entry)) {
+    consola.fatal('devCompilerExtensions: app is undefined')
+    return process.exit(0)
+  }
+
+  const outputPath = options.extensions.path
+  const entrys = options.extensions.entry
+
+  return new Promise(function(done) {
+    const webpackConfig = getExtensionsConfig(options)
+    if (!webpackConfig.plugins) webpackConfig.plugins = []
+    webpackConfig.plugins.push(
+      new webpack.HotModuleReplacementPlugin(),
+      new webpack.NoEmitOnErrorsPlugin()
+    )
+
+    if (webpackConfig && webpackConfig.output) {
+      rimraf.sync(webpackConfig.output.path || '')
+    }
+
+    const compiler = webpack(webpackConfig)
+    const serverDevMiddleware = require('webpack-dev-middleware')(compiler, {
+      noInfo: true
+    })
+    app.use(serverDevMiddleware)
+
+    const mfs = new MFS()
+    compiler.outputFileSystem = mfs
+
+    compiler.plugin('done', function(this: any, stats) {
+      routerStackManagement.init(app)
+      stats = stats.toJson()
+      stats.errors.forEach((err: any) => console.error(err))
+      stats.warnings.forEach((err: any) => console.warn(err))
+      if (stats.errors.length) return
+
+      Object.keys(entrys).forEach(entry => {
+        const name = entry + '.js'
+        let extensions: any = {}
+        try {
+          const souce = mfs.readFileSync(resolve(outputPath, name), 'utf-8')
+          extensions = compile(souce, name, this, true).default
+        } catch (error) {
+          consola.fatal('devCompilerExtensions', error)
+          return process.exit(0)
+        }
+        Object.keys(extensions).forEach(extensionKey => {
+          const extension = extensions[extensionKey]
+          extension(app, routerStackManagement)
+        })
+      })
+      done()
+    })
+
+    app.use(require('webpack-hot-middleware')(compiler, { heartbeat: 5000 }))
   })
 }

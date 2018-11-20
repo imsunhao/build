@@ -3,6 +3,7 @@ import { initConfig } from 'src/utils'
 import { BuildService } from '@types'
 import consola from 'consola'
 import { serverBuild } from 'src/build'
+import { serverExtensions } from 'src/extensions'
 
 async function buildMain(argv: BuildService.parsedArgs) {
   consola.ready(`@bestminr/build v${argv.version}`)
@@ -11,6 +12,8 @@ async function buildMain(argv: BuildService.parsedArgs) {
   const options = await initConfig(argv, 'production', {
     clear: true
   })
+
+  await serverExtensions()
 
   serverBuild()
 

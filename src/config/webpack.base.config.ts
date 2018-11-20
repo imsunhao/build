@@ -2,13 +2,16 @@ import merge from 'webpack-merge'
 import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin'
 import { VueLoaderPlugin } from 'vue-loader'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import consola from 'consola'
 
 import { ConfigOptions } from '@types'
 
 export function getBaseConfig(options: ConfigOptions.options) {
-  const mode = options.webpack
-    ? options.webpack.mode || 'production'
-    : 'production'
+  if (!(options.babelrc && options.webpack)) {
+    consola.fatal('getBaseConfig options.babelrc or options.webpack is undefined')
+    return process.exit(0)
+  }
+  const mode = options.webpack.mode || 'production'
   const isProd = mode === 'production'
   const base = options.webpack ? options.webpack.base || {} : {}
 

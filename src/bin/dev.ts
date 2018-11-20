@@ -3,6 +3,7 @@ import { initConfig, serverInit, serverStart } from 'src/utils'
 import { BuildService } from '@types'
 import consola from 'consola'
 import { serverDevRender } from 'src/render'
+import { serverExtensions } from 'src/extensions'
 
 async function devMain(argv: BuildService.parsedArgs) {
   consola.ready(`@bestminr/build v${argv.version}`)
@@ -15,6 +16,8 @@ async function devMain(argv: BuildService.parsedArgs) {
   })
 
   serverDevRender(app)
+
+  await serverExtensions(app)
 
   serverStart(app)
 

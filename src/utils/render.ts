@@ -29,7 +29,7 @@ export function getRender(
   renderer: BundleRenderer,
   opts: BuildService.getRender.opts
 ) {
-  return function render(
+  return function getRender(
     req: BuildService.Request,
     res: Response,
     next: NextFunction
@@ -83,9 +83,13 @@ export function getRender(
       renderContext: req.renderContext || {}
     }
 
+
+    console.log('getRender: context =', context)
+
     renderer.renderToString(context, (err: any, html: string) => {
       if (err) {
-        return handleError(err)
+        res.send(err)
+        // return handleError(err)
       }
       res.end(html)
       next()

@@ -7,7 +7,7 @@ import consola from 'consola'
 import { createResolve } from 'src/utils/path'
 import rimraf from 'rimraf'
 
-import express, { Express } from 'express'
+import express, { Express, Router } from 'express'
 import compression from 'compression'
 import proxyMiddleware from 'http-proxy-middleware'
 import LRU from 'lru-cache'
@@ -137,7 +137,11 @@ export async function initConfig(
   }
 
   if (opt && opt.clear) {
-    if (options.webpack && options.webpack.base && options.webpack.base.output) {
+    if (
+      options.webpack &&
+      options.webpack.base &&
+      options.webpack.base.output
+    ) {
       rimraf.sync(options.webpack.base.output.path || '')
     } else {
       consola.fatal('options.webpack.base.output is undefined!')
@@ -218,7 +222,7 @@ export function serverInit({
  */
 export function serverStart(app: Express, { port } = { port: 8080 }) {
   app.listen(port, () => {
-    console.log(`server started at localhost:${port}`)
+    consola.info(`server started at localhost:${port}`)
   })
 }
 
@@ -273,3 +277,129 @@ export const BASE_RENDER_OPTIONS = {
   // recommended for performance
   runInNewContext: 'once'
 }
+
+const isProduction = process.env.NODE_ENV === 'production'
+
+// server render会忽略下面的路径
+const routerExtensionPath = ['private']
+
+const routerExtensionRegList: RegExp[] = []
+routerExtensionPath.forEach(path => {
+  routerExtensionRegList.push(new RegExp(`^/${path}/`))
+})
+
+export function isRouterExtensionPath(path: string) {
+  for (const reg of routerExtensionRegList) {
+    if (reg.test(path)) return true
+  }
+  return false
+}
+
+/**
+ * Express 路由 栈管理中心
+ */
+class RouterStackManagement {
+  enabled = false
+
+  startIndex = 0
+  hotUpDateCount = 0
+
+  app?: Express
+  router?: Router
+
+  store: any[] = []
+
+  init(app: Express) {
+    if (this.enabled) return
+    this.enabled = true
+    this.app = app
+    this.router = app._router
+    this.startIndex = this.stack.length - 1
+    consola.info(
+      `RouterStackManagement 已经初始化完成 当前 startIndex = ${
+        this.startIndex
+      }`
+    )
+  }
+
+  get endIndex() {
+    const { startIndex, store } = this
+    return startIndex + store.length
+  }
+
+  get stack() {
+    return this.router ? this.router.stack : []
+  }
+
+  set stack(stack) {
+    if (!this.router) return
+    this.router.stack = stack
+  }
+
+  use({
+    index,
+    middleware: { path, methods, handle }
+  }: {
+    index: number
+    middleware: { path: string; methods: any; handle: any }
+  }) {
+    const { app, store, stack, endIndex } = this
+    if (!app) return
+    const current = store[index]
+    ;(app as any)[methods.toLocaleLowerCase()](path, handle)
+    if (!current) {
+      if (endIndex + 1 !== stack.length) {
+        stack.splice(endIndex, 0, stack.pop())
+      }
+      store[index] = {
+        index: endIndex,
+        hotUpDateCount: 1
+      }
+      consola.info(`stack Index = ${index} 已经初始化完成`)
+    } else {
+      stack.splice(current.index, 1, stack.pop())
+      current.hotUpDateCount++
+      consola.info(
+        `stack Index = ${index} currentIndex = ${
+          current.index
+        } 已经更新, 当前更新次数 = ${current.hotUpDateCount}`
+      )
+    }
+  }
+
+  /**
+   * 热更新 中间件
+   * @param middlewares 中间件
+   */
+  update(middlewares: any[]) {
+    if (isProduction) {
+      return middlewares.forEach(({ path, methods, handle }) => {
+        ;(this.app as any)[methods.toLocaleLowerCase()](path, handle)
+      })
+    }
+    if (!this.enabled) return
+    const { store, stack, endIndex } = this
+    this.hotUpDateCount++
+    middlewares.forEach((middleware, index) => {
+      this.use({
+        index,
+        middleware
+      })
+    })
+    consola.info(
+      `RouterStackManagement 已经更新, 当前总更新次数 = ${this.hotUpDateCount}`
+    )
+    if (middlewares.length !== store.length) {
+      const deleteCount = store.length - middlewares.length
+      const deleteIndex = endIndex - deleteCount
+      stack.splice(deleteIndex, deleteCount)
+      store.length -= deleteCount
+      consola.info('已删除 多余 中间件')
+    }
+  }
+}
+
+/**
+ * Express 路由 栈管理中心 实例
+ */
+export const routerStackManagement = new RouterStackManagement()
