@@ -21,6 +21,20 @@ declare namespace build {
    */
   namespace BuildService {
     /**
+     * BuildService extensions 插件
+     */
+    namespace extensions {
+      /**
+       * BuildService extensions 插件 opt 参数
+       */
+      interface options {
+        /**
+         * extensions 插件 是否不使用打包生成
+         */
+        noCompiler?: boolean
+      }
+    }
+    /**
      * BuildService 通用 启动参数
      */
     interface parsedArgs extends minimist.ParsedArgs {

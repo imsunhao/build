@@ -3,6 +3,7 @@ import { initConfig, serverInit, serverStart } from 'src/utils'
 import { BuildService } from '@types'
 import consola from 'consola'
 import { serverRender } from 'src/render'
+import { serverExtensions } from 'src/extensions'
 
 async function main(argv: BuildService.parsedArgs) {
   consola.ready(`@bestminr/build v${argv.version}`)
@@ -14,9 +15,15 @@ async function main(argv: BuildService.parsedArgs) {
     proxyTable: options.proxyTable
   })
 
+  await serverExtensions(app, {
+    noCompiler: true
+  })
+
   serverRender(app)
 
+
   serverStart(app)
+
 
   // const webpack: any = options.webpack
   // const clientConfig = webpack.client
