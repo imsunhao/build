@@ -2,6 +2,7 @@ import merge from 'webpack-merge'
 import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin'
 import { VueLoaderPlugin } from 'vue-loader'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
+import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin'
 import consola from 'consola'
 
 import { ConfigOptions } from '@types'
@@ -32,6 +33,21 @@ export function getBaseConfig(options: ConfigOptions.options) {
       resolve: {
         extensions: ['.ts', '.js', '.vue', '.json'],
         alias: {}
+      },
+      optimization: {
+        minimizer: [
+          new OptimizeCSSAssetsPlugin(),
+        ],
+        splitChunks: {
+          cacheGroups: {
+            styles: {
+              name: 'styles',
+              test: /\.css$/,
+              chunks: 'all',
+              enforce: true
+            }
+          }
+        },
       },
       module: {
         noParse: /es6-promise\.js$/,

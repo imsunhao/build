@@ -30,12 +30,15 @@
 - vue-router
 - vue-server-renderer
 - vuex
+- vuex-class
 - vuex-router-sync
 - webpack 4
 - express 4
 - babel 7
 
 ### 特性
+
+#### 支持 SSR 使用webpack4 打包 css无法提取的问题
 
 #### 支持 webpack dll
 
