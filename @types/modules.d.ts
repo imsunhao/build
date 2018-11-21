@@ -8,11 +8,6 @@ declare module 'vue-loader' {
   const VueLoaderPlugin: any
 }
 
-declare module 'eval' {
-  function eval(content: string, filename?: string, scope?: any, includeGlobals?: any): any
-  export = eval
-}
-
 declare module 'consola' {
   export interface LevelType {
     level: number

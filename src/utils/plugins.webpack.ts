@@ -5,7 +5,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 
 import { join } from 'path'
 import { existsSync, readFileSync } from 'fs'
-import compile from 'eval'
+import requireFromString from 'require-from-string'
 import consola from 'consola'
 import { compilerDll } from 'src/utils/compiler.webpack'
 
@@ -58,7 +58,7 @@ export async function getClientDllPlugin(options: ConfigOptions.options) {
   nameArr.forEach(name => {
     const path = join(dll.path, `/${name}.manifest.json`)
     if (existsSync(path)) {
-      const manifest = compile(
+      const manifest = requireFromString(
         'module.exports = ' + readFileSync(path, { encoding: 'utf-8' })
       )
       plugins.push(

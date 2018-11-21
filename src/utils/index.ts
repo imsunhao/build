@@ -114,7 +114,7 @@ export async function initConfig(
   let options: any = {}
 
   if (existsSync(configFile)) {
-    options = await compilerConfig(configFile)
+    options = await compilerConfig(configFile, mode, { rootDir })
     if (!options) {
       options = {}
     } else {

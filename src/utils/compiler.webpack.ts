@@ -5,7 +5,7 @@ import consola from 'consola'
 import { getConfigConfig } from 'src/config/webpack.config.config'
 import { getDllConfig } from 'src/config/webpack.dll.config'
 import { getExtensionsConfig } from 'src/config/webpack.extensions.config'
-import compile from 'eval'
+import requireFromString from 'require-from-string'
 import { resolve } from 'path'
 import rimraf from 'rimraf'
 import { Express } from 'express'
@@ -139,10 +139,13 @@ export function compiler(
  * @param configFile 配置文件路径
  */
 export function compilerConfig(
-  configFile: string
+  configFile: string,
+  mode: ConfigOptions.webpackMode,
+  { rootDir }: { rootDir: string }
 ): Promise<() => webpack.Configuration> {
-  return new Promise(function(done) {
-    const webpackConfig = getConfigConfig()
+  return new Promise(function(this: any, done) {
+    const webpackConfig = getConfigConfig({ rootDir })
+    webpackConfig.mode = mode
     webpackConfig.entry = {
       config: configFile
     }
@@ -171,7 +174,9 @@ export function compilerConfig(
           resolve(outputPath, 'config.js'),
           'utf-8'
         )
-        config = compile(config)
+        config = requireFromString(config)
+
+
       } catch (e) {
         consola.error(e)
       } finally {
@@ -317,7 +322,7 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
         let extensions: any = {}
         try {
           const souce = mfs.readFileSync(resolve(outputPath, name), 'utf-8')
-          extensions = compile(souce, name, this, true).default
+          extensions = requireFromString(souce).default
         } catch (error) {
           consola.fatal('devCompilerExtensions', error)
           return process.exit(0)

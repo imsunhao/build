@@ -1,29 +1,41 @@
 import nodeExternals from 'webpack-node-externals'
 import webpack from 'webpack'
 
-export function getConfigConfig(): webpack.Configuration {
+const babelLoder = {
+  loader: 'babel-loader',
+  options: {
+    presets: [['latest-node', { target: 'current' }]]
+  }
+}
+
+export function getConfigConfig({
+  rootDir
+}: {
+  rootDir: string
+}): webpack.Configuration {
   return {
-    mode: 'production',
     devtool: false,
     target: 'node',
-    // stats: 'errors-only',
+    context: rootDir,
     output: {
       filename: '[name].js',
       libraryTarget: 'commonjs2'
     },
     resolve: {
-      extensions: ['.ts']
+      extensions: ['.ts', '.js', '.json']
     },
-    externals: nodeExternals({
-      // whitelist: /\.css$/
-      whitelist: [/\.css$/, /\?vue&type=style/]
-    }),
+    externals: nodeExternals(),
     module: {
       rules: [
         {
+          test: /\.js$/,
+          use: babelLoder,
+          exclude: /node_modules/
+        },
+        {
           test: /\.tsx?$/,
           exclude: /node_modules/,
-          use: ['ts-loader']
+          use: [babelLoder, 'ts-loader']
         }
       ]
     },

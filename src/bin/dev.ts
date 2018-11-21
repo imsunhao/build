@@ -23,9 +23,10 @@ async function devMain(argv: BuildService.parsedArgs) {
 
   // const webpack: any = options.webpack
   // const clientConfig = webpack.client
-  // const serverConfig = webpack.client
+  // const serverConfig = webpack.server
   // console.log('-------------------------------------')
-  // console.log('clientConfig', JSON.stringify(clientConfig, null, 2))
+  // console.log('clientConfig', clientConfig.module.rules[5].test instanceof RegExp)
+  // console.log('clientConfig', clientConfig.module.rules[5].test.constructor)
   // console.log('-------------------------------------')
   // console.log('getServerConfig', JSON.stringify(serverConfig, null, 2))
   // console.log('-------------------------------------')

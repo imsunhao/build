@@ -218,7 +218,7 @@
   resolved "http://registry.npm.taobao.org/@babel/parser/download/@babel/parser-7.1.5.tgz#20b7d5e7e1811ba996f8a868962ea7dd2bfcd2fc"
   integrity sha1-ILfV5+GBG6mW+Kholi6n3Sv80vw=
 
-"@babel/plugin-proposal-async-generator-functions@^7.1.0":
+"@babel/plugin-proposal-async-generator-functions@^7.0.0-beta.46", "@babel/plugin-proposal-async-generator-functions@^7.1.0":
   version "7.1.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-proposal-async-generator-functions/download/@babel/plugin-proposal-async-generator-functions-7.1.0.tgz#41c1a702e10081456e23a7b74d891922dd1bb6ce"
   integrity sha1-QcGnAuEAgUVuI6e3TYkZIt0bts4=
@@ -257,7 +257,7 @@
     "@babel/helper-plugin-utils" "^7.0.0"
     "@babel/plugin-syntax-json-strings" "^7.0.0"
 
-"@babel/plugin-proposal-object-rest-spread@^7.0.0":
+"@babel/plugin-proposal-object-rest-spread@^7.0.0", "@babel/plugin-proposal-object-rest-spread@^7.0.0-beta.46":
   version "7.0.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-proposal-object-rest-spread/download/@babel/plugin-proposal-object-rest-spread-7.0.0.tgz#9a17b547f64d0676b6c9cecd4edf74a82ab85e7e"
   integrity sha1-mhe1R/ZNBna2yc7NTt90qCq4Xn4=
@@ -273,7 +273,7 @@
     "@babel/helper-plugin-utils" "^7.0.0"
     "@babel/plugin-syntax-optional-catch-binding" "^7.0.0"
 
-"@babel/plugin-proposal-unicode-property-regex@^7.0.0":
+"@babel/plugin-proposal-unicode-property-regex@^7.0.0", "@babel/plugin-proposal-unicode-property-regex@^7.0.0-beta.46":
   version "7.0.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-proposal-unicode-property-regex/download/@babel/plugin-proposal-unicode-property-regex-7.0.0.tgz#498b39cd72536cd7c4b26177d030226eba08cd33"
   integrity sha1-SYs5zXJTbNfEsmF30DAibroIzTM=
@@ -282,7 +282,7 @@
     "@babel/helper-regex" "^7.0.0"
     regexpu-core "^4.2.0"
 
-"@babel/plugin-syntax-async-generators@^7.0.0":
+"@babel/plugin-syntax-async-generators@^7.0.0", "@babel/plugin-syntax-async-generators@^7.0.0-beta.46":
   version "7.0.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-syntax-async-generators/download/@babel/plugin-syntax-async-generators-7.0.0.tgz#bf0891dcdbf59558359d0c626fdc9490e20bc13c"
   integrity sha1-vwiR3Nv1lVg1nQxib9yUkOILwTw=
@@ -324,28 +324,28 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-syntax-object-rest-spread@^7.0.0":
+"@babel/plugin-syntax-object-rest-spread@^7.0.0", "@babel/plugin-syntax-object-rest-spread@^7.0.0-beta.46":
   version "7.0.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-syntax-object-rest-spread/download/@babel/plugin-syntax-object-rest-spread-7.0.0.tgz#37d8fbcaf216bd658ea1aebbeb8b75e88ebc549b"
   integrity sha1-N9j7yvIWvWWOoa6764t16I68VJs=
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-syntax-optional-catch-binding@^7.0.0":
+"@babel/plugin-syntax-optional-catch-binding@^7.0.0", "@babel/plugin-syntax-optional-catch-binding@^7.0.0-beta.46":
   version "7.0.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-syntax-optional-catch-binding/download/@babel/plugin-syntax-optional-catch-binding-7.0.0.tgz#886f72008b3a8b185977f7cb70713b45e51ee475"
   integrity sha1-iG9yAIs6ixhZd/fLcHE7ReUe5HU=
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-transform-arrow-functions@^7.0.0":
+"@babel/plugin-transform-arrow-functions@^7.0.0", "@babel/plugin-transform-arrow-functions@^7.0.0-beta.46":
   version "7.0.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-transform-arrow-functions/download/@babel/plugin-transform-arrow-functions-7.0.0.tgz#a6c14875848c68a3b4b3163a486535ef25c7e749"
   integrity sha1-psFIdYSMaKO0sxY6SGU17yXH50k=
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-transform-async-to-generator@^7.1.0":
+"@babel/plugin-transform-async-to-generator@^7.0.0-beta.46", "@babel/plugin-transform-async-to-generator@^7.1.0":
   version "7.1.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-transform-async-to-generator/download/@babel/plugin-transform-async-to-generator-7.1.0.tgz#109e036496c51dd65857e16acab3bafdf3c57811"
   integrity sha1-EJ4DZJbFHdZYV+FqyrO6/fPFeBE=
@@ -413,7 +413,7 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-transform-exponentiation-operator@^7.1.0":
+"@babel/plugin-transform-exponentiation-operator@^7.0.0-beta.46", "@babel/plugin-transform-exponentiation-operator@^7.1.0":
   version "7.1.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-transform-exponentiation-operator/download/@babel/plugin-transform-exponentiation-operator-7.1.0.tgz#9c34c2ee7fd77e02779cfa37e403a2e1003ccc73"
   integrity sha1-nDTC7n/XfgJ3nPo35AOi4QA8zHM=
@@ -436,7 +436,7 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-transform-function-name@^7.1.0":
+"@babel/plugin-transform-function-name@^7.0.0-beta.46", "@babel/plugin-transform-function-name@^7.1.0":
   version "7.1.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-transform-function-name/download/@babel/plugin-transform-function-name-7.1.0.tgz#29c5550d5c46208e7f730516d41eeddd4affadbb"
   integrity sha1-KcVVDVxGII5/cwUW1B7t3Ur/rbs=
@@ -459,7 +459,7 @@
     "@babel/helper-module-transforms" "^7.1.0"
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-transform-modules-commonjs@^7.1.0":
+"@babel/plugin-transform-modules-commonjs@^7.0.0-beta.46", "@babel/plugin-transform-modules-commonjs@^7.1.0":
   version "7.1.0"
   resolved "http://registry.npm.taobao.org/@babel/plugin-transform-modules-commonjs/download/@babel/plugin-transform-modules-commonjs-7.1.0.tgz#0a9d86451cbbfb29bd15186306897c67f6f9a05c"
   integrity sha1-Cp2GRRy7+ym9FRhjBol8Z/b5oFw=
@@ -880,6 +880,11 @@
   version "0.2.28"
   resolved "http://registry.npm.taobao.org/@types/relateurl/download/@types/relateurl-0.2.28.tgz#6bda7db8653fa62643f5ee69e9f69c11a392e3a6"
   integrity sha1-a9p9uGU/piZD9e5p6facEaOS46Y=
+
+"@types/require-from-string@^1.2.0":
+  version "1.2.0"
+  resolved "http://registry.npm.taobao.org/@types/require-from-string/download/@types/require-from-string-1.2.0.tgz#c18cfc8a2c1a0259e5841d1fef2b5e9d01c64242"
+  integrity sha1-wYz8iiwaAlnlhB0f7ytenQHGQkI=
 
 "@types/rimraf@^2.0.2":
   version "2.0.2"
@@ -1346,6 +1351,23 @@ babel-loader@^8.0.4:
     loader-utils "^1.0.2"
     mkdirp "^0.5.1"
     util.promisify "^1.0.0"
+
+babel-preset-latest-node@^2.0.0-beta.3:
+  version "2.0.0-beta.3"
+  resolved "http://registry.npm.taobao.org/babel-preset-latest-node/download/babel-preset-latest-node-2.0.0-beta.3.tgz#074811ef7c1529278c959d204be8fe8746622404"
+  integrity sha1-B0gR73wVKSeMlZ0gS+j+h0ZiJAQ=
+  dependencies:
+    "@babel/plugin-proposal-async-generator-functions" "^7.0.0-beta.46"
+    "@babel/plugin-proposal-object-rest-spread" "^7.0.0-beta.46"
+    "@babel/plugin-proposal-unicode-property-regex" "^7.0.0-beta.46"
+    "@babel/plugin-syntax-async-generators" "^7.0.0-beta.46"
+    "@babel/plugin-syntax-object-rest-spread" "^7.0.0-beta.46"
+    "@babel/plugin-syntax-optional-catch-binding" "^7.0.0-beta.46"
+    "@babel/plugin-transform-arrow-functions" "^7.0.0-beta.46"
+    "@babel/plugin-transform-async-to-generator" "^7.0.0-beta.46"
+    "@babel/plugin-transform-exponentiation-operator" "^7.0.0-beta.46"
+    "@babel/plugin-transform-function-name" "^7.0.0-beta.46"
+    "@babel/plugin-transform-modules-commonjs" "^7.0.0-beta.46"
 
 balanced-match@^1.0.0:
   version "1.0.0"
@@ -2658,13 +2680,6 @@ etag@~1.8.1:
   version "1.8.1"
   resolved "http://registry.npm.taobao.org/etag/download/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=
-
-eval@^0.1.2:
-  version "0.1.2"
-  resolved "http://registry.npm.taobao.org/eval/download/eval-0.1.2.tgz#9f7103284c105a66df4030b2b3273165837013da"
-  integrity sha1-n3EDKEwQWmbfQDCysycxZYNwE9o=
-  dependencies:
-    require-like ">= 0.1.1"
 
 eventemitter3@^3.0.0:
   version "3.1.0"
@@ -5474,10 +5489,10 @@ require-directory@^2.1.1:
   resolved "http://registry.npm.taobao.org/require-directory/download/require-directory-2.1.1.tgz#8c64ad5fd30dab1c976e2344ffe7f792a6a6df42"
   integrity sha1-jGStX9MNqxyXbiNE/+f3kqam30I=
 
-"require-like@>= 0.1.1":
-  version "0.1.2"
-  resolved "http://registry.npm.taobao.org/require-like/download/require-like-0.1.2.tgz#ad6f30c13becd797010c468afa775c0c0a6b47fa"
-  integrity sha1-rW8wwTvs15cBDEaK+ndcDAprR/o=
+require-from-string@^2.0.2:
+  version "2.0.2"
+  resolved "http://registry.npm.taobao.org/require-from-string/download/require-from-string-2.0.2.tgz#89a7fdd938261267318eafe14f9c32e598c36909"
+  integrity sha1-iaf92TgmEmcxjq/hT5wy5ZjDaQk=
 
 require-main-filename@^1.0.1:
   version "1.0.1"

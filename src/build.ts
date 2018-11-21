@@ -1,5 +1,4 @@
 import { getConfig } from 'src/utils'
-import rimraf from 'rimraf'
 import { compiler } from 'src/utils/compiler.webpack.ts'
 
 export function serverBuild() {

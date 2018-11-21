@@ -1,13 +1,14 @@
 {
   "name": "@bestminr/build",
-  "version": "1.2.0",
+  "version": "1.2.3",
   "license": "MIT",
   "scripts": {
     "publish": "npm publish --access=public",
     "dev": "webpack --config webpack.js --watch --progress",
     "build": "cross-env NODE_ENV=production webpack --config webpack.js",
     "test:init": "mkdir ~/Documents/imsunhao/sh-blog/node_modules/@bestminr && ln -s ~/Documents/imsunhao/lib/build  ~/Documents/imsunhao/sh-blog/node_modules/@bestminr/build",
-    "test:reTest": "rm -rf ~/Documents/imsunhao/sh-blog/node_modules/@bestminr/build && ln -s ~/Documents/imsunhao/lib/build  ~/Documents/imsunhao/sh-blog/node_modules/@bestminr/build"
+    "test:reTest": "rm -rf ~/Documents/imsunhao/sh-blog/node_modules/@bestminr/build && ln -s ~/Documents/imsunhao/lib/build  ~/Documents/imsunhao/sh-blog/node_modules/@bestminr/build",
+    "test:reTest:blueberry": "rm -rf /Users/sunhao/Documents/blueberry/node_modules/@bestminr/build && ln -s ~/Documents/imsunhao/lib/build  /Users/sunhao/Documents/blueberry/node_modules/@bestminr/build"
   },
   "files": [
     "bin/*",
@@ -49,6 +50,7 @@
     "@types/mini-css-extract-plugin": "^0.2.0",
     "@types/node": "^10.12.3",
     "@types/optimize-css-assets-webpack-plugin": "^1.3.3",
+    "@types/require-from-string": "^1.2.0",
     "@types/rimraf": "^2.0.2",
     "@types/webpack-hot-middleware": "^2.16.4",
     "@types/webpack-merge": "^4.1.3",
@@ -72,12 +74,12 @@
     "@types/minimist": "^1.2.0",
     "@types/webpack": "^4.4.19",
     "babel-loader": "^8.0.4",
+    "babel-preset-latest-node": "^2.0.0-beta.3",
     "compression": "^1.7.3",
     "consola": "^2.2.4",
     "cookie-parser": "^1.4.3",
     "css-loader": "^1.0.1",
     "es6-promise": "^4.2.5",
-    "eval": "^0.1.2",
     "express": "^4.16.4",
     "friendly-errors-webpack-plugin": "^1.7.0",
     "html-webpack-plugin": "^3.2.0",
@@ -88,6 +90,7 @@
     "node-sass": "^4.10.0",
     "null-loader": "^0.1.1",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
+    "require-from-string": "^2.0.2",
     "rimraf": "^2.6.2",
     "sass-loader": "^7.1.0",
     "ts-loader": "^5.3.0",

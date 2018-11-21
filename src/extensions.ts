@@ -2,7 +2,7 @@ import { BuildService } from '@types'
 import { Express } from 'express'
 import { getConfig, routerStackManagement } from 'src/utils'
 import { compilerExtensions } from 'src/utils/compiler.webpack.ts'
-import compile from 'eval'
+import requireFromString from 'require-from-string'
 import consola from 'consola'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
@@ -28,7 +28,7 @@ export async function serverExtensions(this: any, app?: Express, opt?: BuildServ
         let extensions: any = {}
         try {
           const souce = readFileSync(resolve(outputPath, name), 'utf-8')
-          extensions = compile(souce, name, this, true).default
+          extensions = requireFromString(souce).default
         } catch (error) {
           consola.fatal('serverExtensions', error)
           return process.exit(0)
