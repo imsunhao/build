@@ -7,6 +7,7 @@ import { getDllConfig } from 'src/config/webpack.dll.config'
 import { getExtensionsConfig } from 'src/config/webpack.extensions.config'
 import requireFromString from 'require-from-string'
 import { resolve } from 'path'
+import { readFileSync, existsSync } from 'fs'
 import rimraf from 'rimraf'
 import { Express } from 'express'
 import { routerStackManagement } from 'src/utils'
@@ -88,6 +89,10 @@ function devCompiler({
 
   const clientCompiler = webpack(clientConfig)
 
+  // clientCompiler.hooks.compile.tap('stats-plugin', stats => {
+  //   consola.info('compile\n', JSON.stringify(stats, null, 2))
+  // })
+
   const devMiddleware = require('webpack-dev-middleware')(clientCompiler, {
     publicPath: clientConfig.output.publicPath,
     noInfo: true,
@@ -125,6 +130,7 @@ export function compiler(
   options: BuildService.compiler.compilerOptions,
   mode?: ConfigOptions.webpackMode
 ) {
+  consola.log('compiling', mode)
   const isProd = mode === 'production'
 
   if (isProd) {
@@ -150,7 +156,7 @@ export function compilerConfig(
       config: configFile
     }
 
-    const outputPath = '/cache'
+    const outputPath = resolve(rootDir, './.build')
 
     if (webpackConfig.output) {
       webpackConfig.output.path = outputPath
@@ -159,31 +165,38 @@ export function compilerConfig(
       return {}
     }
 
-    const compiler = webpack(webpackConfig)
-    const memoryFs = new MFS()
-    compiler.outputFileSystem = memoryFs
-    compiler.plugin('done', stats => {
-      stats = stats.toJson()
-      stats.errors.forEach((err: any) => consola.error(err))
-      stats.warnings.forEach((err: any) => consola.info(err))
-      if (stats.errors.length) return
+    const path = resolve(outputPath, 'config.js')
+    let config: any = {}
 
-      let config: any = {}
+    if (existsSync(path)) {
       try {
-        config = memoryFs.readFileSync(
-          resolve(outputPath, 'config.js'),
-          'utf-8'
-        )
-        config = requireFromString(config)
-
-
-      } catch (e) {
-        consola.error(e)
+        const souce = readFileSync(path, 'utf-8')
+        config = requireFromString(souce)
+      } catch (error) {
+        consola.fatal('compilerConfig', error)
+        return process.exit(0)
       } finally {
         done(config)
       }
-    })
-    compiler.run((err, stats) => {})
+    } else {
+      const compiler = webpack(webpackConfig)
+      compiler.plugin('done', stats => {
+        stats = stats.toJson()
+        stats.errors.forEach((err: any) => consola.error(err))
+        stats.warnings.forEach((err: any) => consola.info(err))
+        if (stats.errors.length) return
+        try {
+          const souce = readFileSync(path, 'utf-8')
+          config = requireFromString(souce)
+        } catch (error) {
+          consola.fatal('compilerConfig', error)
+          return process.exit(0)
+        } finally {
+          done(config)
+        }
+      })
+      compiler.run((err, stats) => {})
+    }
   })
 }
 
