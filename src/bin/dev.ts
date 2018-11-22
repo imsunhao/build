@@ -19,7 +19,7 @@ async function devMain(argv: BuildService.parsedArgs) {
 
   await serverExtensions(app)
 
-  serverStart(app)
+  serverStart(app, argv)
 
   // const webpack: any = options.webpack
   // const clientConfig = webpack.client

@@ -22,7 +22,7 @@ async function main(argv: BuildService.parsedArgs) {
   serverRender(app)
 
 
-  serverStart(app)
+  serverStart(app, argv)
 
 
   // const webpack: any = options.webpack

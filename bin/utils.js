@@ -10,11 +10,12 @@ function getArgv() {
       h: 'help',
       d: 'dll',
       c: 'config-file',
+      fd: 'fileDescriptor',
       cl: 'clear',
       v: 'version'
     },
     boolean: ['h', 'd', 'v', 'cl'],
-    string: ['H', 'c'],
+    string: ['H', 'c', 'fd'],
     default: {
       c: 'build.config.ts'
     }

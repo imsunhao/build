@@ -221,9 +221,22 @@ export function serverInit({
  * @param app Express 实例
  * @param param1 服务器启动参数
  */
-export function serverStart(app: Express, { port } = { port: 8080 }) {
-  app.listen(port, () => {
-    consola.info(`server started at localhost:${port}`)
+export function serverStart(
+  app: Express,
+  { port, fileDescriptor }: BuildService.parsedArgs
+) {
+  let options: any
+  if (fileDescriptor) {
+    const fd = parseInt(fileDescriptor, 10)
+
+    options = {
+      fd,
+    }
+  } else {
+    options = port || 8020
+  }
+  app.listen(options, () => {
+    consola.info(`server started at ${JSON.stringify(options, null, 2)}`)
   })
 }
 

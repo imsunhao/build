@@ -52,6 +52,16 @@ declare namespace build {
        * 是否使用 webpack dll
        */
       dll: boolean
+
+      /**
+       * 启动端口号
+       */
+      port?: number
+
+      /**
+       * 文件描述符
+       */
+      fileDescriptor?: string
     }
 
     /**

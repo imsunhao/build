@@ -159,8 +159,8 @@ export function compilerConfig(
 ): Promise<() => webpack.Configuration> {
   return new Promise(function(this: any, done) {
     const webpackConfig = getConfigConfig({ rootDir })
-    webpackConfig.mode = mode
     const entryName = `${mode}_config`
+    webpackConfig.mode = mode
     webpackConfig.entry = {
       [entryName]: configFile
     }

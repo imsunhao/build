@@ -1,10 +1,11 @@
 const path = require('path')
 const nodeExternals = require('webpack-node-externals')
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const resolve = p => path.resolve(__dirname, '.', p)
 
 module.exports = {
-  mode: 'production',
+  mode: 'development',
   devtool: false,
   target: 'node',
   entry: {
