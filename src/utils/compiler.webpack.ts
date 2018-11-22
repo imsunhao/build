@@ -70,8 +70,17 @@ function devCompiler({
   serverCompilerDone,
   app
 }: BuildService.compiler.devCompilerOptions) {
-  if (!(clientConfig.output && clientConfig.plugins && clientConfig.entry)) {
-    consola.fatal('clientConfig.{output, plugins, entry} is undefined')
+  if (
+    !(
+      clientConfig.output &&
+      serverConfig.output &&
+      clientConfig.plugins &&
+      clientConfig.entry
+    )
+  ) {
+    consola.fatal(
+      '{clientConfig, serverConfig}.{output, plugins, entry} is undefined'
+    )
     return process.exit(0)
   }
 
@@ -81,7 +90,6 @@ function devCompiler({
   })
 
   clientConfig.output.filename = '[name].js'
-  clientConfig.output.publicPath = '/webpack-hot-middleware'
   clientConfig.plugins.push(
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin()
@@ -152,8 +160,9 @@ export function compilerConfig(
   return new Promise(function(this: any, done) {
     const webpackConfig = getConfigConfig({ rootDir })
     webpackConfig.mode = mode
+    const entryName = `${mode}_config`
     webpackConfig.entry = {
-      config: configFile
+      [entryName]: configFile
     }
 
     const outputPath = resolve(rootDir, './.build')
@@ -165,7 +174,7 @@ export function compilerConfig(
       return {}
     }
 
-    const path = resolve(outputPath, 'config.js')
+    const path = resolve(outputPath, `${entryName}.js`)
     let config: any = {}
 
     if (existsSync(path)) {
@@ -195,7 +204,9 @@ export function compilerConfig(
           done(config)
         }
       })
-      compiler.run((err, stats) => {})
+      compiler.run((err, stats) => {
+        showError(stats)
+      })
     }
   })
 }
@@ -252,6 +263,7 @@ export async function compilerExtensions(
   }
 
   const isProd = options.webpack.mode === 'production'
+  consola.log('compiling compilerExtensions', options.webpack.mode)
 
   if (isProd) {
     await prodCompilerExtensions(options)
@@ -274,7 +286,7 @@ function prodCompilerExtensions(options: ConfigOptions.options) {
       stats.errors.forEach((err: any) => consola.error(err))
       stats.warnings.forEach((err: any) => consola.info(err))
       if (stats.errors.length) {
-        consola.fatal('build dll fail!')
+        consola.fatal('build extensions fail!')
         return process.exit(0)
       }
       done()
@@ -326,9 +338,10 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
     compiler.plugin('done', function(this: any, stats) {
       routerStackManagement.init(app)
       stats = stats.toJson()
-      stats.errors.forEach((err: any) => console.error(err))
-      stats.warnings.forEach((err: any) => console.warn(err))
-      if (stats.errors.length) return
+      if (stats.errors.length) {
+        showError(stats)
+        return process.exit(0)
+      }
 
       Object.keys(entrys).forEach(entry => {
         const name = entry + '.js'

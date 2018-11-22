@@ -11,6 +11,7 @@ import express, { Express, Router } from 'express'
 import compression from 'compression'
 import proxyMiddleware from 'http-proxy-middleware'
 import LRU from 'lru-cache'
+import HappyPack from 'happypack'
 import { compilerConfig, compilerDll } from 'src/utils/compiler.webpack'
 
 /**
@@ -403,3 +404,14 @@ class RouterStackManagement {
  * Express 路由 栈管理中心 实例
  */
 export const routerStackManagement = new RouterStackManagement()
+
+/**
+ * 制作 HappyPack plugin
+ */
+export function makeHappyPack(id: any, loaders: any) {
+  return new HappyPack({
+    id,
+    threads: 4,
+    loaders
+  })
+}

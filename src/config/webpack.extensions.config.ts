@@ -25,17 +25,21 @@ export function getExtensionsConfig(
 
   const babelLoder = {
     loader: 'babel-loader',
-    options: options.babelrc
+    options: {
+      presets: [['latest-node', { target: 'current' }]]
+    }
   }
 
   let resolve = {}
   if (options.webpack.server && options.webpack.server.resolve) {
     resolve = options.webpack.server.resolve
   }
+  const mode = options.webpack.mode || 'production'
+  const isProd = mode === 'production'
 
   return (merge as any)(
     {
-      mode: options.webpack.mode,
+      mode,
       devtool: false,
       target: 'node',
       // stats: 'errors-only',

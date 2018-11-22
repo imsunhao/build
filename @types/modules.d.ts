@@ -8,6 +8,11 @@ declare module 'vue-loader' {
   const VueLoaderPlugin: any
 }
 
+declare module 'happypack' {
+  class HappyPack {constructor(par: any)}
+  export = HappyPack
+}
+
 declare module 'consola' {
   export interface LevelType {
     level: number

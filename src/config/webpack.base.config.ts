@@ -1,15 +1,18 @@
 import merge from 'webpack-merge'
 import FriendlyErrorsPlugin from 'friendly-errors-webpack-plugin'
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import { VueLoaderPlugin } from 'vue-loader'
-import MiniCssExtractPlugin from 'mini-css-extract-plugin'
-import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin'
 import consola from 'consola'
+import { makeHappyPack } from 'src/utils'
+import UglifyJsPlugin from 'uglifyjs-webpack-plugin'
 
 import { ConfigOptions } from '@types'
 
 export function getBaseConfig(options: ConfigOptions.options) {
   if (!(options.babelrc && options.webpack)) {
-    consola.fatal('getBaseConfig options.babelrc or options.webpack is undefined')
+    consola.fatal(
+      'getBaseConfig options.babelrc or options.webpack is undefined'
+    )
     return process.exit(0)
   }
   const mode = options.webpack.mode || 'production'
@@ -31,23 +34,7 @@ export function getBaseConfig(options: ConfigOptions.options) {
         filename: '[chunkhash].js'
       },
       resolve: {
-        extensions: ['.ts', '.js', '.vue', '.json'],
-        alias: {}
-      },
-      optimization: {
-        minimizer: [
-          new OptimizeCSSAssetsPlugin(),
-        ],
-        splitChunks: {
-          cacheGroups: {
-            styles: {
-              name: 'styles',
-              test: /\.css$/,
-              chunks: 'all',
-              enforce: true
-            }
-          }
-        },
+        extensions: ['.ts', '.js', '.vue', '.json']
       },
       module: {
         noParse: /es6-promise\.js$/,
@@ -63,32 +50,55 @@ export function getBaseConfig(options: ConfigOptions.options) {
           },
           {
             test: /\.js$/,
-            use: babelLoder,
+            loader: 'happypack/loader?id=babel',
             exclude: /node_modules/
           },
           {
             test: /\.tsx?$/,
-            exclude: /node_modules/,
-            use: [
-              babelLoder,
-              {
-                loader: 'ts-loader',
-                options: { appendTsxSuffixTo: [/\.vue$/] }
-              }
-            ]
+            loader: 'happypack/loader?id=ts',
+            exclude: /node_modules/
           }
         ]
       },
+      optimization: {
+        minimizer: [
+          new UglifyJsPlugin({
+            uglifyOptions: {
+              compress: {
+                warnings: false,
+              },
+              output: {
+                ecma: 5,
+              },
+              ecma: 8,
+            },
+            parallel: true
+          })
+        ]
+      },
       performance: {
-        maxEntrypointSize: 300000,
+        maxEntrypointSize: 1024 * 300,
+        maxAssetSize: 1024 * 300,
         hints: isProd ? 'warning' : false
       },
-      plugins: isProd
-        ? [
-            new VueLoaderPlugin(),
-            new MiniCssExtractPlugin({ filename: '[contenthash].css' })
-          ]
-        : [new VueLoaderPlugin(), new FriendlyErrorsPlugin()]
+      plugins: (isProd ? [] : [new FriendlyErrorsPlugin()]).concat([
+        new VueLoaderPlugin(),
+        new ForkTsCheckerWebpackPlugin({
+          vue: true, // 开启以检测 .vue 文件中的类型错误
+          ignoreDiagnostics: [2339]
+        }),
+        makeHappyPack('ts', [
+          {
+            loader: 'ts-loader',
+            options: {
+              appendTsSuffixTo: [/\.vue$/],
+              transpileOnly: true,
+              happyPackMode: true
+            }
+          }
+        ]),
+        makeHappyPack('babel', [babelLoder])
+      ])
     },
     base
   )

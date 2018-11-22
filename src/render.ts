@@ -160,12 +160,14 @@ export function serverRender(app: Express) {
         siteInfo: config.siteInfo
       })
 
+      app.use(cookieParser())
+
       app.get('*', render)
     } else {
-      throw new Error('config error')
+      throw new Error('config error, config.render.options.clientManifestPath or config.render.bundle is undefined')
     }
   } catch (error) {
-    consola.fatal('config.render config error!')
+    consola.fatal('config.render', error)
     process.exit(0)
   }
 }

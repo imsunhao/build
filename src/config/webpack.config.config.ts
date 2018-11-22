@@ -1,4 +1,5 @@
 import nodeExternals from 'webpack-node-externals'
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import webpack from 'webpack'
 
 const babelLoder = {
@@ -39,6 +40,8 @@ export function getConfigConfig({
         }
       ]
     },
-    plugins: []
+    plugins: [
+      new ForkTsCheckerWebpackPlugin()
+    ]
   }
 }

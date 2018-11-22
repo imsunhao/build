@@ -41,6 +41,7 @@ export function getRender(
       return res.status(404).end()
     }
 
+    // TODO 自动解析 RouterExtensionPath
     // if (isRouterExtensionPath(req.url)) {
     //   return next()
     // }
@@ -83,13 +84,10 @@ export function getRender(
       renderContext: req.renderContext || {}
     }
 
-
-    console.log('getRender: context =', context)
-
     renderer.renderToString(context, (err: any, html: string) => {
       if (err) {
         res.send(err)
-        // return handleError(err)
+        return handleError(err)
       }
       res.end(html)
       next()
