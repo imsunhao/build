@@ -57,7 +57,7 @@ function getConfigFileOptions(
   } else {
     return {
       entry: resolve(rootDir, argv.entry || './build.config.ts'),
-      output: resolve(rootDir, argv.output || './dist/config')
+      output: resolve(rootDir, argv.output || './dist/build')
     }
   }
 }

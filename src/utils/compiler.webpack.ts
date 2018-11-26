@@ -8,7 +8,6 @@ import { getExtensionsConfig } from 'src/config/webpack.extensions.config'
 import requireFromString from 'require-from-string'
 import { resolve } from 'path'
 import { readFileSync, existsSync } from 'fs'
-import rimraf from 'rimraf'
 import { Express } from 'express'
 import { routerStackManagement } from 'src/utils'
 
@@ -227,10 +226,6 @@ export function compilerDll(options: ConfigOptions.options): Promise<any> {
   return new Promise(function(done) {
     const webpackConfig = getDllConfig(options)
 
-    if (webpackConfig && webpackConfig.output) {
-      rimraf.sync(webpackConfig.output.path || '')
-    }
-
     const compiler = webpack(webpackConfig)
     compiler.plugin('done', stats => {
       stats = stats.toJson()
@@ -285,10 +280,6 @@ function prodCompilerExtensions(options: ConfigOptions.options) {
   return new Promise(function(done) {
     const webpackConfig = getExtensionsConfig(options)
 
-    if (webpackConfig && webpackConfig.output) {
-      rimraf.sync(webpackConfig.output.path || '')
-    }
-
     const compiler = webpack(webpackConfig)
     compiler.plugin('done', stats => {
       stats = stats.toJson()
@@ -330,10 +321,6 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
       new webpack.HotModuleReplacementPlugin(),
       new webpack.NoEmitOnErrorsPlugin()
     )
-
-    if (webpackConfig && webpackConfig.output) {
-      rimraf.sync(webpackConfig.output.path || '')
-    }
 
     const compiler = webpack(webpackConfig)
     const serverDevMiddleware = require('webpack-dev-middleware')(compiler, {

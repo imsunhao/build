@@ -87,9 +87,9 @@ function getArgv() {
           return process.exit(0)
         }
 
-        path = resolve(rootDir, options.output || './dist/config')
+        path = resolve(rootDir, options.output || './dist/build')
       } else {
-        path = resolve(rootDir, './dist/config')
+        path = resolve(rootDir, './dist/build')
       }
     }
 

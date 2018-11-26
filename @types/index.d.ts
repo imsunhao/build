@@ -66,14 +66,14 @@ declare namespace build {
        */
       interface config {
         /**
-         * config文件 入口
+         * 项目 入口
          * * 默认值 ./build.config.ts
          */
         entry?: string
 
         /**
-         * config文件 产出目录
-         * * 默认值 ./dist/config
+         * 项目 产出目录
+         * * 默认值 ./dist/build
          */
         output?: string
       }
