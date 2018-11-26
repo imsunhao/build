@@ -146,6 +146,12 @@ export async function initConfig(
 
   let options: any = {}
 
+  if (opt && opt.clear) {
+    if (configOptions && configOptions.output) {
+      rimraf.sync(configOptions.output)
+    }
+  }
+
   if (existsSync(configOptions.entry || '')) {
     options = await compilerConfig(configOptions, mode, { rootDir })
     if (!options) {
@@ -167,19 +173,6 @@ export async function initConfig(
 
   if (typeof options.rootDir !== 'string') {
     options.rootDir = rootDir
-  }
-
-  if (opt && opt.clear) {
-    if (
-      options.webpack &&
-      options.webpack.base &&
-      options.webpack.base.output
-    ) {
-      rimraf.sync(options.webpack.base.output.path || '')
-    } else {
-      consola.fatal('options.webpack.base.output is undefined!')
-      return process.exit(0)
-    }
   }
 
   options = setStaticFileExts(options)
