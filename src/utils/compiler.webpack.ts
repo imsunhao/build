@@ -159,7 +159,7 @@ export function compilerConfig(
 ): Promise<() => webpack.Configuration> {
   return new Promise(function(this: any, done) {
     const webpackConfig = getConfigConfig({ rootDir })
-    const entryName = `${mode}_config`
+    const entryName = `${mode === 'none'? 'production': mode}_config`
     const { entry, output } = configOptions
 
     if (!(entry && output)) {
@@ -192,7 +192,7 @@ export function compilerConfig(
       } finally {
         done(config)
       }
-    } else {
+    } else if (mode !== 'none') {
       const compiler = webpack(webpackConfig)
       compiler.plugin('done', stats => {
         stats = stats.toJson()
@@ -212,6 +212,9 @@ export function compilerConfig(
       compiler.run((err, stats) => {
         showError(stats)
       })
+    } else {
+      consola.fatal('compilerConfig: config path not find.', path)
+      return process.exit(0)
     }
   })
 }

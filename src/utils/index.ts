@@ -25,32 +25,40 @@ function getRootDir(argv: BuildService.parsedArgs) {
 /**
  * 获取 配置文件 设置
  * @param argv BuildService 通用 启动参数
+ * @param mode webpack 环境
  */
 function getConfigFileOptions(
   argv: BuildService.parsedArgs
 ): BuildService.parsedArgs.config {
   const rootDir = getRootDir(argv)
-  const configFile = resolve(rootDir, argv['config-file'])
-  if (!existsSync(configFile)) {
-    consola.fatal('entry is not exists', configFile)
-    return process.exit(0)
-  }
+  if (argv['config-file']) {
+    const configFile = resolve(rootDir, argv['config-file'])
+    if (!existsSync(configFile)) {
+      consola.fatal('entry is not exists', configFile)
+      return process.exit(0)
+    }
 
-  let options: any = {}
+    let options: any = {}
 
-  try {
-    const jsonString = readFileSync(configFile, { encoding: 'utf-8' })
-    options = JSON.parse(jsonString)
-  } catch (error) {
-    consola.fatal(error)
-    return process.exit(0)
-  }
+    try {
+      const jsonString = readFileSync(configFile, { encoding: 'utf-8' })
+      options = JSON.parse(jsonString)
+    } catch (error) {
+      consola.fatal(error)
+      return process.exit(0)
+    }
 
-  const { entry, output } = options
+    const { entry, output } = options
 
-  return {
-    entry: resolve(rootDir, entry),
-    output: resolve(rootDir, output)
+    return {
+      entry: resolve(rootDir, argv.entry || entry),
+      output: resolve(rootDir, argv.output || output)
+    }
+  } else {
+    return {
+      entry: resolve(rootDir, argv.entry || './build.config.ts'),
+      output: resolve(rootDir, argv.output || './dist/config')
+    }
   }
 }
 

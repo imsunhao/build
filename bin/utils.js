@@ -63,7 +63,36 @@ function getArgv() {
     consola.info('clear cache')
     const rimraf = require('rimraf')
     const resolve = require('path').resolve
-    path = resolve(argv._[0] || './.build')
+    const rootDir = resolve(argv._[0] || '.')
+
+    if (argv.output) {
+      path = resolve(rootDir, argv.output)
+    } else {
+      const fs = require('fs')
+
+      if (argv['config-file']) {
+        const configFile = resolve(rootDir, argv['config-file'])
+        if (!fs.existsSync(configFile)) {
+          consola.fatal('configFile is not exists', configFile)
+          return process.exit(0)
+        }
+
+        let options = {}
+
+        try {
+          const jsonString = fs.readFileSync(configFile, { encoding: 'utf-8' })
+          options = JSON.parse(jsonString)
+        } catch (error) {
+          consola.fatal('clear:', error)
+          return process.exit(0)
+        }
+
+        path = resolve(rootDir, options.output || './dist/config')
+      } else {
+        path = resolve(rootDir, './dist/config')
+      }
+    }
+
     rimraf.sync(path)
   }
 

@@ -8,7 +8,7 @@ import { serverExtensions } from 'src/extensions'
 async function main(argv: BuildService.parsedArgs) {
   consola.ready(`@bestminr/build v${argv.version}`)
   consola.start('start with production mode')
-  const options = await initConfig(argv, 'production')
+  const options = await initConfig(argv, 'none')
 
   const app = serverInit({
     statics: options.statics,

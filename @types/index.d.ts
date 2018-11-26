@@ -41,7 +41,7 @@ declare namespace build {
       /**
        * 配置文件名称
        */
-      'config-file': string
+      'config-file'?: string
 
       /**
        * 当前运行版本
@@ -67,11 +67,13 @@ declare namespace build {
       interface config {
         /**
          * config文件 入口
+         * * 默认值 ./build.config.ts
          */
         entry?: string
 
         /**
          * config文件 产出目录
+         * * 默认值 ./dist/config
          */
         output?: string
       }
