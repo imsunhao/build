@@ -150,31 +150,36 @@ export function compiler(
 
 /**
  * webpack 编译 配置文件
- * @param configFile 配置文件路径
+ * @param configOptions 配置文件 设置
  */
 export function compilerConfig(
-  configFile: string,
+  configOptions: BuildService.parsedArgs.config,
   mode: ConfigOptions.webpackMode,
   { rootDir }: { rootDir: string }
 ): Promise<() => webpack.Configuration> {
   return new Promise(function(this: any, done) {
     const webpackConfig = getConfigConfig({ rootDir })
     const entryName = `${mode}_config`
-    webpackConfig.mode = mode
-    webpackConfig.entry = {
-      [entryName]: configFile
+    const { entry, output } = configOptions
+
+    if (!(entry && output)) {
+      consola.fatal('compilerConfig: entry or output is undefined')
+      return process.exit(0)
     }
 
-    const outputPath = resolve(rootDir, './.build')
+    webpackConfig.mode = mode
+    webpackConfig.entry = {
+      [entryName]: entry
+    }
 
     if (webpackConfig.output) {
-      webpackConfig.output.path = outputPath
+      webpackConfig.output.path = output
     } else {
       consola.error('webpackConfig.output is undefined!')
       return {}
     }
 
-    const path = resolve(outputPath, `${entryName}.js`)
+    const path = resolve(output, `${entryName}.js`)
     let config: any = {}
 
     if (existsSync(path)) {
@@ -213,7 +218,7 @@ export function compilerConfig(
 
 /**
  * webpack 编译 dll
- * @param configFile 配置文件路径
+ * @param options build 通用 webpack 配置
  */
 export function compilerDll(options: ConfigOptions.options): Promise<any> {
   return new Promise(function(done) {
@@ -251,7 +256,8 @@ export function compilerDll(options: ConfigOptions.options): Promise<any> {
 
 /**
  * webpack 编译 dll
- * @param configFile 配置文件路径
+ * @param options build 通用 webpack 配置
+ * @param app Express 实例
  */
 export async function compilerExtensions(
   options: ConfigOptions.options,

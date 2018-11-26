@@ -37,7 +37,7 @@ declare namespace build {
     /**
      * BuildService 通用 启动参数
      */
-    interface parsedArgs extends minimist.ParsedArgs {
+    interface parsedArgs extends minimist.ParsedArgs, parsedArgs.config, parsedArgs.serverStart {
       /**
        * 配置文件名称
        */
@@ -49,19 +49,47 @@ declare namespace build {
       version: string
 
       /**
-       * 是否使用 webpack dll
+       * 是否显示 帮助
+       */
+      help: boolean
+
+      /**
+       * 是否使用 webpack dll 启动
+       * * 仅仅打包dll
        */
       dll: boolean
+    }
+
+    namespace parsedArgs {
+      /**
+       * 配置文件 设置
+       */
+      interface config {
+        /**
+         * config文件 入口
+         */
+        entry?: string
+
+        /**
+         * config文件 产出目录
+         */
+        output?: string
+      }
 
       /**
-       * 启动端口号
+       * 服务器启动 设置
        */
-      port?: number
+      interface serverStart {
+        /**
+         * 启动端口号
+         */
+        port?: number
 
-      /**
-       * 文件描述符
-       */
-      fileDescriptor?: string
+        /**
+         * 文件描述符
+         */
+        fileDescriptor?: string
+      }
     }
 
     /**

@@ -2,7 +2,7 @@ import { resolve } from 'path'
 import { ConfigOptions, BuildService } from '@types'
 
 import { getClientConfig, getServerConfig } from 'src/config'
-import { existsSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import consola from 'consola'
 import { createResolve } from 'src/utils/path'
 import rimraf from 'rimraf'
@@ -23,11 +23,35 @@ function getRootDir(argv: BuildService.parsedArgs) {
 }
 
 /**
- * 获取 配置目录 地址
+ * 获取 配置文件 设置
  * @param argv BuildService 通用 启动参数
  */
-function getConfigFile(argv: BuildService.parsedArgs) {
-  return resolve(getRootDir(argv), argv['config-file'])
+function getConfigFileOptions(
+  argv: BuildService.parsedArgs
+): BuildService.parsedArgs.config {
+  const rootDir = getRootDir(argv)
+  const configFile = resolve(rootDir, argv['config-file'])
+  if (!existsSync(configFile)) {
+    consola.fatal('entry is not exists', configFile)
+    return process.exit(0)
+  }
+
+  let options: any = {}
+
+  try {
+    const jsonString = readFileSync(configFile, { encoding: 'utf-8' })
+    options = JSON.parse(jsonString)
+  } catch (error) {
+    consola.fatal(error)
+    return process.exit(0)
+  }
+
+  const { entry, output } = options
+
+  return {
+    entry: resolve(rootDir, entry),
+    output: resolve(rootDir, output)
+  }
 }
 
 function getDefaultStaticFileExts() {
@@ -38,7 +62,7 @@ let buildServiceConfig: ConfigOptions.options
 
 /**
  * 设置 Babelrc
- * @param configFile build 通用 webpack 配置
+ * @param options build 通用 webpack 配置
  */
 function setBabelrc(options: ConfigOptions.options) {
   const babelPlugins = [
@@ -73,7 +97,7 @@ function setBabelrc(options: ConfigOptions.options) {
 
 /**
  * 设置 webpack
- * @param configFile build 通用 webpack 配置
+ * @param options build 通用 webpack 配置
  * @param mode webpack 环境
  */
 async function setWebpack(
@@ -88,7 +112,7 @@ async function setWebpack(
 }
 /**
  * 设置 静态文件后缀
- * @param configFile build 通用 webpack 配置
+ * @param options build 通用 webpack 配置
  */
 function setStaticFileExts(options: ConfigOptions.options) {
   if (!options.staticFileExts || options.staticFileExts.constructor !== Array) {
@@ -110,12 +134,12 @@ export async function initConfig(
   opt?: ConfigOptions.options.initConfigOptions
 ): Promise<ConfigOptions.options> {
   const rootDir = getRootDir(argv)
-  const configFile = getConfigFile(argv)
+  const configOptions = getConfigFileOptions(argv)
 
   let options: any = {}
 
-  if (existsSync(configFile)) {
-    options = await compilerConfig(configFile, mode, { rootDir })
+  if (existsSync(configOptions.entry || '')) {
+    options = await compilerConfig(configOptions, mode, { rootDir })
     if (!options) {
       options = {}
     } else {
@@ -230,7 +254,7 @@ export function serverStart(
     const fd = parseInt(fileDescriptor, 10)
 
     options = {
-      fd,
+      fd
     }
   } else {
     options = port || 8020
