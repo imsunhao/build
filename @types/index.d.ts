@@ -130,8 +130,21 @@ declare namespace build {
        * 静态文件后缀
        */
       staticFileExts?: string[]
+
+      /**
+       * 静态文件转发目录
+       */
       statics?: statics
+
+      /**
+       * 转发列表
+       */
       proxyTable?: proxyTable
+
+      /**
+       * 注入环境变量
+       */
+      env?: string[]
     }
 
     /**
@@ -141,7 +154,12 @@ declare namespace build {
       /**
        * 当前 rander 设备上下文
        */
-      renderContext: any
+      renderContext?: any
+
+      /**
+       * 当前 rander Env环境 key
+       */
+      renderEnv?: string[]
     }
 
     namespace getRender {

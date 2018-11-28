@@ -40,6 +40,11 @@
 
 #### 支持 SSR 使用webpack4 打包 css无法提取的问题
 
+#### 支持 注入 Env
+
+- 为了方便打包一遍, 多种环境公用一套代码. 比如: stage环境 release环境 线上环境
+- 代码仅仅与node环境一致, 而不是webpack打包时决定
+
 #### 支持 webpack dll
 
 - dev 模式下 配置 dll 后, 如果 dll 未初始化 那么自动初始化 dll, 如果已经初始化 而且修改过 dll, 那么 需要手动 `service:dev -d` 来进行 dll 的更新

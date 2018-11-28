@@ -226,10 +226,12 @@ export function getConfig() {
  * @param {*} BuildService.serverInitOptions
  * @return express实例: app
  */
-export function serverInit({
-  statics,
-  proxyTable
-}: BuildService.serverInitOptions) {
+export function serverInit() {
+  const {
+    env,
+    statics,
+    proxyTable,
+  } = getConfig()
   const app = express()
 
   app.use(compression({ threshold: 0 }))
@@ -237,6 +239,8 @@ export function serverInit({
   serverStatics(app, statics)
 
   serverProxy(app, proxyTable)
+
+  serverRenderDefaultEnv(app, env)
 
   return app
 }
@@ -299,6 +303,21 @@ function serverProxy(app: Express, proxyTable?: BuildService.proxyTable) {
       options = { target: options }
     }
     app.use(proxyMiddleware(proxyKey, options))
+  })
+}
+
+/**
+ * 服务器 获取 渲染默认 Env
+ * @param app Express 实例
+ * @param env 转发列表集合
+ */
+function serverRenderDefaultEnv(app: Express, env: any = []) {
+  env = env.concat(['VUE_ENV'])
+  consola.info('serverRenderDefaultEnv', env)
+  app.use(function(req: BuildService.Request, res, next) {
+    const renderEnv = req.renderEnv || []
+    req.renderEnv = env.concat(renderEnv)
+    next()
   })
 }
 

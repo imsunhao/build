@@ -10,14 +10,9 @@ async function devMain(argv: BuildService.parsedArgs) {
   consola.start('dev with development mode')
   const options = await initConfig(argv, 'development')
 
-  const app = serverInit({
-    statics: options.statics,
-    proxyTable: options.proxyTable
-  })
+  const app = serverInit()
 
-  serverDevRender(app)
-
-  await serverExtensions(app)
+  await Promise.all([serverExtensions(app), serverDevRender(app)])
 
   serverStart(app, argv)
 

@@ -4,6 +4,8 @@ import { BundleRenderer } from 'vue-server-renderer'
 
 import path from 'path'
 import { getConfig } from 'src/utils'
+import consola from 'consola'
+import serialize from 'serialize-javascript'
 
 function isStaticResourceUrl(url: string) {
   const ext = path.extname(url)
@@ -19,6 +21,35 @@ function redirectTo404(res: Response, req: BuildService.Request) {
 function makeLoginPageUrl(toPath: string) {
   const newUrl = `/login?toPath=${encodeURIComponent(toPath)}`
   return newUrl
+}
+
+function getWindowEnv(renderEnv: string[]) {
+  const env = renderEnv.reduce(function(obj: any, key) {
+    obj[key] = process.env[key]
+    return obj
+  }, {})
+  env.VUE_ENV = 'client'
+  return serialize(env, { isJSON: true })
+}
+
+function getContextHead(req: BuildService.Request) {
+  if (!req.renderEnv) {
+    consola.fatal('req.renderEnv is undefined')
+    return ''
+  }
+
+  const env = ['NODE_ENV'].reduce(function(obj: any, key) {
+    obj[key] = process.env[key]
+    return obj
+  }, {})
+
+  const autoRemove =
+    env.NODE_ENV === 'production'
+      ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
+      : ''
+  return `<script>window.env = ${getWindowEnv(
+    req.renderEnv
+  )}${autoRemove}</script>`
 }
 
 const serverInfo =
@@ -81,7 +112,8 @@ export function getRender(
       headers: req.headers,
       url: req.url,
       cookies: req.cookies,
-      renderContext: req.renderContext || {}
+      renderContext: req.renderContext || {},
+      head: getContextHead(req)
     }
 
     renderer.renderToString(context, (err: any, html: string) => {

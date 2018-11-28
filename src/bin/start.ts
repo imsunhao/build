@@ -10,10 +10,7 @@ async function main(argv: BuildService.parsedArgs) {
   consola.start('start with production mode')
   const options = await initConfig(argv, 'none')
 
-  const app = serverInit({
-    statics: options.statics,
-    proxyTable: options.proxyTable
-  })
+  const app = serverInit()
 
   await serverExtensions(app, {
     noCompiler: true

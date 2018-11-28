@@ -125,6 +125,7 @@ export function serverDevRender(app: Express) {
       render(req, res, next)
     })
   })
+  return readyPromise
 }
 
 /**
