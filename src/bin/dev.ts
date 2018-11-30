@@ -12,7 +12,7 @@ async function devMain(argv: BuildService.parsedArgs) {
 
   const app = serverInit()
 
-  await Promise.all([serverExtensions(app), serverDevRender(app)])
+  await Promise.all([serverDevRender(app), serverExtensions(app)])
 
   serverStart(app, argv)
 
