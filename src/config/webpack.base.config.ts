@@ -81,12 +81,16 @@ export function getBaseConfig(options: ConfigOptions.options) {
         maxAssetSize: 1024 * 300,
         hints: isProd ? 'warning' : false
       },
-      plugins: (isProd ? [] : [new FriendlyErrorsPlugin()]).concat([
+      plugins: (
+        isProd ? [] : [
+          new FriendlyErrorsPlugin(),
+          new ForkTsCheckerWebpackPlugin({
+            vue: true, // 开启以检测 .vue 文件中的类型错误
+            ignoreDiagnostics: [2339]
+          }),
+        ]
+      ).concat([
         new VueLoaderPlugin(),
-        new ForkTsCheckerWebpackPlugin({
-          vue: true, // 开启以检测 .vue 文件中的类型错误
-          ignoreDiagnostics: [2339]
-        }),
         makeHappyPack('ts', [
           {
             loader: 'ts-loader',
