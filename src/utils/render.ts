@@ -118,7 +118,6 @@ export function getRender(
 
     renderer.renderToString(context, (err: any, html: string) => {
       if (err) {
-        res.send(err)
         return handleError(err)
       }
       res.end(html)
