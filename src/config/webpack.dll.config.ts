@@ -6,6 +6,8 @@ import { ConfigOptions } from '@types'
 import consola from 'consola'
 import webpack from 'webpack'
 
+import { getCommonConfig } from './webpack.common.config'
+
 export function getDllConfig(
   options: ConfigOptions.options
 ): webpack.Configuration {
@@ -19,7 +21,9 @@ export function getDllConfig(
   const dll = options.webpack.dll
 
   return (merge as any)(
+    getCommonConfig(mode),
     {
+      name: 'dll',
       mode,
       entry: dll.entry,
       output: {
@@ -42,7 +46,7 @@ export function getDllConfig(
         maxEntrypointSize: 1024 * 500,
         maxAssetSize: 1024 * 500,
         hints: isProd ? 'warning' : false
-      },
+      }
     },
     getDllPlugin(dll),
     dll.webpack

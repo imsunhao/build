@@ -13,6 +13,7 @@ export async function getClientConfig(options: ConfigOptions.options) {
   return (merge as any)(
     getBaseConfig(options),
     {
+      name: 'client',
       entry: {
         app: './src/entry-client.js'
       },

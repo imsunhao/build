@@ -3,6 +3,7 @@ import merge from 'webpack-merge'
 import nodeExternals from 'webpack-node-externals'
 import webpack from 'webpack'
 import consola from 'consola'
+import { getCommonConfig } from './webpack.common.config'
 
 export function getExtensionsConfig(
   options: ConfigOptions.options
@@ -38,7 +39,9 @@ export function getExtensionsConfig(
   const isProd = mode === 'production'
 
   return (merge as any)(
+    getCommonConfig(mode),
     {
+      name: 'extensions',
       mode,
       devtool: false,
       target: 'node',

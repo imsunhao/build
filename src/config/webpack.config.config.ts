@@ -1,6 +1,8 @@
 import nodeExternals from 'webpack-node-externals'
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import webpack from 'webpack'
+import merge from 'webpack-merge'
+import { getCommonConfig } from './webpack.common.config'
 
 const babelLoder = {
   loader: 'babel-loader',
@@ -14,7 +16,8 @@ export function getConfigConfig({
 }: {
   rootDir: string
 }): webpack.Configuration {
-  return {
+  return (merge as any)(getCommonConfig('development'), {
+    name: 'config',
     devtool: false,
     target: 'node',
     context: rootDir,
@@ -40,8 +43,6 @@ export function getConfigConfig({
         }
       ]
     },
-    plugins: [
-      new ForkTsCheckerWebpackPlugin()
-    ]
-  }
+    plugins: [new ForkTsCheckerWebpackPlugin()]
+  })
 }

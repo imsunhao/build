@@ -21,6 +21,7 @@ export function getServerConfig(options: ConfigOptions.options) {
   return (merge as any)(
     getBaseConfig(options),
     {
+      name: 'server',
       target: 'node',
       entry: './src/entry-server.js',
       output: {

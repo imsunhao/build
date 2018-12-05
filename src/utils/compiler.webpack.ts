@@ -21,6 +21,7 @@ function showError(stats: webpack.Stats) {
     stats.compilation.errors.forEach(error => {
       consola.fatal(error)
     })
+    return process.exit(0)
   }
 }
 
@@ -34,7 +35,7 @@ function prodCompiler({
   clientCompilerDone,
   serverCompilerDone
 }: BuildService.compiler.prodCompilerOptions) {
-  const clientCompiler = webpack(clientConfig)
+  const clientCompiler = getCompiler(clientConfig)
   clientCompiler.plugin('done', stats => {
     clientCompilerDone({ stats })
   })
@@ -43,7 +44,7 @@ function prodCompiler({
     consola.log(stats.toString())
   })
 
-  const serverCompiler = webpack(serverConfig)
+  const serverCompiler = getCompiler(serverConfig)
   serverCompiler.plugin('done', stats => {
     serverCompilerDone({ stats })
   })
@@ -94,7 +95,7 @@ function devCompiler({
     new webpack.NoEmitOnErrorsPlugin()
   )
 
-  const clientCompiler = webpack(clientConfig)
+  const clientCompiler = getCompiler(clientConfig)
 
   // clientCompiler.hooks.compile.tap('stats-plugin', stats => {
   //   consola.info('compile\n', JSON.stringify(stats, null, 2))
@@ -103,6 +104,7 @@ function devCompiler({
   const devMiddleware = require('webpack-dev-middleware')(clientCompiler, {
     publicPath: clientConfig.output.publicPath,
     noInfo: true,
+    logLevel: 'warn',
     writeToDisk: false
   })
 
@@ -120,7 +122,7 @@ function devCompiler({
   )
 
   // watch and update server renderer
-  const serverCompiler = webpack(serverConfig)
+  const serverCompiler = getCompiler(serverConfig)
   const mfs = new MFS()
   serverCompiler.outputFileSystem = mfs
   serverCompiler.watch({}, (err, stats) => {
@@ -192,7 +194,7 @@ export function compilerConfig(
         done(config)
       }
     } else if (mode !== 'none') {
-      const compiler = webpack(webpackConfig)
+      const compiler = getCompiler(webpackConfig)
       compiler.plugin('done', stats => {
         stats = stats.toJson()
         stats.errors.forEach((err: any) => consola.error(err))
@@ -226,7 +228,7 @@ export function compilerDll(options: ConfigOptions.options): Promise<any> {
   return new Promise(function(done) {
     const webpackConfig = getDllConfig(options)
 
-    const compiler = webpack(webpackConfig)
+    const compiler = getCompiler(webpackConfig)
     compiler.plugin('done', stats => {
       stats = stats.toJson()
       stats.errors.forEach((err: any) => consola.error(err))
@@ -280,7 +282,7 @@ function prodCompilerExtensions(options: ConfigOptions.options) {
   return new Promise(function(done) {
     const webpackConfig = getExtensionsConfig(options)
 
-    const compiler = webpack(webpackConfig)
+    const compiler = getCompiler(webpackConfig)
     compiler.plugin('done', stats => {
       stats = stats.toJson()
       stats.errors.forEach((err: any) => consola.error(err))
@@ -322,9 +324,10 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
       new webpack.NoEmitOnErrorsPlugin()
     )
 
-    const compiler = webpack(webpackConfig)
+    const compiler = getCompiler(webpackConfig)
     const serverDevMiddleware = require('webpack-dev-middleware')(compiler, {
-      noInfo: true
+      noInfo: true,
+      logLevel: 'silent',
     })
     app.use(serverDevMiddleware)
 
@@ -359,4 +362,13 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
 
     app.use(require('webpack-hot-middleware')(compiler, { heartbeat: 5000 }))
   })
+}
+
+/**
+ * 获取 webpack Compiler
+ * @param config webpack 配置文件
+ */
+function getCompiler(config: webpack.Configuration) {
+  consola.info('Working Compiler:', config.name , '\n')
+  return webpack(config)
 }
