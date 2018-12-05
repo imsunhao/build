@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.7"></a>
+## [1.5.7](https://github.com/imsunhao/build/compare/v1.5.5...v1.5.7) (2018-12-05)
+
+
+### Features
+
+* add Webpackbar ([705ac73](https://github.com/imsunhao/build/commit/705ac73))
+
+
+
 <a name="1.5.5"></a>
 ## 1.5.5 (2018-12-04)
 
