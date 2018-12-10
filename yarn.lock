@@ -976,6 +976,14 @@
     "@types/uglify-js" "*"
     source-map "^0.6.0"
 
+"@types/webpackbar@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@types/webpackbar/-/webpackbar-2.6.0.tgz#0fa1b88e2c7ab68919d94fb8a5b3c882e4d7c94c"
+  integrity sha512-5rFY8CRCgBLlG7mimOn0lrf1LUiX6ps52/Lhv9s8mQIpXmiP/iIBdQPqta3FktxoUKDl31rNi0tVEfg5lbOOFA==
+  dependencies:
+    "@types/node" "*"
+    "@types/webpack" "*"
+
 "@vue/component-compiler-utils@^2.0.0":
   version "2.3.0"
   resolved "http://registry.npm.taobao.org/@vue/component-compiler-utils/download/@vue/component-compiler-utils-2.3.0.tgz#4f580f1b28fc7685859d87ea0e92a1c0271c93da"
@@ -1204,6 +1212,11 @@ ansi-colors@^3.0.0:
   resolved "http://registry.npm.taobao.org/ansi-colors/download/ansi-colors-3.2.1.tgz#9638047e4213f3428a11944a7d4b31cba0a3ff95"
   integrity sha1-ljgEfkIT80KKEZRKfUsxy6Cj/5U=
 
+ansi-escapes@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-3.1.0.tgz#f73207bb81207d75fd6c83f125af26eea378ca30"
+  integrity sha512-UgAb8H9D41AQnu/PbWlCofQVcnV4Gs2bBJi9eZPxfU/hgglFh3SMDMENRIqdr7H6XFnXdoknctFByVsCOotTVw==
+
 ansi-html@0.0.7:
   version "0.0.7"
   resolved "http://registry.npm.taobao.org/ansi-html/download/ansi-html-0.0.7.tgz#813584021962a9e9e6fd039f940d12f56ca7859e"
@@ -1224,7 +1237,7 @@ ansi-styles@^2.2.1:
   resolved "http://registry.npm.taobao.org/ansi-styles/download/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
   integrity sha1-tDLdM1i2NM914eRmQ2gkBTPB3b4=
 
-ansi-styles@^3.2.1:
+ansi-styles@^3.2.0, ansi-styles@^3.2.1:
   version "3.2.1"
   resolved "http://registry.npm.taobao.org/ansi-styles/download/ansi-styles-3.2.1.tgz#41fbb20243e50b12be0f04b8dedbf07520ce841d"
   integrity sha1-QfuyAkPlCxK+DwS43tvwdSDOhB0=
@@ -1946,10 +1959,10 @@ concat-stream@^1.5.0:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-consola@^2.2.4:
+consola@2.2.4, consola@^2.2.4:
   version "2.2.4"
-  resolved "http://registry.npm.taobao.org/consola/download/consola-2.2.4.tgz#33130c924e715eec17c7b5c836fd41f468616f38"
-  integrity sha1-MxMMkk5xXuwXx7XINv1B9Ghhbzg=
+  resolved "https://registry.yarnpkg.com/consola/-/consola-2.2.4.tgz#33130c924e715eec17c7b5c836fd41f468616f38"
+  integrity sha512-1iYib+5XUvHL9YZsFYAV5gavnFvCyoJbG23XAPAKA0631bL1JZ3WsJUgtyOn/J1YWuJCV3VFmJ+CIHhMUVbGhQ==
   dependencies:
     chalk "^2.4.1"
     dayjs "^1.7.7"
@@ -5185,6 +5198,11 @@ pretty-error@^2.0.2:
     renderkid "^2.0.1"
     utila "~0.4"
 
+pretty-time@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/pretty-time/-/pretty-time-1.1.0.tgz#ffb7429afabb8535c346a34e41873adf3d74dd0e"
+  integrity sha512-28iF6xPQrP8Oa6uxE6a1biz+lWeTOAPKggvjB8HAs6nVMKZwf5bG++632Dx614hIWgUPkgivRfG+a8uAXGTIbA==
+
 private@^0.1.6:
   version "0.1.8"
   resolved "http://registry.npm.taobao.org/private/download/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
@@ -5966,7 +5984,7 @@ statuses@~1.4.0:
   resolved "http://registry.npm.taobao.org/statuses/download/statuses-1.4.0.tgz#bb73d446da2796106efcc1b601a253d6c46bd087"
   integrity sha1-u3PURtonlhBu/MG2AaJT1sRr0Ic=
 
-std-env@^2.1.1:
+std-env@^2.1.1, std-env@^2.2.1:
   version "2.2.1"
   resolved "http://registry.npm.taobao.org/std-env/download/std-env-2.2.1.tgz#2ffa0fdc9e2263e0004c1211966e960948a40f6b"
   integrity sha1-L/oP3J4iY+AATBIRlm6WCUikD2s=
@@ -6146,6 +6164,11 @@ tar@^4:
     mkdirp "^0.5.0"
     safe-buffer "^5.1.2"
     yallist "^3.0.2"
+
+text-table@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
+  integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
 
 through2@^2.0.0:
   version "2.0.5"
@@ -6642,9 +6665,9 @@ vue-template-es2015-compiler@^1.6.0:
   integrity sha1-3EJpcTMwLOMBdSQ1amxht7abShg=
 
 vue@^2.5.17:
-  version "2.5.17"
-  resolved "http://registry.npm.taobao.org/vue/download/vue-2.5.17.tgz#0f8789ad718be68ca1872629832ed533589c6ada"
-  integrity sha1-D4eJrXGL5oyhhyYpgy7VM1icato=
+  version "2.5.19"
+  resolved "https://registry.yarnpkg.com/vue/-/vue-2.5.19.tgz#c4c9ba01a97a23ea24018d4702e994c15785e025"
+  integrity sha512-zs7w/dy/yMTCcUunUl05UHhYEI2bt67R7G2jD42HnJ28JxCtC1FY8zZ9GU4PF2SJP8Ff/B9HyojWk/NztqKfFA==
 
 vuex-class@^0.3.1:
   version "0.3.1"
@@ -6764,6 +6787,20 @@ webpack@^4.25.1:
     watchpack "^1.5.0"
     webpack-sources "^1.3.0"
 
+webpackbar@^3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/webpackbar/-/webpackbar-3.1.3.tgz#3ea7b7e3d09fd3ac62ba476a45a1c0c2830e6dcb"
+  integrity sha512-OvCUjHxd+FRSlocJTqi0wjBZIIetW04WkDiKpkfL7ZvvEeQnTVL+6yBzjJVpdaY7CZ/tfQKM8IBXIcHlPqyX+g==
+  dependencies:
+    ansi-escapes "^3.1.0"
+    chalk "^2.4.1"
+    consola "^2.2.4"
+    figures "^2.0.0"
+    pretty-time "^1.1.0"
+    std-env "^2.2.1"
+    text-table "^0.2.0"
+    wrap-ansi "^4.0.0"
+
 which-module@^1.0.0:
   version "1.0.0"
   resolved "http://registry.npm.taobao.org/which-module/download/which-module-1.0.0.tgz#bba63ca861948994ff307736089e3b96026c2a4f"
@@ -6802,6 +6839,15 @@ wrap-ansi@^2.0.0:
   dependencies:
     string-width "^1.0.1"
     strip-ansi "^3.0.1"
+
+wrap-ansi@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-4.0.0.tgz#b3570d7c70156159a2d42be5cc942e957f7b1131"
+  integrity sha512-uMTsj9rDb0/7kk1PbcbCcwvHUxp60fGDB/NNXpVa0Q+ic/e7y5+BwTxKfQ33VYgDppSwi/FBzpetYzo8s6tfbg==
+  dependencies:
+    ansi-styles "^3.2.0"
+    string-width "^2.1.1"
+    strip-ansi "^4.0.0"
 
 wrappy@1:
   version "1.0.2"
