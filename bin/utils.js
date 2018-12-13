@@ -13,11 +13,12 @@ function getArgv() {
       d: 'dll',
       c: 'config-file',
       fd: 'fileDescriptor',
+      ic: 'injectContext',
       cl: 'clear',
       v: 'version'
     },
     boolean: ['h', 'd', 'v', 'cl'],
-    string: ['H', 'c', 'fd', 'e', 'o'],
+    string: ['H', 'c', 'fd', 'e', 'o', 'ic'],
     default: {
       c: 'build.config.json'
     }
@@ -28,13 +29,14 @@ function getArgv() {
       Description
         Starts the application in ${process.env.NODE_ENV} mode
       Options
-        --port, -p          A port number on which to start the application
-        --hostname, -H      Hostname on which to start the application
-        --clear, --cl       clear cache
-        --dll, -d           build webpack dll
-        --version, -v       look over version
-        --config-file, -c   Path to config file (default: build.config.json)
-        --help, -h          Displays this message
+        --port, -p            A port number on which to start the application
+        --hostname, -H        Hostname on which to start the application
+        --clear, --cl         clear cache
+        --dll, -d             build webpack dll
+        --injectContext, -ic  Path to injectContext file
+        --version, -v         look over version
+        --config-file, -c     Path to config file (default: build.config.json)
+        --help, -h            Displays this message
   `)
     process.exit(0)
   }

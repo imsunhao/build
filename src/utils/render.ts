@@ -32,7 +32,7 @@ function getWindowEnv(renderEnv: string[]) {
   return serialize(env, { isJSON: true })
 }
 
-function getContextHead(req: BuildService.Request) {
+function getContextHead(req: BuildService.Request, injectContext: any) {
   if (!req.renderEnv) {
     consola.fatal('req.renderEnv is undefined')
     return ''
@@ -47,14 +47,17 @@ function getContextHead(req: BuildService.Request) {
     env.NODE_ENV === 'production'
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
-  return `<script>window.env = ${getWindowEnv(
+  return `<script>window.__INJECT_ENV__ = ${getWindowEnv(
     req.renderEnv
-  )}${autoRemove}</script>`
+  )};window.__INJECT_CONTEXT__ = ${serialize(injectContext, {
+    isJSON: true
+  })}${autoRemove}</script>`
 }
 
 const serverInfo =
   `express/${require('express/package.json').version} ` +
-  `vue-server-renderer/${require('vue-server-renderer/package.json').version}`
+  `vue-server-renderer/${require('vue-server-renderer/package.json').version} ` +
+  `@bestminr/build/${require('../../package.json').version} `
 
 export function getRender(
   renderer: BundleRenderer,
@@ -103,17 +106,17 @@ export function getRender(
     }
 
     const context = {
+      ...opts.context,
       pageInfo: {
         title: '  ', // default title @see util/mixins/index
         keywords: '',
         description: ''
       },
-      siteInfo: getConfig().siteInfo || {},
       headers: req.headers,
       url: req.url,
       cookies: req.cookies,
-      renderContext: req.renderContext || {},
-      head: getContextHead(req)
+      injectContext: req.injectContext || {},
+      head: getContextHead(req, opts.context)
     }
 
     renderer.renderToString(context, (err: any, html: string) => {

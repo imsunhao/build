@@ -48,16 +48,18 @@ function getConfigFileOptions(
       return process.exit(0)
     }
 
-    const { entry, output } = options
+    const { entry, output, injectContext } = options
 
     return {
       entry: resolve(rootDir, argv.entry || entry),
-      output: resolve(rootDir, argv.output || output)
+      output: resolve(rootDir, argv.output || output),
+      injectContext: resolve(rootDir, argv.injectContext || injectContext)
     }
   } else {
     return {
       entry: resolve(rootDir, argv.entry || './build.config.ts'),
-      output: resolve(rootDir, argv.output || './dist/build')
+      output: resolve(rootDir, argv.output || './dist/build'),
+      injectContext: resolve(rootDir, argv.injectContext || '')
     }
   }
 }
@@ -133,24 +135,41 @@ function setStaticFileExts(options: ConfigOptions.options) {
 }
 
 /**
- * 初始化并获取 BuildService 配置
- * @param argv BuildService 通用 启动参数
+ * 设置 注入的上下文
+ * @param configOptions 配置文件 设置
  */
-export async function initConfig(
-  argv: BuildService.parsedArgs,
-  mode: ConfigOptions.webpackMode,
-  opt?: ConfigOptions.options.initConfigOptions
-): Promise<ConfigOptions.options> {
-  const rootDir = getRootDir(argv)
-  const configOptions = getConfigFileOptions(argv)
+function getInjectContext(configOptions: BuildService.parsedArgs.config) {
+  const injectContext: any = {}
 
-  let options: any = {}
-
-  if (opt && opt.clear) {
-    if (configOptions && configOptions.output) {
-      rimraf.sync(configOptions.output)
+  if (existsSync(configOptions.injectContext || '')) {
+    try {
+      const jsonString = readFileSync(configOptions.injectContext, {
+        encoding: 'utf-8'
+      })
+      Object.assign(injectContext, JSON.parse(jsonString))
+    } catch (error) {
+      consola.fatal(error)
+      return process.exit(0)
     }
   }
+  return injectContext
+}
+
+/**
+ * 获取 用户配置
+ * @param configOptions 配置文件 设置
+ * @param injectContext 注入的上下文
+ * @param argv BuildService 通用 启动参数
+ * @param mode webpack 启动模式
+ */
+async function getUserConfig(
+  configOptions: BuildService.parsedArgs.config,
+  injectContext: any,
+  mode: ConfigOptions.webpackMode,
+  argv: BuildService.parsedArgs
+) {
+  const rootDir = getRootDir(argv)
+  let options: any
 
   if (existsSync(configOptions.entry || '')) {
     options = await compilerConfig(configOptions, mode, { rootDir })
@@ -160,7 +179,8 @@ export async function initConfig(
       const args: ConfigOptions.getOptionsInject = {
         argv,
         mode,
-        resolve: createResolve(rootDir)
+        resolve: createResolve(rootDir),
+        injectContext,
       }
       options = options.default(args)
     }
@@ -169,19 +189,55 @@ export async function initConfig(
     }
   } else if (argv['config-file'] !== 'buildService.config.js') {
     consola.fatal('Could not load config file: ' + argv['config-file'])
+    return process.exit(0)
   }
 
-  if (typeof options.rootDir !== 'string') {
-    options.rootDir = rootDir
+  if (!options.injectContext) {
+    options.injectContext = injectContext
+  } else {
+    options.injectContext = {
+      ...injectContext,
+      ...options.injectContext
+    }
   }
 
-  options = setStaticFileExts(options)
+  return options
+}
 
-  options = setBabelrc(options)
+/**
+ * 初始化并获取 BuildService 配置
+ * @param argv BuildService 通用 启动参数
+ * @param mode webpack 启动模式
+ */
+export async function initConfig(
+  argv: BuildService.parsedArgs,
+  mode: ConfigOptions.webpackMode,
+  opt?: ConfigOptions.options.initConfigOptions
+): Promise<ConfigOptions.options> {
+  const configOptions = getConfigFileOptions(argv)
+
+  if (opt && opt.clear) {
+    if (configOptions && configOptions.output) {
+      rimraf.sync(configOptions.output)
+    }
+  }
+
+  const injectContext = getInjectContext(configOptions)
+
+  const options: ConfigOptions.options = await getUserConfig(
+    configOptions,
+    injectContext,
+    mode,
+    argv
+  )
+
+  setStaticFileExts(options)
+
+  setBabelrc(options)
 
   await checkDll(argv, options)
 
-  options = await setWebpack(options, mode)
+  await setWebpack(options, mode)
 
   options.version = argv.version
 
@@ -227,11 +283,7 @@ export function getConfig() {
  * @return express实例: app
  */
 export function serverInit() {
-  const {
-    env,
-    statics,
-    proxyTable,
-  } = getConfig()
+  const { env, statics, proxyTable, injectContext } = getConfig()
   const app = express()
 
   app.use(compression({ threshold: 0 }))
@@ -241,6 +293,8 @@ export function serverInit() {
   serverProxy(app, proxyTable)
 
   serverRenderDefaultEnv(app, env)
+
+  setInjectContext(injectContext)
 
   return app
 }
@@ -322,6 +376,14 @@ function serverRenderDefaultEnv(app: Express, env: any = []) {
 }
 
 /**
+ * 设置 服务器端 注入的上下文 __INJECT_CONTEXT__
+ * @param injectContext 注入的上下文
+ */
+function setInjectContext(injectContext: any = {}) {
+  (process as any).__INJECT_CONTEXT__ = injectContext
+}
+
+/**
  * 基础 渲染 配置
  */
 export const BASE_RENDER_OPTIONS = {
@@ -333,7 +395,8 @@ export const BASE_RENDER_OPTIONS = {
   // this is only needed when vue-server-renderer is npm-linked
   // basedir: resolve(config.assetRoot),
   // recommended for performance
-  runInNewContext: 'once'
+  runInNewContext: 'once',
+  inject: true,
 }
 
 const isProduction = process.env.NODE_ENV === 'production'

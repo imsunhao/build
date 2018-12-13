@@ -44,6 +44,6 @@ export async function getClientConfig(options: ConfigOptions.options) {
     },
     getStyle(options, { isServer: false }),
     await getClientDllPlugin(options),
-    client
+    client,
   )
 }

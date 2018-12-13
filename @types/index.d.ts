@@ -76,6 +76,11 @@ declare namespace build {
          * * 默认值 ./dist/build
          */
         output?: string
+
+        /**
+         * 注入的上下文 配置文件目录
+         */
+        injectContext?: any
       }
 
       /**
@@ -152,18 +157,31 @@ declare namespace build {
      */
     interface Request extends expressRequest {
       /**
-       * 当前 rander 设备上下文
+       * 当前 注入的上下文
        */
-      renderContext?: any
+      injectContext?: any
 
       /**
-       * 当前 rander Env环境 key
+       * 当前 render Env环境 key
        */
       renderEnv?: string[]
     }
 
     namespace getRender {
-      interface opts {}
+      /**
+       * 获取 render 配置参数
+       */
+      interface opts {
+        /**
+         * 注入的上下文
+         */
+        context: any
+
+        /**
+         * 发布文件地址 默认为本地
+         */
+        publicPath?: string
+      }
       type renderFn = (
         req: BuildService.Request,
         res: expressResponse,
@@ -233,6 +251,14 @@ declare namespace build {
     interface getOptionsInject {
       argv: BuildService.parsedArgs
       mode: ConfigOptions.webpackMode
+
+      /**
+       * 注入的上下文
+       * * 用户自行配置
+       * * 详情 参见 --injectContext
+       */
+      injectContext: any
+
       /**
        * 获取 正确的路径
        * @param path 相对root路径
@@ -255,9 +281,9 @@ declare namespace build {
       rootDir?: string
 
       /**
-       * 当前 站点信息
+       * 注入的上下文
        */
-      siteInfo?: any
+      injectContext?: any
 
       /**
        * render 配置

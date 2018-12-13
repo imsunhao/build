@@ -7,6 +7,7 @@ import consola from 'consola'
 import webpack from 'webpack'
 
 import { getCommonConfig } from './webpack.common.config'
+import VueSSRClientPlugin from 'vue-server-renderer/client-plugin'
 
 export function getDllConfig(
   options: ConfigOptions.options
@@ -46,7 +47,12 @@ export function getDllConfig(
         maxEntrypointSize: 1024 * 500,
         maxAssetSize: 1024 * 500,
         hints: isProd ? 'warning' : false
-      }
+      },
+      plugins: [
+        new VueSSRClientPlugin({
+          filename: 'vue-ssr-dll-manifest.json'
+        }),
+      ]
     },
     getDllPlugin(dll),
     dll.webpack

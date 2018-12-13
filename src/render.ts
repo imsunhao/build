@@ -65,7 +65,7 @@ export function serverDevRender(app: Express) {
           clientManifest
         }),
         {
-          siteInfo: config.siteInfo
+          context: config.injectContext
         }
       )
       ready(render)
@@ -139,13 +139,31 @@ export function serverRender(app: Express) {
     if (
       config.render &&
       config.render.bundle &&
-      config.render.options.clientManifestPath
+      config.render.options.clientManifestPath &&
+      config.webpack &&
+      config.webpack.client &&
+      config.webpack.client.output
     ) {
-      const bundle = JSON.parse(readFileSync(config.render.bundle, 'utf-8'))
       const template = readFileSync(config.render.options.templatePath, 'utf-8')
       const clientManifest = JSON.parse(
         readFileSync(config.render.options.clientManifestPath, 'utf-8')
       )
+      if (config.webpack.dll) {
+        const dllManifest = JSON.parse(
+          readFileSync(path.resolve(config.webpack.dll.path, './vue-ssr-dll-manifest.json'), 'utf-8')
+        )
+        dllManifest.all.forEach((js: string) => {
+          clientManifest.all.push( 'dll/' + js)
+        })
+        dllManifest.initial.forEach((js: string) => {
+          clientManifest.initial.unshift( 'dll/' + js)
+        })
+      }
+
+      const publicPath = config.webpack.client.output.publicPath
+
+      clientManifest.publicPath = publicPath
+
       const options = Object.assign(
         {
           ...BASE_RENDER_OPTIONS,
@@ -155,10 +173,11 @@ export function serverRender(app: Express) {
         config.render.options
       )
 
-      const renderer = createBundleRenderer(bundle, options)
+      const renderer = createBundleRenderer(config.render.bundle, options)
 
       const render: any = getRender(renderer, {
-        siteInfo: config.siteInfo
+        context: config.injectContext,
+        publicPath,
       })
 
       app.use(cookieParser())

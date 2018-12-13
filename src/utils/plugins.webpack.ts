@@ -25,7 +25,7 @@ export function getDllPlugin({
       new HtmlWebpackPlugin({
         filename: join(templateOutput, 'index.template.html'),
         template,
-        inject: true,
+        inject: false,
         minify: {
           removeComments: false,
           collapseWhitespace: true,
