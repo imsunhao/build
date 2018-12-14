@@ -78,8 +78,10 @@ export function serverDevRender(app: Express) {
     stats.warnings.forEach((err: any) => consola.info(err))
     if (stats.errors.length) return
 
-    renderOptions.clientManifest = JSON.parse(
-      readFile(devMiddleware.fileSystem, 'vue-ssr-client-manifest.json')
+    renderOptions.clientManifest = clientManifestAddDll(
+      JSON.parse(
+        readFile(devMiddleware.fileSystem, 'vue-ssr-client-manifest.json')
+      )
     )
     update('clientManifest')
   }
@@ -128,6 +130,26 @@ export function serverDevRender(app: Express) {
   return readyPromise
 }
 
+function clientManifestAddDll(clientManifest: any) {
+  const config = getConfig()
+  if (config.webpack && config.webpack.client && config.webpack.client.output)
+    if (config.webpack.dll) {
+      const dllManifest = JSON.parse(
+        readFileSync(
+          path.resolve(config.webpack.dll.path, './vue-ssr-dll-manifest.json'),
+          'utf-8'
+        )
+      )
+      dllManifest.all.forEach((js: string) => {
+        clientManifest.all.push('dll/' + js)
+      })
+      dllManifest.initial.forEach((js: string) => {
+        clientManifest.initial.unshift('dll/' + js)
+      })
+    }
+  return clientManifest
+}
+
 /**
  * prod 服务器渲染 服务
  * @param app Express 实例
@@ -145,20 +167,11 @@ export function serverRender(app: Express) {
       config.webpack.client.output
     ) {
       const template = readFileSync(config.render.options.templatePath, 'utf-8')
-      const clientManifest = JSON.parse(
-        readFileSync(config.render.options.clientManifestPath, 'utf-8')
-      )
-      if (config.webpack.dll) {
-        const dllManifest = JSON.parse(
-          readFileSync(path.resolve(config.webpack.dll.path, './vue-ssr-dll-manifest.json'), 'utf-8')
+      const clientManifest = clientManifestAddDll(
+        JSON.parse(
+          readFileSync(config.render.options.clientManifestPath, 'utf-8')
         )
-        dllManifest.all.forEach((js: string) => {
-          clientManifest.all.push( 'dll/' + js)
-        })
-        dllManifest.initial.forEach((js: string) => {
-          clientManifest.initial.unshift( 'dll/' + js)
-        })
-      }
+      )
 
       const publicPath = config.webpack.client.output.publicPath
 
@@ -177,14 +190,16 @@ export function serverRender(app: Express) {
 
       const render: any = getRender(renderer, {
         context: config.injectContext,
-        publicPath,
+        publicPath
       })
 
       app.use(cookieParser())
 
       app.get('*', render)
     } else {
-      throw new Error('config error, config.render.options.clientManifestPath or config.render.bundle is undefined')
+      throw new Error(
+        'config error, config.render.options.clientManifestPath or config.render.bundle is undefined'
+      )
     }
   } catch (error) {
     consola.fatal('config.render', error)

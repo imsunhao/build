@@ -56,7 +56,9 @@ function getContextHead(req: BuildService.Request, injectContext: any) {
 
 const serverInfo =
   `express/${require('express/package.json').version} ` +
-  `vue-server-renderer/${require('vue-server-renderer/package.json').version} ` +
+  `vue-server-renderer/${
+    require('vue-server-renderer/package.json').version
+  } ` +
   `@bestminr/build/${require('../../package.json').version} `
 
 export function getRender(
@@ -68,9 +70,13 @@ export function getRender(
     res: Response,
     next: NextFunction
   ) {
+    // const webpack = getConfig().webpack
+    // const mode = webpack ? webpack.mode : undefined
+    // const isProduction = mode ? mode !== 'development' : true
+    // if (!isProduction) consola.log(req.url)
+
     // 一切正常工作的情况下，静态文件的请求会被 nginx 或者 express-static 处理，不应该进到这里
     // 直接返回 404 ，不占用 server-render 的宝贵资源
-
     if (isStaticResourceUrl(req.url)) {
       return res.status(404).end()
     }

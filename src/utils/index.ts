@@ -65,7 +65,7 @@ function getConfigFileOptions(
 }
 
 function getDefaultStaticFileExts() {
-  return ['.ico', '.png', '.jpg', '.js', '.css', '.json']
+  return ['.ico', '.png', '.jpg', '.js', '.css', '.json', '.mp4']
 }
 
 let buildServiceConfig: ConfigOptions.options
@@ -118,6 +118,16 @@ async function setWebpack(
   options.webpack.mode = mode
   options.webpack.client = await getClientConfig(options)
   options.webpack.server = getServerConfig(options)
+  // const isProduction = mode ? mode !== 'development' : true
+  // if (!isProduction) {
+  // }
+  const rootDirLength = options.rootDir ? options.rootDir.length : 0
+  let path = (options.webpack.client as any).output.path
+  if (path[path.length - 1] !== '/') {
+    path += '/'
+  }
+  path = path.slice(rootDirLength)
+  process.env.PUBLIC_PATH = path
   return options
 }
 /**
@@ -180,9 +190,10 @@ async function getUserConfig(
         argv,
         mode,
         resolve: createResolve(rootDir),
-        injectContext,
+        injectContext
       }
       options = options.default(args)
+      options.rootDir = options.rootDir || rootDir
     }
     if (options.default) {
       options = options.default
@@ -283,7 +294,7 @@ export function getConfig() {
  * @return express实例: app
  */
 export function serverInit() {
-  const { env, statics, proxyTable, injectContext } = getConfig()
+  const { env, statics, proxyTable, injectContext, webpack } = getConfig()
   const app = express()
 
   app.use(compression({ threshold: 0 }))
@@ -292,7 +303,7 @@ export function serverInit() {
 
   serverProxy(app, proxyTable)
 
-  serverRenderDefaultEnv(app, env)
+  serverRenderDefaultEnv(app, env, webpack)
 
   setInjectContext(injectContext)
 
@@ -364,9 +375,16 @@ function serverProxy(app: Express, proxyTable?: BuildService.proxyTable) {
  * 服务器 获取 渲染默认 Env
  * @param app Express 实例
  * @param env 转发列表集合
+ * @param webpack webpack设置
  */
-function serverRenderDefaultEnv(app: Express, env: any = []) {
-  env = env.concat(['VUE_ENV'])
+function serverRenderDefaultEnv(
+  app: Express,
+  env: any = [],
+  webpack: ConfigOptions.options.webpack = {}
+) {
+  // const isProduction = webpack.mode ? webpack.mode !== 'development' : true
+  const defaultEnv = ['VUE_ENV', 'PUBLIC_PATH']
+  env = env.concat(defaultEnv)
   consola.info('serverRenderDefaultEnv', env)
   app.use(function(req: BuildService.Request, res, next) {
     const renderEnv = req.renderEnv || []
@@ -380,7 +398,7 @@ function serverRenderDefaultEnv(app: Express, env: any = []) {
  * @param injectContext 注入的上下文
  */
 function setInjectContext(injectContext: any = {}) {
-  (process as any).__INJECT_CONTEXT__ = injectContext
+  ;(process as any).__INJECT_CONTEXT__ = injectContext
 }
 
 /**
@@ -396,7 +414,7 @@ export const BASE_RENDER_OPTIONS = {
   // basedir: resolve(config.assetRoot),
   // recommended for performance
   runInNewContext: 'once',
-  inject: true,
+  inject: true
 }
 
 const isProduction = process.env.NODE_ENV === 'production'
