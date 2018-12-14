@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.1"></a>
+## [1.6.1](https://github.com/imsunhao/build/compare/v1.5.9...v1.6.1) (2018-12-14)
+
+
+### Features
+
+* 支持注入 injectContext ([b948f7e](https://github.com/imsunhao/build/commit/b948f7e))
+
+
+
 <a name="1.5.9"></a>
 ## [1.5.9](https://github.com/imsunhao/build/compare/v1.5.8...v1.5.9) (2018-12-11)
 
