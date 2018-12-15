@@ -134,18 +134,23 @@ function clientManifestAddDll(clientManifest: any) {
   const config = getConfig()
   if (config.webpack && config.webpack.client && config.webpack.client.output)
     if (config.webpack.dll) {
-      const dllManifest = JSON.parse(
-        readFileSync(
-          path.resolve(config.webpack.dll.path, './vue-ssr-dll-manifest.json'),
-          'utf-8'
+      try {
+        const dllManifest = JSON.parse(
+          readFileSync(
+            path.resolve(config.webpack.dll.path, './vue-ssr-dll-manifest.json'),
+            'utf-8'
+          )
         )
-      )
-      dllManifest.all.forEach((js: string) => {
-        clientManifest.all.push('dll/' + js)
-      })
-      dllManifest.initial.forEach((js: string) => {
-        clientManifest.initial.unshift('dll/' + js)
-      })
+        dllManifest.all.forEach((js: string) => {
+          clientManifest.all.push('dll/' + js)
+        })
+        dllManifest.initial.forEach((js: string) => {
+          clientManifest.initial.unshift('dll/' + js)
+        })
+      } catch (error) {
+        consola.fatal('clientManifestAddDll', error)
+        return process.exit(0)
+      }
     }
   return clientManifest
 }

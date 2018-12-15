@@ -9,7 +9,8 @@
     "version": "standard-version -r patch",
     "test:init": "mkdir ~/Documents/imsunhao/sh-blog/node_modules/@bestminr && ln -s ~/Documents/imsunhao/lib/build  ~/Documents/imsunhao/sh-blog/node_modules/@bestminr/build",
     "test:reTest": "rm -rf ~/Documents/imsunhao/sh-blog/node_modules/@bestminr/build && ln -s ~/Documents/imsunhao/lib/build  ~/Documents/imsunhao/sh-blog/node_modules/@bestminr/build",
-    "test:reTest:blueberry": "rm -rf /Users/sunhao/Documents/blueberry/node_modules/@bestminr/build && ln -s ~/Documents/imsunhao/lib/build  /Users/sunhao/Documents/blueberry/node_modules/@bestminr/build"
+    "test:reTest:blueberry": "rm -rf /Users/sunhao/Documents/blueberry/node_modules/@bestminr/build && ln -s ~/Documents/imsunhao/lib/build  /Users/sunhao/Documents/blueberry/node_modules/@bestminr/build",
+    "debug:stage": "rsync ./dist/start.js git@bm9:/home/git/workspace/deploys/duomu_deploy/blueberry/node_modules/@bestminr/build/dist/start.js"
   },
   "files": [
     "bin/*",
