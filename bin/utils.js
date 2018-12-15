@@ -3,22 +3,24 @@ const consola = require('consola')
 const { version } = require('../package.json')
 
 function getArgv() {
+  const alias = {
+    H: 'hostname',
+    p: 'port',
+    h: 'help',
+    e: 'entry',
+    o: 'output',
+    d: 'dll',
+    c: 'config-file',
+    fd: 'fileDescriptor',
+    ic: 'injectContext',
+    cl: 'clear',
+    v: 'version'
+  }
+  const string = ['H', 'c', 'fd', 'e', 'o', 'ic']
   const argv = parseArgs(process.argv.slice(2), {
-    alias: {
-      H: 'hostname',
-      p: 'port',
-      h: 'help',
-      e: 'entry',
-      o: 'output',
-      d: 'dll',
-      c: 'config-file',
-      fd: 'fileDescriptor',
-      ic: 'injectContext',
-      cl: 'clear',
-      v: 'version'
-    },
+    alias,
     boolean: ['h', 'd', 'v', 'cl'],
-    string: ['H', 'c', 'fd', 'e', 'o', 'ic'],
+    string,
     default: {
       c: 'build.config.json'
     }
@@ -60,6 +62,14 @@ function getArgv() {
     consola.fatal('Provided entry argument has no value')
     process.exit(0)
   }
+
+  string.forEach(index => {
+    if (Array.isArray(argv[index])) {
+      const value = argv[index][argv[index].length - 1]
+      argv[index] = value
+      argv[alias[index]] = value
+    }
+  })
 
   if (argv.clear) {
     consola.info('clear cache')
