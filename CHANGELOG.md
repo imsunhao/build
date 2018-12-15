@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.2"></a>
+## [1.6.2](https://github.com/imsunhao/build/compare/v1.6.1...v1.6.2) (2018-12-15)
+
+
+### Bug Fixes
+
+* 修复 clientManifestAddDll 如果找不到正确的path 需要扔出错误原因 ([6936f23](https://github.com/imsunhao/build/commit/6936f23))
+
+
+### Features
+
+* 当存在有多个相同的配置项key的时候 value已最后一个为最终结果 ([7666792](https://github.com/imsunhao/build/commit/7666792))
+
+
+
 <a name="1.6.1"></a>
 ## [1.6.1](https://github.com/imsunhao/build/compare/v1.5.9...v1.6.1) (2018-12-14)
 
