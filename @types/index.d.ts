@@ -411,5 +411,12 @@ declare namespace build {
        */
       unpdate: (middlewares: any[]) => void
     }
+
+    namespace Get {
+      interface BaseGetOptions {
+        strict?: boolean
+        defaultValue?: any
+      }
+    }
   }
 }
