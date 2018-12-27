@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.3"></a>
+## [1.6.3](https://github.com/imsunhao/build/compare/v1.6.2...v1.6.3) (2018-12-27)
+
+
+### Features
+
+* 支持 ts导入 json ([17262f3](https://github.com/imsunhao/build/commit/17262f3))
+* 添加 defaultEnv PACKAGE_VERSION  值为 build 通用 webpack 配置中设置的值 ([c31f863](https://github.com/imsunhao/build/commit/c31f863))
+* 添加 get utils ([bc146aa](https://github.com/imsunhao/build/commit/bc146aa))
+* 自动解析 RouterExtensionPath 默认为 private ([2461e89](https://github.com/imsunhao/build/commit/2461e89))
+
+
+
 <a name="1.6.2"></a>
 ## [1.6.2](https://github.com/imsunhao/build/compare/v1.6.1...v1.6.2) (2018-12-15)
 
