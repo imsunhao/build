@@ -250,7 +250,7 @@ export async function initConfig(
 
   await setWebpack(options, mode)
 
-  options.version = argv.version
+  options.version = options.version || argv.version
 
   buildServiceConfig = options
 
@@ -383,7 +383,8 @@ function serverRenderDefaultEnv(
   webpack: ConfigOptions.options.webpack = {}
 ) {
   // const isProduction = webpack.mode ? webpack.mode !== 'development' : true
-  const defaultEnv = ['VUE_ENV', 'PUBLIC_PATH']
+  const defaultEnv = ['VUE_ENV', 'PUBLIC_PATH', 'PACKAGE_VERSION']
+  process.env.PACKAGE_VERSION = getConfig().version
   env = env.concat(defaultEnv)
   consola.info('serverRenderDefaultEnv', env)
   app.use(function(req: BuildService.Request, res, next) {
