@@ -82,9 +82,9 @@ export function getRender(
     }
 
     // TODO 自动解析 RouterExtensionPath
-    // if (isRouterExtensionPath(req.url)) {
-    //   return next()
-    // }
+    if (/^\/private/.test(req.url)) {
+      return next()
+    }
 
     res.setHeader('Content-Type', 'text/html')
     res.setHeader('Server', serverInfo)
