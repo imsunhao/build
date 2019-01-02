@@ -271,9 +271,15 @@ declare namespace build {
      */
     interface options extends BuildService.serverInitOptions {
       /**
-       * 当前运行版本
+       * 当前程序运行版本
        */
       version?: string
+
+      /**
+       * 当前 @bestminr/build 运行版本
+       * * readonly
+       */
+      buildVersion?: string
 
       /**
        * 根目录 地址

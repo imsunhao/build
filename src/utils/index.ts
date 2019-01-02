@@ -106,6 +106,26 @@ function setBabelrc(options: ConfigOptions.options) {
 }
 
 /**
+ * 设置 版本号
+ * @param options build 通用 webpack 配置
+ */
+function setVersion(options: ConfigOptions.options) {
+  if (options.version) return options
+  try {
+    const PACKAGE = JSON.parse(
+      readFileSync(resolve(options.rootDir || '', 'package.json'), {
+        encoding: 'utf-8'
+      })
+    )
+    options.version = PACKAGE.version
+    return options
+  } catch (error) {
+    consola.fatal('setVersion', error)
+    return process.exit(0)
+  }
+}
+
+/**
  * 设置 webpack
  * @param options build 通用 webpack 配置
  * @param mode webpack 环境
@@ -250,7 +270,9 @@ export async function initConfig(
 
   await setWebpack(options, mode)
 
-  options.version = options.version || argv.version
+  options.buildVersion = argv.version
+
+  setVersion(options)
 
   buildServiceConfig = options
 
