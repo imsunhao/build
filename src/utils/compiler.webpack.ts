@@ -11,7 +11,7 @@ import { readFileSync, existsSync } from 'fs'
 import { Express } from 'express'
 import { routerStackManagement } from 'src/utils'
 
-function showError(stats: webpack.Stats) {
+function showError(stats: webpack.Stats, { isdev }: { isdev?: boolean } = {}) {
   if (stats.hasWarnings()) {
     stats.compilation.warnings.forEach(warning => {
       consola.info(warning)
@@ -21,7 +21,7 @@ function showError(stats: webpack.Stats) {
     stats.compilation.errors.forEach(error => {
       consola.fatal(error)
     })
-    return process.exit(0)
+    if (!isdev) return process.exit(0)
   }
 }
 
@@ -160,7 +160,7 @@ export function compilerConfig(
 ): Promise<() => webpack.Configuration> {
   return new Promise(function(this: any, done) {
     const webpackConfig = getConfigConfig({ rootDir })
-    const entryName = `${mode === 'none'? 'production': mode}_config`
+    const entryName = `${mode === 'none' ? 'production' : mode}_config`
     const { entry, output } = configOptions
 
     if (!(entry && output)) {
@@ -327,7 +327,7 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
     const compiler = getCompiler(webpackConfig)
     const serverDevMiddleware = require('webpack-dev-middleware')(compiler, {
       noInfo: true,
-      logLevel: 'silent',
+      logLevel: 'silent'
     })
     app.use(serverDevMiddleware)
 
@@ -336,11 +336,7 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
 
     compiler.plugin('done', function(this: any, stats) {
       routerStackManagement.init(app)
-      stats = stats.toJson()
-      if (stats.errors.length) {
-        showError(stats)
-        return process.exit(0)
-      }
+      showError(stats, { isdev: true })
 
       Object.keys(entrys).forEach(entry => {
         const name = entry + '.js'
@@ -369,6 +365,6 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
  * @param config webpack 配置文件
  */
 function getCompiler(config: webpack.Configuration) {
-  consola.info('Working Compiler:', config.name , '\n')
+  consola.info('Working Compiler:', config.name, '\n')
   return webpack(config)
 }
