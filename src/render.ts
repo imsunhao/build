@@ -56,7 +56,9 @@ export function serverDevRender(app: Express) {
       const templatePath = config.render
         ? config.render.options.templatePath
         : ''
-      const clientManifest: any = renderOptions.clientManifest
+      const clientManifest: any = clientManifestAddDll(
+        renderOptions.clientManifest
+      )
       render = getRender(
         createBundleRenderer(renderOptions.bundle, {
           ...(BASE_RENDER_OPTIONS as any),
@@ -78,10 +80,8 @@ export function serverDevRender(app: Express) {
     stats.warnings.forEach((err: any) => consola.info(err))
     if (stats.errors.length) return
 
-    renderOptions.clientManifest = clientManifestAddDll(
-      JSON.parse(
-        readFile(devMiddleware.fileSystem, 'vue-ssr-client-manifest.json')
-      )
+    renderOptions.clientManifest = JSON.parse(
+      readFile(devMiddleware.fileSystem, 'vue-ssr-client-manifest.json')
     )
     update('clientManifest')
   }
@@ -131,13 +131,17 @@ export function serverDevRender(app: Express) {
 }
 
 function clientManifestAddDll(clientManifest: any) {
+  clientManifest = JSON.parse(JSON.stringify(clientManifest))
   const config = getConfig()
   if (config.webpack && config.webpack.client && config.webpack.client.output)
     if (config.webpack.dll) {
       try {
         const dllManifest = JSON.parse(
           readFileSync(
-            path.resolve(config.webpack.dll.path, './vue-ssr-dll-manifest.json'),
+            path.resolve(
+              config.webpack.dll.path,
+              './vue-ssr-dll-manifest.json'
+            ),
             'utf-8'
           )
         )
