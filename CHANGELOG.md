@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.5"></a>
+## [1.6.5](https://github.com/imsunhao/build/compare/v1.6.4...v1.6.5) (2019-01-16)
+
+
+### Bug Fixes
+
+* 修复 devCompilerExtensions 报错需要提示错误信息 ([bd28ef1](https://github.com/imsunhao/build/commit/bd28ef1))
+
+
+### Features
+
+* DLL 更新 dev模式下不应该重启 ([d35db44](https://github.com/imsunhao/build/commit/d35db44))
+* 发生端口冲突 应该重试端口号而不是直接关闭 ([f6495a7](https://github.com/imsunhao/build/commit/f6495a7))
+
+
+
 <a name="1.6.4"></a>
 ## [1.6.4](https://github.com/imsunhao/build/compare/v1.6.3...v1.6.4) (2019-01-02)
 
