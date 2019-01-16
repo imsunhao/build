@@ -7,6 +7,7 @@ import consola from 'consola'
 import { createResolve } from 'src/utils/path'
 import rimraf from 'rimraf'
 
+import http from 'http'
 import express, { Express, Router } from 'express'
 import compression from 'compression'
 import proxyMiddleware from 'http-proxy-middleware'
@@ -351,9 +352,35 @@ export function serverStart(
   } else {
     options = port || 8020
   }
-  app.listen(options, () => {
+
+  const WAIT_TIME = 1000
+  const MAX = 60
+  let index = 0
+
+  const server = http.createServer(app)
+  server.on('error', function(error) {
+    if (index++ < MAX) {
+      consola.fatal(
+        'SERVER_START:',
+        error.message,
+        `\n\t重试中, 当前次数: ${index}`
+      )
+      setTimeout(() => {
+        start()
+      }, WAIT_TIME)
+    } else {
+      process.exit(0)
+    }
+  })
+  server.on('listening', function() {
     consola.info(`server started at ${JSON.stringify(options, null, 2)}`)
   })
+
+  start()
+
+  function start() {
+    server.listen(options)
+  }
 }
 
 /**
