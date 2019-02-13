@@ -6,6 +6,7 @@ import path from 'path'
 import { getConfig } from 'src/utils'
 import consola from 'consola'
 import serialize from 'serialize-javascript'
+import { randomStringAsBase64Url } from './random'
 
 function isStaticResourceUrl(url: string) {
   const ext = path.extname(url)
@@ -32,7 +33,11 @@ function getWindowEnv(renderEnv: string[]) {
   return serialize(env, { isJSON: true })
 }
 
-function getContextHead(req: BuildService.Request, injectContext: any) {
+function getContextHead(
+  req: BuildService.Request,
+  injectContext: any,
+  nonce: string
+) {
   if (!req.renderEnv) {
     consola.fatal('req.renderEnv is undefined')
     return ''
@@ -47,7 +52,8 @@ function getContextHead(req: BuildService.Request, injectContext: any) {
     env.NODE_ENV === 'production'
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
-  return `<script>window.__INJECT_ENV__ = ${getWindowEnv(
+  const nonceStr = nonce ? `nonce="${nonce}"` : ''
+  return `<script ${nonceStr}>window.__INJECT_ENV__ = ${getWindowEnv(
     req.renderEnv
   )};window.__INJECT_CONTEXT__ = ${serialize(injectContext, {
     isJSON: true
@@ -111,6 +117,8 @@ export function getRender(
       }
     }
 
+    const nonce = randomStringAsBase64Url(12)
+
     const context = {
       ...opts.context,
       pageInfo: {
@@ -118,11 +126,12 @@ export function getRender(
         keywords: '',
         description: ''
       },
+      nonce,
       headers: req.headers,
       url: req.url,
       cookies: req.cookies,
       injectContext: req.injectContext || {},
-      head: getContextHead(req, opts.context)
+      head: getContextHead(req, opts.context, nonce)
     }
 
     renderer.renderToString(context, (err: any, html: string) => {
