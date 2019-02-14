@@ -78,6 +78,13 @@ let buildServiceConfig: ConfigOptions.options
 function setBabelrc(options: ConfigOptions.options) {
   const babelPlugins = [
     [
+      'component',
+      {
+        libraryName: 'element-ui',
+        styleLibraryName: 'theme-chalk'
+      }
+    ],
+    [
       '@babel/plugin-transform-runtime',
       {
         helpers: false
