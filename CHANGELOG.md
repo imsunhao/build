@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.7"></a>
+## [1.6.7](https://github.com/imsunhao/build/compare/v1.6.6...v1.6.7) (2019-02-14)
+
+
+
 <a name="1.6.6"></a>
 ## [1.6.6](https://github.com/imsunhao/build/compare/v1.6.5...v1.6.6) (2019-02-13)
 
