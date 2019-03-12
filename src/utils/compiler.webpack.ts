@@ -21,7 +21,7 @@ function showError(stats: webpack.Stats, { isdev }: { isdev?: boolean } = {}) {
     stats.compilation.errors.forEach(error => {
       consola.fatal(error)
     })
-    if (!isdev) return process.exit(0)
+    if (!isdev) return process.exit(1)
   }
 }
 
@@ -55,7 +55,7 @@ function prodCompiler({
         warnings: false
       })
     )
-    showError(stats)
+    showError(stats, { isdev: false })
   })
 }
 
