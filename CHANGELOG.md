@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.8"></a>
+## [1.6.8](https://github.com/imsunhao/build/compare/v1.6.7...v1.6.8) (2019-03-12)
+
+
+### Features
+
+* 打包出错返回出错code为1 ([071ebc3](https://github.com/imsunhao/build/commit/071ebc3))
+
+
+
 <a name="1.6.7"></a>
 ## [1.6.7](https://github.com/imsunhao/build/compare/v1.6.6...v1.6.7) (2019-02-14)
 
