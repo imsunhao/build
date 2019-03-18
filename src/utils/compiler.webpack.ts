@@ -81,7 +81,7 @@ function devCompiler({
     consola.fatal(
       '{clientConfig, serverConfig}.{output, plugins, entry} is undefined'
     )
-    return process.exit(0)
+    return process.exit(1)
   }
 
   const entry: any = clientConfig.entry
@@ -165,7 +165,7 @@ export function compilerConfig(
 
     if (!(entry && output)) {
       consola.fatal('compilerConfig: entry or output is undefined')
-      return process.exit(0)
+      return process.exit(1)
     }
 
     webpackConfig.mode = mode
@@ -189,7 +189,7 @@ export function compilerConfig(
         config = requireFromString(souce)
       } catch (error) {
         consola.fatal('compilerConfig', error)
-        return process.exit(0)
+        return process.exit(1)
       } finally {
         done(config)
       }
@@ -205,7 +205,7 @@ export function compilerConfig(
           config = requireFromString(souce)
         } catch (error) {
           consola.fatal('compilerConfig', error)
-          return process.exit(0)
+          return process.exit(1)
         } finally {
           done(config)
         }
@@ -215,7 +215,7 @@ export function compilerConfig(
       })
     } else {
       consola.fatal('compilerConfig: config path not find.', path)
-      return process.exit(0)
+      return process.exit(1)
     }
   })
 }
@@ -235,7 +235,7 @@ export function compilerDll(options: ConfigOptions.options): Promise<any> {
       stats.warnings.forEach((err: any) => consola.info(err))
       if (stats.errors.length) {
         consola.fatal('build dll fail!')
-        return process.exit(0)
+        return process.exit(1)
       }
       done()
     })
@@ -265,7 +265,7 @@ export async function compilerExtensions(
 ) {
   if (!(options.webpack && options.extensions && options.webpack.mode)) {
     consola.fatal('options.extensions or options.webpack.mode is undefined')
-    return process.exit(0)
+    return process.exit(1)
   }
 
   const isProd = options.webpack.mode === 'production'
@@ -289,7 +289,7 @@ function prodCompilerExtensions(options: ConfigOptions.options) {
       stats.warnings.forEach((err: any) => consola.info(err))
       if (stats.errors.length) {
         consola.fatal('build extensions fail!')
-        return process.exit(0)
+        return process.exit(1)
       }
       done()
     })
@@ -310,7 +310,7 @@ function prodCompilerExtensions(options: ConfigOptions.options) {
 function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
   if (!(app && options.extensions && options.extensions.entry)) {
     consola.fatal('devCompilerExtensions: app is undefined')
-    return process.exit(0)
+    return process.exit(1)
   }
 
   const outputPath = options.extensions.path
@@ -346,7 +346,7 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
           extensions = requireFromString(souce).default
         } catch (error) {
           consola.fatal('devCompilerExtensions', error)
-          return process.exit(0)
+          return process.exit(1)
         }
         Object.keys(extensions).forEach(extensionKey => {
           const extension = extensions[extensionKey]

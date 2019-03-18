@@ -18,7 +18,7 @@ export async function serverExtensions(this: any, app?: Express, opt?: BuildServ
     if (opt && opt.noCompiler) {
       if (!app) {
         consola.fatal('serverExtensions', 'app is undefined')
-        return process.exit(0)
+        return process.exit(1)
       }
       const outputPath = config.extensions.path
       const entrys = config.extensions.entry
@@ -31,7 +31,7 @@ export async function serverExtensions(this: any, app?: Express, opt?: BuildServ
           extensions = requireFromString(souce).default
         } catch (error) {
           consola.fatal('serverExtensions', error)
-          return process.exit(0)
+          return process.exit(1)
         }
         Object.keys(extensions).forEach(extensionKey => {
           const extension = extensions[extensionKey]

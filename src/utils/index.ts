@@ -36,7 +36,7 @@ function getConfigFileOptions(
     const configFile = resolve(rootDir, argv['config-file'])
     if (!existsSync(configFile)) {
       consola.fatal('entry is not exists', configFile)
-      return process.exit(0)
+      return process.exit(1)
     }
 
     let options: any = {}
@@ -46,7 +46,7 @@ function getConfigFileOptions(
       options = JSON.parse(jsonString)
     } catch (error) {
       consola.fatal(error)
-      return process.exit(0)
+      return process.exit(1)
     }
 
     const { entry, output, injectContext } = options
@@ -129,7 +129,7 @@ function setVersion(options: ConfigOptions.options) {
     return options
   } catch (error) {
     consola.fatal('setVersion', error)
-    return process.exit(0)
+    return process.exit(1)
   }
 }
 
@@ -187,7 +187,7 @@ function getInjectContext(configOptions: BuildService.parsedArgs.config) {
       Object.assign(injectContext, JSON.parse(jsonString))
     } catch (error) {
       consola.fatal(error)
-      return process.exit(0)
+      return process.exit(1)
     }
   }
   return injectContext
@@ -228,7 +228,7 @@ async function getUserConfig(
     }
   } else if (argv['config-file'] !== 'buildService.config.js') {
     consola.fatal('Could not load config file: ' + argv['config-file'])
-    return process.exit(0)
+    return process.exit(1)
   }
 
   if (!options.injectContext) {
@@ -299,7 +299,7 @@ async function checkDll(
   if (argv.dll) {
     if (!(options.webpack && options.webpack.dll)) {
       consola.fatal('options.webpack.dll is undefined')
-      return process.exit(0)
+      return process.exit(1)
     }
 
     await compilerDll(options)
@@ -376,7 +376,7 @@ export function serverStart(
         start()
       }, WAIT_TIME)
     } else {
-      process.exit(0)
+      process.exit(1)
     }
   })
   server.on('listening', function() {

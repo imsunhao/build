@@ -15,7 +15,7 @@ export function getBaseConfig(options: ConfigOptions.options) {
     consola.fatal(
       'getBaseConfig options.babelrc or options.webpack is undefined'
     )
-    return process.exit(0)
+    return process.exit(1)
   }
   const mode = options.webpack.mode || 'production'
   const isProd = mode === 'production'

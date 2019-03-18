@@ -14,7 +14,7 @@ export function getDllConfig(
 ): webpack.Configuration {
   if (!(options.webpack && options.webpack.dll)) {
     consola.fatal('getDllConfig options.webpack.dll is undefined')
-    return process.exit(0)
+    return process.exit(1)
   }
 
   const mode = options.webpack.mode || 'production'

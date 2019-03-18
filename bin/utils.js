@@ -50,17 +50,17 @@ function getArgv() {
 
   if (argv.hostname === '') {
     consola.fatal('Provided hostname argument has no value')
-    process.exit(0)
+    process.exit(1)
   }
 
   if (argv.output === '') {
     consola.fatal('Provided output argument has no value')
-    process.exit(0)
+    process.exit(1)
   }
 
   if (argv.entry === '') {
     consola.fatal('Provided entry argument has no value')
-    process.exit(0)
+    process.exit(1)
   }
 
   string.forEach(index => {
@@ -86,7 +86,7 @@ function getArgv() {
         const configFile = resolve(rootDir, argv['config-file'])
         if (!fs.existsSync(configFile)) {
           consola.fatal('configFile is not exists', configFile)
-          return process.exit(0)
+          return process.exit(1)
         }
 
         let options = {}
@@ -96,7 +96,7 @@ function getArgv() {
           options = JSON.parse(jsonString)
         } catch (error) {
           consola.fatal('clear:', error)
-          return process.exit(0)
+          return process.exit(1)
         }
 
         path = resolve(rootDir, options.output || './dist/build')

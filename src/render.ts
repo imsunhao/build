@@ -153,7 +153,7 @@ function clientManifestAddDll(clientManifest: any) {
         })
       } catch (error) {
         consola.fatal('clientManifestAddDll', error)
-        return process.exit(0)
+        return process.exit(1)
       }
     }
   return clientManifest
@@ -212,6 +212,6 @@ export function serverRender(app: Express) {
     }
   } catch (error) {
     consola.fatal('config.render', error)
-    process.exit(0)
+    process.exit(1)
   }
 }

@@ -21,7 +21,7 @@ export function getExtensionsConfig(
     consola.fatal(
       'getExtensionsConfig options.extensions.entry or options.babelrc is undefined'
     )
-    return process.exit(0)
+    return process.exit(1)
   }
 
   const babelLoder = {
