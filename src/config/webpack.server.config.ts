@@ -13,37 +13,45 @@ export function getServerConfig(options: ConfigOptions.options) {
     consola.fatal(
       'getBaseConfig options.babelrc or options.webpack is undefined'
     )
-    return process.exit(0)
+    return process.exit(1)
   }
-  const server = options.webpack.server || {}
-  const mode = options.webpack.mode || 'production'
-  const isProd = mode === 'production'
-  return (merge as any)(
-    getBaseConfig(options),
-    {
-      name: 'server',
-      target: 'node',
-      entry: './src/entry-server.js',
-      output: {
-        libraryTarget: 'commonjs2'
+  if (options.webpack.server) {
+    const server = options.webpack.server.webpack || options.webpack.server || {}
+    const whitelist = [/\.css$/, /\?vue&type=style/].concat(options.webpack.server.nodeExternalsWhitelist || [])
+    const mode = options.webpack.mode || 'production'
+    const isProd = mode === 'production'
+    return (merge as any)(
+      getBaseConfig(options),
+      {
+        name: 'server',
+        target: 'node',
+        entry: './src/entry-server.js',
+        output: {
+          libraryTarget: 'commonjs2'
+        },
+        externals: nodeExternals({
+          // whitelist: /\.css$/
+          whitelist
+        }),
+        performance: {
+          maxEntrypointSize: 1024 * 1024 * 6,
+          maxAssetSize: 1024 * 1024 * 3,
+          hints: isProd ? 'warning' : false
+        },
+        plugins: [
+          new VueSSRServerPlugin(),
+          new webpack.DefinePlugin({
+            'process.env.VUE_ENV': '"server"'
+          })
+        ]
       },
-      externals: nodeExternals({
-        // whitelist: /\.css$/
-        whitelist: [/\.css$/, /\?vue&type=style/]
-      }),
-      performance: {
-        maxEntrypointSize: 1024 * 1024 * 6,
-        maxAssetSize: 1024 * 1024 * 3,
-        hints: isProd ? 'warning' : false
-      },
-      plugins: [
-        new VueSSRServerPlugin(),
-        new webpack.DefinePlugin({
-          'process.env.VUE_ENV': '"server"'
-        })
-      ]
-    },
-    getStyle(options, { isServer: true }),
-    server
-  )
+      getStyle(options, { isServer: true }),
+      server
+    )
+  } else {
+    consola.fatal(
+      'getServerConfig options.webpack.server is undefined'
+    )
+    return process.exit(1)
+  }
 }

@@ -347,7 +347,12 @@ declare namespace build {
         mode?: webpackMode
         base?: Configuration
         client?: Configuration
-        server?: Configuration
+        server?: serverConfig
+      }
+
+      interface serverConfig extends Configuration {
+        nodeExternalsWhitelist: any[]
+        webpack: Configuration
       }
 
       /**
