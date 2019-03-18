@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.9"></a>
+## [1.6.9](https://github.com/imsunhao/build/compare/v1.6.8...v1.6.9) (2019-03-18)
+
+
+### Bug Fixes
+
+* 打包出错时 为了保证工具链完整 需要 出错code为1 ([775dbfc](https://github.com/imsunhao/build/commit/775dbfc))
+
+
+### Features
+
+* add server nodeExternalsWhitelist ([3505775](https://github.com/imsunhao/build/commit/3505775))
+
+
+
 <a name="1.6.8"></a>
 ## [1.6.8](https://github.com/imsunhao/build/compare/v1.6.7...v1.6.8) (2019-03-12)
 
