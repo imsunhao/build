@@ -119,6 +119,11 @@ export function getRender(
 
     const nonce = randomStringAsBase64Url(12)
 
+    const injectContext = {
+      ...opts.context,
+      ...req.injectContext,
+    }
+
     const context = {
       ...opts.context,
       pageInfo: {
@@ -130,7 +135,7 @@ export function getRender(
       headers: req.headers,
       url: req.url,
       cookies: req.cookies,
-      injectContext: req.injectContext || {},
+      injectContext,
       head: getContextHead(req, opts.context, nonce)
     }
 
