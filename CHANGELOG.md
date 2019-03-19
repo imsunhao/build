@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.10"></a>
+## [1.6.10](https://github.com/imsunhao/build/compare/v1.6.9...v1.6.10) (2019-03-19)
+
+
+### Features
+
+* 完善 getRender中 renderToString 的 injectContext ([d3435e6](https://github.com/imsunhao/build/commit/d3435e6))
+
+
+
 <a name="1.6.9"></a>
 ## [1.6.9](https://github.com/imsunhao/build/compare/v1.6.8...v1.6.9) (2019-03-18)
 
