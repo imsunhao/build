@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.11"></a>
+## [1.6.11](https://github.com/imsunhao/build/compare/v1.6.10...v1.6.11) (2019-03-20)
+
+
+### Features
+
+* 在 env中 提供 nonce 支持 ([701a37b](https://github.com/imsunhao/build/commit/701a37b))
+
+
+
 <a name="1.6.10"></a>
 ## [1.6.10](https://github.com/imsunhao/build/compare/v1.6.9...v1.6.10) (2019-03-19)
 
