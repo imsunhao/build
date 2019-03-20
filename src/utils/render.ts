@@ -24,12 +24,13 @@ function makeLoginPageUrl(toPath: string) {
   return newUrl
 }
 
-function getWindowEnv(renderEnv: string[]) {
+function getWindowEnv(renderEnv: string[], nonce: string) {
   const env = renderEnv.reduce(function(obj: any, key) {
     obj[key] = process.env[key]
     return obj
   }, {})
   env.VUE_ENV = 'client'
+  env.NONCE = nonce
   return serialize(env, { isJSON: true })
 }
 
@@ -54,7 +55,7 @@ function getContextHead(
       : ''
   const nonceStr = nonce ? `nonce="${nonce}"` : ''
   return `<script ${nonceStr}>window.__INJECT_ENV__ = ${getWindowEnv(
-    req.renderEnv
+    req.renderEnv, nonce
   )};window.__INJECT_CONTEXT__ = ${serialize(injectContext, {
     isJSON: true
   })}${autoRemove}</script>`
