@@ -24,20 +24,20 @@ function makeLoginPageUrl(toPath: string) {
   return newUrl
 }
 
-function getWindowEnv(renderEnv: string[], nonce: string) {
+function getWindowEnv(renderEnv: string[], nonce?: string) {
   const env = renderEnv.reduce(function(obj: any, key) {
     obj[key] = process.env[key]
     return obj
   }, {})
   env.VUE_ENV = 'client'
-  env.NONCE = nonce
+  if (nonce) env.NONCE = nonce
   return serialize(env, { isJSON: true })
 }
 
 function getContextHead(
   req: BuildService.Request,
   injectContext: any,
-  nonce: string
+  nonce?: string
 ) {
   if (!req.renderEnv) {
     consola.fatal('req.renderEnv is undefined')
@@ -49,12 +49,14 @@ function getContextHead(
     return obj
   }, {})
 
+  const CSP_HEAD = nonce && injectContext.CSP ? `<meta http-equiv="Content-Security-Policy" content="script-src data: blob: 'nonce-${ nonce }' 'self' ${ injectContext.CSP }">` : ''
+
   const autoRemove =
     env.NODE_ENV === 'production'
       ? ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
       : ''
   const nonceStr = nonce ? `nonce="${nonce}"` : ''
-  return `<script ${nonceStr}>window.__INJECT_ENV__ = ${getWindowEnv(
+  return CSP_HEAD + `<script ${nonceStr}>window.__INJECT_ENV__ = ${getWindowEnv(
     req.renderEnv, nonce
   )};window.__INJECT_CONTEXT__ = ${serialize(injectContext, {
     isJSON: true
@@ -72,7 +74,7 @@ export function getRender(
   renderer: BundleRenderer,
   opts: BuildService.getRender.opts
 ) {
-  return function getRender(
+  return function (
     req: BuildService.Request,
     res: Response,
     next: NextFunction
@@ -118,13 +120,12 @@ export function getRender(
       }
     }
 
-    const nonce = randomStringAsBase64Url(12)
-
     const injectContext = {
       ...opts.context,
       ...req.injectContext,
     }
 
+    const isUseCSP = !injectContext.CSP_DISABLED
     const context = {
       ...opts.context,
       pageInfo: {
@@ -132,13 +133,22 @@ export function getRender(
         keywords: '',
         description: ''
       },
-      nonce,
       headers: req.headers,
       url: req.url,
       cookies: req.cookies,
       injectContext,
-      head: getContextHead(req, opts.context, nonce)
+      nonce: '',
     }
+
+    if (isUseCSP) {
+      const nonce = randomStringAsBase64Url(12)
+      const head = getContextHead(req, opts.context, nonce)
+      context.head = head
+      context.nonce = nonce
+    } else {
+      context.head = getContextHead(req, opts.context)
+    }
+
 
     renderer.renderToString(context, (err: any, html: string) => {
       if (err) {

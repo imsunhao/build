@@ -26,6 +26,7 @@ export function getDllPlugin({
         filename: join(templateOutput, 'index.template.html'),
         template,
         inject: false,
+        showErrors: false,
         minify: {
           removeComments: false,
           collapseWhitespace: true,
