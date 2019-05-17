@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.12"></a>
+## [1.6.12](https://github.com/imsunhao/build/compare/v1.6.11...v1.6.12) (2019-05-17)
+
+
+### Features
+
+* add isUseCSP 用来启动是否启动CSP ([437b73c](https://github.com/imsunhao/build/commit/437b73c))
+* upgrade fork-ts-checker-webpack-plugin ([a6871b4](https://github.com/imsunhao/build/commit/a6871b4))
+* 调整 tsconfig 结构 ([9c09a37](https://github.com/imsunhao/build/commit/9c09a37))
+
+
+
 <a name="1.6.11"></a>
 ## [1.6.11](https://github.com/imsunhao/build/compare/v1.6.10...v1.6.11) (2019-03-20)
 
