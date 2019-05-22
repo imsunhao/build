@@ -1,6 +1,6 @@
 {
   "name": "@bestminr/build",
-  "version": "1.6.13",
+  "version": "1.6.14",
   "license": "MIT",
   "scripts": {
     "publish": "npm publish --access=public",
