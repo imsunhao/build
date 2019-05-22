@@ -1,5 +1,4 @@
 import nodeExternals from 'webpack-node-externals'
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin'
 import webpack from 'webpack'
 import merge from 'webpack-merge'
 import { getCommonConfig } from './webpack.common.config'
@@ -43,10 +42,6 @@ export function getConfigConfig({
         }
       ]
     },
-    plugins: [
-      new ForkTsCheckerWebpackPlugin({
-        async: false
-      })
-    ]
+    plugins: []
   })
 }
