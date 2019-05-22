@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.17"></a>
+## [1.6.17](https://github.com/imsunhao/build/compare/v1.6.16...v1.6.17) (2019-05-22)
+
+
+### Features
+
+* 移除 在编译 config时 使用 ForkTsCheckerWebpackPlugin ([28f0305](https://github.com/imsunhao/build/commit/28f0305))
+
+
+
 <a name="1.6.16"></a>
 ## [1.6.16](https://github.com/imsunhao/build/compare/v1.6.14...v1.6.16) (2019-05-22)
 
