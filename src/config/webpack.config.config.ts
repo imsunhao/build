@@ -43,6 +43,10 @@ export function getConfigConfig({
         }
       ]
     },
-    plugins: [new ForkTsCheckerWebpackPlugin()]
+    plugins: [
+      new ForkTsCheckerWebpackPlugin({
+        async: false
+      })
+    ]
   })
 }
