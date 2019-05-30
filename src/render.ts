@@ -7,7 +7,7 @@ import { readFileSync } from 'fs'
 import chokidar from 'chokidar'
 import cookieParser from 'cookie-parser'
 import { getConfig, BASE_RENDER_OPTIONS } from 'src/utils'
-import { compiler } from 'src/utils/compiler.webpack.ts'
+import { compiler, showWebpackStats } from 'src/utils/compiler.webpack.ts'
 import consola from 'consola'
 
 /**
@@ -75,9 +75,7 @@ export function serverDevRender(app: Express) {
   }
 
   function clientCompilerDone({ devMiddleware, stats }: any) {
-    stats = stats.toJson()
-    stats.errors.forEach((err: any) => consola.error(err))
-    stats.warnings.forEach((err: any) => consola.info(err))
+    showWebpackStats(stats, { isdev: true })
     if (stats.errors.length) return
 
     renderOptions.clientManifest = JSON.parse(
@@ -89,7 +87,7 @@ export function serverDevRender(app: Express) {
   function serverCompilerDone({ err, mfs, stats }: any) {
     if (err) throw err
 
-    stats = stats.toJson()
+    showWebpackStats(stats, { isdev: true })
 
     renderOptions.bundle = JSON.parse(
       readFile(mfs, 'vue-ssr-server-bundle.json')
