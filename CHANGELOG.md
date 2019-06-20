@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.20"></a>
+## [1.6.20](https://github.com/imsunhao/build/compare/v1.6.19...v1.6.20) (2019-06-20)
+
+
+### Features
+
+* tsx 暂时无法使用 ([77fc57b](https://github.com/imsunhao/build/commit/77fc57b))
+* 初始化 doc ([cbb386e](https://github.com/imsunhao/build/commit/cbb386e))
+
+
+
 <a name="1.6.19"></a>
 ## [1.6.19](https://github.com/imsunhao/build/compare/v1.6.18...v1.6.19) (2019-05-30)
 
