@@ -1,0 +1,5 @@
+{
+  "entry": "./build.config.ts",
+  "injectContext": "./inject-context.json",
+  "output": "./dist/build"
+}

@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "resolveJsonModule": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es5",
+    "importHelpers": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "sourceMap": true,
+    "allowJs": true,
+    "incremental": false,
+    "experimentalDecorators": true,
+    "baseUrl": "./",
+    "paths": {
+      "*": ["*", "src/*"]
+    },
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
+    "noUnusedLocals": false,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true,
+    "keyofStringsOnly": true,
+    "lib": ["dom", "es5", "es6", "scripthost", "es2018.promise", "webworker"]
+  },
+  "include": ["tests", "src", "src/**/*.vue", "@types/*"],
+  "exclude": ["node_modules", "*node_modules*", "dist", "docs", ".tmp", "build"]
+}
