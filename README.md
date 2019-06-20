@@ -2,9 +2,15 @@
 
 ## Vue Typescript SSR Express 自动化构建 like Nuxt
 
+### TODO LIST
+
+- bug: prot 端口配置不生效
+- opt: 整理 stats
+- feat: *doc* 整理出一个欢迎界面
+
 ### api 文档 TODO
 
-- 文档还没出
+- 文档还没出 正在做了 现在做了一个 doc 例子
 - 但是有类型 在@types 中
 
 ### 功能
