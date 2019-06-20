@@ -1,6 +1,5 @@
 import { getConfig } from 'src/utils'
-import { compiler, showWebpackStats } from 'src/utils/compiler.webpack.ts'
-import webpack from 'webpack'
+import { compiler } from 'src/utils/compiler.webpack.ts'
 
 export function serverBuild() {
   const config = getConfig()
@@ -12,12 +11,8 @@ export function serverBuild() {
     {
       serverConfig,
       clientConfig,
-      clientCompilerDone: ({ stats }: { stats: webpack.Stats }) => {
-        showWebpackStats(stats, { message: 'clientCompilerDone' })
-      },
-      serverCompilerDone: ({ stats }: { stats: webpack.Stats }) => {
-        showWebpackStats(stats, { message: 'serverCompilerDone' })
-      }
+      clientCompilerDone: () => {},
+      serverCompilerDone: () => {}
     },
     'production'
   )

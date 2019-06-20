@@ -11,39 +11,17 @@ import { readFileSync, existsSync } from 'fs'
 import { Express } from 'express'
 import { routerStackManagement } from 'src/utils'
 
-const WARNINGS_FILTER = /export .* was not found in/
-
-export function showWebpackStats(
-  stats: webpack.Stats,
-  {
-    isdev,
-    message,
-    tostring
-  }: { isdev?: boolean; message?: string; tostring?: boolean } = {}
-) {
-  if (tostring) {
-    consola.log(
-      (stats as webpack.Stats).toString({
-        warningsFilter: WARNINGS_FILTER
-      })
-    )
-  } else if (stats.hasWarnings()) {
-    const statsJSON = (stats as webpack.Stats).toJson({
-      warningsFilter: WARNINGS_FILTER
+function showError(stats: webpack.Stats, { isdev }: { isdev?: boolean } = {}) {
+  if (stats.hasWarnings()) {
+    stats.compilation.warnings.forEach(warning => {
+      consola.info(warning)
     })
-    if (statsJSON.warnings.length) {
-      statsJSON.warnings.forEach((err: any) => consola.info(err))
-    }
   }
-
   if (stats.hasErrors()) {
     stats.compilation.errors.forEach(error => {
       consola.fatal(error)
     })
-    if (!isdev) {
-      if (message) consola.fatal(message)
-      return process.exit(1)
-    }
+    if (!isdev) return process.exit(1)
   }
 }
 
@@ -63,7 +41,7 @@ function prodCompiler({
   })
 
   clientCompiler.run((err, stats) => {
-    showWebpackStats(stats, { tostring: true })
+    consola.log(stats.toString())
   })
 
   const serverCompiler = getCompiler(serverConfig)
@@ -77,7 +55,7 @@ function prodCompiler({
         warnings: false
       })
     )
-    showWebpackStats(stats, { isdev: false })
+    showError(stats, { isdev: false })
   })
 }
 
@@ -127,9 +105,6 @@ function devCompiler({
     publicPath: clientConfig.output.publicPath,
     noInfo: true,
     logLevel: 'warn',
-    stats: {
-      warningsFilter: WARNINGS_FILTER
-    },
     writeToDisk: false
   })
 
@@ -221,7 +196,9 @@ export function compilerConfig(
     } else if (mode !== 'none') {
       const compiler = getCompiler(webpackConfig)
       compiler.plugin('done', stats => {
-        showWebpackStats(stats)
+        stats = stats.toJson()
+        stats.errors.forEach((err: any) => consola.error(err))
+        stats.warnings.forEach((err: any) => consola.info(err))
         if (stats.errors.length) return
         try {
           const souce = readFileSync(path, 'utf-8')
@@ -233,7 +210,9 @@ export function compilerConfig(
           done(config)
         }
       })
-      compiler.run((err, stats) => {})
+      compiler.run((err, stats) => {
+        showError(stats)
+      })
     } else {
       consola.fatal('compilerConfig: config path not find.', path)
       return process.exit(1)
@@ -251,7 +230,13 @@ export function compilerDll(options: ConfigOptions.options): Promise<any> {
 
     const compiler = getCompiler(webpackConfig)
     compiler.plugin('done', stats => {
-      showWebpackStats(stats, { message: 'build dll fail!' })
+      stats = stats.toJson()
+      stats.errors.forEach((err: any) => consola.error(err))
+      stats.warnings.forEach((err: any) => consola.info(err))
+      if (stats.errors.length) {
+        consola.fatal('build dll fail!')
+        return process.exit(1)
+      }
       done()
     })
 
@@ -263,7 +248,7 @@ export function compilerDll(options: ConfigOptions.options): Promise<any> {
             assets: true
           })
         )
-        showWebpackStats(stats)
+        showError(stats)
       }
     })
   })
@@ -299,7 +284,13 @@ function prodCompilerExtensions(options: ConfigOptions.options) {
 
     const compiler = getCompiler(webpackConfig)
     compiler.plugin('done', stats => {
-      showWebpackStats(stats, { message: 'build extensions fail!' })
+      stats = stats.toJson()
+      stats.errors.forEach((err: any) => consola.error(err))
+      stats.warnings.forEach((err: any) => consola.info(err))
+      if (stats.errors.length) {
+        consola.fatal('build extensions fail!')
+        return process.exit(1)
+      }
       done()
     })
 
@@ -311,7 +302,7 @@ function prodCompilerExtensions(options: ConfigOptions.options) {
             assets: true
           })
         )
-        showWebpackStats(stats)
+        showError(stats)
       }
     })
   })
@@ -345,7 +336,7 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
 
     compiler.plugin('done', function(this: any, stats) {
       routerStackManagement.init(app)
-      showWebpackStats(stats, { isdev: true })
+      showError(stats, { isdev: true })
 
       Object.keys(entrys).forEach(entry => {
         const name = entry + '.js'
