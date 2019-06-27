@@ -296,13 +296,17 @@ function prodCompilerExtensions(options: ConfigOptions.options) {
 
     compiler.run((err, stats) => {
       {
-        consola.log(
-          stats.toString({
-            all: false,
-            assets: true
-          })
-        )
-        showError(stats)
+        if (err) {
+          consola.fatal(err)
+        } else {
+          consola.log(
+            stats.toString({
+              all: false,
+              assets: true
+            })
+          )
+          showError(stats)
+        }
       }
     })
   })

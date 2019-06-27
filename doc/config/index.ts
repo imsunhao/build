@@ -1,3 +1,5 @@
+import { ConfigOptions } from '@bestminr/build'
+
 import path from 'path'
 import ProdEnv from './prod.env'
 import DevEnv from './dev.env'
@@ -46,11 +48,11 @@ export function baseConfig(inject) {
       statics: {
         '/service-worker.js': {
           path: resolve('./dist/service-worker.js'),
-          maxAge: getStaticsMaxAge({ cache: false, isProd: true }),
+          maxAge: 0,
         },
         '/manifest.json': {
           path: resolve('./manifest.json'),
-          maxAge: getStaticsMaxAge({ cache: false, isProd: false }),
+          maxAge: 0,
         },
       },
       render: {
@@ -71,23 +73,23 @@ export function baseConfig(inject) {
       statics: {
         '/dist': {
           path: resolve('./dist'),
-          maxAge: getStaticsMaxAge({ cache: true, isProd: false }),
+          maxAge: 0,
         },
         '/common-assets': {
           path: resolve('./common-assets'),
-          maxAge: getStaticsMaxAge({ cache: true, isProd: false }),
+          maxAge: 0,
         },
         '/public': {
           path: resolve('./public'),
-          maxAge: getStaticsMaxAge({ cache: true, isProd: false }),
+          maxAge: 0,
         },
         '/service-worker.js': {
           path: resolve('./dist/service-worker.js'),
-          maxAge: getStaticsMaxAge({ cache: false, isProd: false }),
+          maxAge: 0,
         },
         '/manifest.json': {
           path: resolve('./manifest.json'),
-          maxAge: getStaticsMaxAge({ cache: false, isProd: false }),
+          maxAge: 0,
         },
       },
       proxyTable: getProxyTable(inject),
@@ -101,7 +103,7 @@ export function baseConfig(inject) {
   }
 }
 
-export function getConfig(inject, opts = {}) {
+export function getConfig(inject: ConfigOptions.getOptionsInject, opts = {}) {
   const config = baseConfig(inject)
   const { resolve } = inject
   let resultConfig
@@ -115,15 +117,15 @@ export function getConfig(inject, opts = {}) {
         ...resultConfig.statics,
         '/dist': {
           path: resolve('./dist'),
-          maxAge: getStaticsMaxAge({ cache: true, isProd: false }),
+          maxAge: 0,
         },
         '/common-assets': {
           path: resolve('./common-assets'),
-          maxAge: getStaticsMaxAge({ cache: true, isProd: false }),
+          maxAge: 0,
         },
         [`${outputPath}public`]: {
           path: resolve('./public'),
-          maxAge: getStaticsMaxAge({ cache: true, isProd: false }),
+          maxAge: 0,
         },
       }
       resultConfig.proxyTable = getProxyTable(inject)
@@ -132,8 +134,4 @@ export function getConfig(inject, opts = {}) {
     resultConfig = Object.assign({}, config.public, config.dev, opts)
   }
   return resultConfig
-}
-
-function getStaticsMaxAge(options) {
-  return options.cache && options.isProd ? STATICS_MAX_AGE : 0
 }

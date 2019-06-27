@@ -5,17 +5,20 @@ import getBase from './build/webpack.base.conf.babel'
 import getDll from './build/webpack.dll.conf.babel'
 import getClient from './build/webpack.client.conf.babel'
 import getServer from './build/webpack.server.conf.babel'
-import path from 'path'
+import getExtensions from './build/webpack.extensions.conf.babel.js'
 
 export default function(inject: ConfigOptions.getOptionsInject): ConfigOptions.options {
   const config = getConfig(inject)
 
-  const base: any = getBase(config, inject)
-  const dll: any = getDll(config, inject)
-  const client: any = getClient(config, inject)
-  const server: any = getServer(config, inject)
+  const webpack: any = {
+    base: getBase(config, inject),
+    dll: getDll(config, inject),
+    client: getClient(config, inject),
+    server: getServer(config, inject),
+  }
+  const extensions: any = getExtensions(config, inject)
 
-  const { port } = config
+  const { port, render, statics, proxyTable } = config
 
   return {
     env: ['SERVER_ENV', 'ENV', 'NODE_ENV'],
@@ -33,20 +36,10 @@ export default function(inject: ConfigOptions.getOptionsInject): ConfigOptions.o
         ],
       ],
     },
-    render: config.render,
-    statics: config.statics,
-    proxyTable: config.proxyTable,
-    extensions: {
-      entry: {
-        extensions: inject.resolve('./server/index.js'),
-      },
-      path: path.resolve(base.output.path),
-    },
-    webpack: {
-      dll,
-      base,
-      client,
-      server,
-    },
+    render,
+    statics,
+    proxyTable,
+    extensions,
+    webpack,
   }
 }
