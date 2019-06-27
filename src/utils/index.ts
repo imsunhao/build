@@ -158,6 +158,20 @@ async function setWebpack(
   process.env.PUBLIC_PATH = path
   return options
 }
+
+/**
+ * 通过 用户的设定 完善 argv参数
+ * @param options build 通用 webpack 配置
+ * @param argv BuildService 通用 启动参数
+ */
+function completeArgvByUserConfig(
+  argv: BuildService.parsedArgs,
+  options: ConfigOptions.options
+) {
+  if (!argv.port) argv.port = options.port
+  if (!argv.fileDescriptor) argv.fileDescriptor = options.fileDescriptor
+  return argv
+}
 /**
  * 设置 静态文件后缀
  * @param options build 通用 webpack 配置
@@ -283,6 +297,8 @@ export async function initConfig(
   setVersion(options)
 
   buildServiceConfig = options
+
+  argv = completeArgvByUserConfig(argv, options)
 
   return options
 }

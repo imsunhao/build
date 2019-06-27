@@ -269,7 +269,7 @@ declare namespace build {
     /**
      * build 通用 webpack 配置
      */
-    interface options extends BuildService.serverInitOptions {
+    interface options extends BuildService.serverInitOptions, BuildService.parsedArgs.serverStart {
       /**
        * 当前程序运行版本
        */

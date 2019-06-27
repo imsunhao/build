@@ -15,8 +15,11 @@ export default function(inject: ConfigOptions.getOptionsInject): ConfigOptions.o
   const client: any = getClient(config, inject)
   const server: any = getServer(config, inject)
 
+  const { port } = config
+
   return {
     env: ['SERVER_ENV', 'ENV', 'NODE_ENV'],
+    port,
     babelrc: {
       presets: [
         [
