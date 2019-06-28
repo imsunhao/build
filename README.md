@@ -4,7 +4,6 @@
 
 ### TODO LIST
 
-- bug: prot 端口配置不生效
 - opt: 整理 stats
 - feat: _doc_ 整理出一个欢迎界面
 
@@ -26,9 +25,11 @@
 - H: 'hostname' 主机地址
 - p: 'port' 端口号
 - h: 'help' 帮助
-- d: 'dll' 打包对应 dll
-- c: 'config-file' 配置文件路径
+- c: 'config-file' build配置文件路径
 - v: 'version' 版本
+- cl: 'clear' 清空config缓存
+- d: 'dll' 清空dll缓存
+- ic: 'injectContext' 依赖注入文件地址
 
 ### 技术栈
 
