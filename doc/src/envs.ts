@@ -25,7 +25,7 @@ export interface HostGlobal extends Window {
   /**
    * vuex 实例
    */
-  store: Store<Tstore.state>
+  store: Store<Tstore.state['global']>
 
   /**
    * vue router 实例

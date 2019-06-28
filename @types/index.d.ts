@@ -411,16 +411,19 @@ declare namespace build {
     }
   }
 
+  /**
+   * build 工具
+   */
   namespace utils {
     /**
      * Express 路由 栈管理中心
      */
-    class RouterStackManagement {
+    interface RouterStackManagement {
       /**
        * 热更新 中间件
        * @param middlewares 中间件
        */
-      unpdate: (middlewares: any[]) => void
+      update: (middlewares: any[]) => void
     }
 
     namespace Get {

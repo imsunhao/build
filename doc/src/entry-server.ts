@@ -19,7 +19,7 @@ function isMobilePageUrl(url) {
 // return a Promise that resolves to the app instance.
 export default context => {
   // hostGlobal.__INJECT_CONTEXT__ = context
-  // console.log('server url = ', context.url, ' server context.renderContext = ', context.renderContext)
+  // console.log('server url = ', context.url, ' server context.injectContext.middlewaresContent = ', context.injectContext.middlewaresContent)
 
   return new Promise((resolve, reject) => {
     const s = !isProduction && Date.now()
@@ -71,7 +71,7 @@ export default context => {
           cookies,
           stage: 'server-onReady',
           matchedComponents,
-        }, context.renderContext)
+        }, context.injectContext.middlewaresContent)
 
         const asyncDataResults = callComponentsHookWith(matchedComponents, 'asyncData', callComponentsHookWithOptions)
         // Call fetchData hooks on components matched by the route.

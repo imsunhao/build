@@ -12,7 +12,7 @@ declare namespace Doc {
      * vuex 创建 工具函数
      * * typescript namespace
      */
-    namespace TcreateUtils {
+    namespace createUtils {
       type ActionDescriptor = [any, any]
 
       /**
@@ -35,16 +35,44 @@ declare namespace Doc {
      */
     interface state {
       /**
-       * 是否 使用 移动设备 访问
-       * * 来自服务器端
+       * 全局
        */
-      isMobile: boolean
+      global: {
+        /**
+         * 是否 使用 移动设备 访问
+         * * 来自服务器端
+         * * 这是一个例子
+         */
+        isMobile: boolean
+
+        /**
+         * 是否 使用 移动设备 访问
+         * * 来自 中间件-服务器端
+         * * 这是一个例子
+         */
+        hello: string
+
+        /**
+         * 测试 热加载 vuex
+         * * 来自 客户端
+         * * 这是一个例子
+         */
+        testHotLoadingVuex: number
+
+        /**
+         * 初始化 跳转访问 URL
+         * * 来自服务器端
+         * * 这是一个例子
+         */
+        initialReplaceStateUrl: string
+      }
 
       /**
-       * 初始化 跳转访问 URL
-       * * 来自服务器端
+       * 编辑器
        */
-      initialReplaceStateUrl: string
+      editor: {
+        test: string
+      }
     }
 
     /**
@@ -56,6 +84,8 @@ declare namespace Doc {
        */
       global: {
         SET_IS_MOBILE: boolean
+        SET_HELLO: { hello: string }
+        SET_testHotLoadingVuex: { number: number }
       }
 
       /**

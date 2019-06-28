@@ -302,6 +302,7 @@ export async function initConfig(
 
   return options
 }
+
 /**
  * 检测 是否启用 dll 启动
  *  * **必须** 放置在 **setWebpack** 设置webpack **之前**
@@ -510,16 +511,16 @@ export function isRouterExtensionPath(path: string) {
 /**
  * Express 路由 栈管理中心
  */
-class RouterStackManagement {
-  enabled = false
+export class RouterStackManagement {
+  private enabled = false
 
-  startIndex = 0
-  hotUpDateCount = 0
+  private startIndex = 0
+  private hotUpDateCount = 0
 
   app?: Express
   router?: Router
 
-  store: any[] = []
+  private store: any[] = []
 
   init(app: Express) {
     if (this.enabled) return
@@ -548,7 +549,7 @@ class RouterStackManagement {
     this.router.stack = stack
   }
 
-  use({
+  private use({
     index,
     middleware: { path, methods, handle }
   }: {
@@ -583,7 +584,7 @@ class RouterStackManagement {
    * 热更新 中间件
    * @param middlewares 中间件
    */
-  update(middlewares: any[]) {
+  protected update(middlewares: any[]) {
     if (isProduction) {
       return middlewares.forEach(({ path, methods, handle }) => {
         ;(this.app as any)[methods.toLocaleLowerCase()](path, handle)

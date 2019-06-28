@@ -16,13 +16,13 @@ export function routerExtension(app) {
 
   const router = express.Router()
 
-  //*** 自己编写的-请求中间件
+  // *** 自己编写的-请求中间件
 
   router.get(`/version`, (req, res) => {
     return res.json({ version })
   })
 
-  //*** end 自己编写的-请求中间件
+  // *** end 自己编写的-请求中间件
 
   app.use('/private', router)
   console.log('routerExtension init')
