@@ -1,12 +1,56 @@
 import { Tstore } from '@types'
-import { ActionContext, Store, MutationTree } from 'vuex'
+import { ActionTree, Store, MutationTree } from 'vuex'
 
 export type SniffMutationPayload<T> = T extends (state: any, payload: infer P) => any ? P: unknown
 export type SniffMutationPayloadTree<S, M extends MutationTree<S>> = {
   [K in keyof M]: SniffMutationPayload<M[K]>
 }
 
+export type SniffActionPayload<T> = T extends (state: any, payload: infer P) => infer V ? { payload: P, value: V }: { payload: unknown, value: unknown }
+export type SniffActionPayloadTree<S, M extends ActionTree<S, any>> = {
+  [K in keyof M]: SniffActionPayload<M[K]>
+}
+
 export function makeWrapper<T>(namespace: keyof Tstore.state = ('' as any)) {
+
+  function createGetState() {
+    function getState<K extends keyof T>(
+      context: Store<any>,
+      stateKey: K,
+    ): T[K]
+    function getState<K extends keyof T, K1 extends keyof T[K]>(
+      context: Store<any>,
+      stateKey: K,
+      state1Key: K1,
+    ): T[K][K1]
+    function getState<K extends keyof T, K1 extends keyof T[K], K2 extends keyof T[K][K1]>(
+      context: Store<any>,
+      stateKey: K,
+      state1Key: K1,
+      state2Key: K2,
+    ): T[K][K1][K2]
+    function getState<K extends keyof T, K1 extends keyof T[K], K2 extends keyof T[K][K1], K3 extends keyof T[K][K1][K2]>(
+      context: Store<any>,
+      stateKey: K,
+      state1Key: K1,
+      state2Key: K2,
+      state3Key: K3,
+    ): T[K][K1][K2][K3]
+    function getState(context: Store<any>, ...args: string[]) {
+      if (!checkStore(context)) return
+      checkNamespace(namespace, args)
+      let result
+      for (let index = 0; index < args.length; index++) {
+        const key = args[index];
+        if (!result) result = context.state[key]
+        else result = result[key]
+        if (!result) return
+      }
+      return result
+    }
+    return getState
+  }
+
   function makeMutations<M extends MutationTree<T>>(mutationTree: M) {
     return mutationTree
   }
@@ -54,48 +98,40 @@ export function makeWrapper<T>(namespace: keyof Tstore.state = ('' as any)) {
     return commit
   }
 
-  function createGetState() {
-    function getState<K extends keyof T>(
+  type TActionTree = ActionTree<T, Tstore.state>
+
+  function makeActions<A extends TActionTree>(actionTree: A) {
+    return actionTree
+  }
+
+  function createDispatch<M extends TActionTree>() {
+    type actionPayloadTree = SniffActionPayloadTree<T, M>
+    function dispatch<M extends keyof actionPayloadTree>(
       context: Store<any>,
-      stateKey: K,
-    ): T[K]
-    function getState<K extends keyof T, K1 extends keyof T[K]>(
-      context: Store<any>,
-      stateKey: K,
-      state1Key: K1,
-    ): T[K][K1]
-    function getState<K extends keyof T, K1 extends keyof T[K], K2 extends keyof T[K][K1]>(
-      context: Store<any>,
-      stateKey: K,
-      state1Key: K1,
-      state2Key: K2,
-    ): T[K][K1][K2]
-    function getState<K extends keyof T, K1 extends keyof T[K], K2 extends keyof T[K][K1], K3 extends keyof T[K][K1][K2]>(
-      context: Store<any>,
-      stateKey: K,
-      state1Key: K1,
-      state2Key: K2,
-      state3Key: K3,
-    ): T[K][K1][K2][K3]
-    function getState(context: Store<any>, ...args: string[]) {
+      type: M,
+      payload: actionPayloadTree[M]['payload'],
+    ): actionPayloadTree[M]['value']
+    function dispatch(context: Store<any>, ...args: any[]): any {
       if (!checkStore(context)) return
-      checkNamespace(namespace, args)
-      let result
-      for (let index = 0; index < args.length; index++) {
-        const key = args[index];
-        if (!result) result = context.state[key]
-        else result = result[key]
-        if (!result) return
+      if (args.length < 2) {
+        console.error('commit args.length must > 2')
+        return
       }
-      return result
+      checkNamespace(namespace, args)
+      const payload = args.pop()
+      const paths = args.join('/')
+      return context.dispatch(paths, payload)
     }
-    return getState
+
+    return dispatch
   }
 
   return {
+    createGetState,
     makeMutations,
     createCommit,
-    createGetState,
+    makeActions,
+    createDispatch,
   }
 }
 
