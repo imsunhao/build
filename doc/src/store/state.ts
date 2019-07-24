@@ -1,6 +1,6 @@
 import { Tstore } from '@types'
 
-export default function state(): Tstore.state['global'] {
+export default function state(): Tstore.state {
   return {
     isMobile: false,
     hello: '',

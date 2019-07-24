@@ -35,43 +35,42 @@ declare namespace Doc {
      */
     interface state {
       /**
-       * 全局
+       * 是否 使用 移动设备 访问
+       * * 来自服务器端
+       * * 这是一个例子
        */
-      global: {
-        /**
-         * 是否 使用 移动设备 访问
-         * * 来自服务器端
-         * * 这是一个例子
-         */
-        isMobile: boolean
+      isMobile: boolean
 
-        /**
-         * 是否 使用 移动设备 访问
-         * * 来自 中间件-服务器端
-         * * 这是一个例子
-         */
-        hello: string
+      /**
+       * 是否 使用 移动设备 访问
+       * * 来自 中间件-服务器端
+       * * 这是一个例子
+       */
+      hello: string
 
-        /**
-         * 测试 热加载 vuex
-         * * 来自 客户端
-         * * 这是一个例子
-         */
-        testHotLoadingVuex: number
+      /**
+       * 测试 热加载 vuex
+       * * 来自 客户端
+       * * 这是一个例子
+       */
+      testHotLoadingVuex: number
 
-        /**
-         * 初始化 跳转访问 URL
-         * * 来自服务器端
-         * * 这是一个例子
-         */
-        initialReplaceStateUrl: string
-      }
+      /**
+       * 初始化 跳转访问 URL
+       * * 来自服务器端
+       * * 这是一个例子
+       */
+      initialReplaceStateUrl: string
 
       /**
        * 编辑器
        */
-      editor: {
+      editor?: {
         test: string
+        deepTest: {
+          test1: string
+          test2: number
+        }
       }
     }
 
@@ -79,14 +78,9 @@ declare namespace Doc {
      * vuex Mutation-Payload-tree
      */
     interface MutationPayloads {
-      /**
-       * 全局
-       */
-      global: {
-        SET_IS_MOBILE: boolean
-        SET_HELLO: { hello: string }
-        SET_testHotLoadingVuex: { number: number }
-      }
+      SET_IS_MOBILE: boolean
+      SET_HELLO: { hello: string }
+      SET_testHotLoadingVuex: { number: number }
 
       /**
        * 编辑器
