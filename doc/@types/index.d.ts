@@ -1,4 +1,5 @@
 import { Store } from 'vuex'
+import { TMutations as GlobalMutations } from 'src/store/mutations'
 
 declare namespace Doc {
   type DictOf<T> = { [key: string]: T }
@@ -75,20 +76,22 @@ declare namespace Doc {
     }
 
     /**
-     * vuex Mutation-Payload-tree
+     * vuex Mutation-tree
      */
-    interface MutationPayloads {
-      SET_IS_MOBILE: boolean
-      SET_HELLO: { hello: string }
-      SET_testHotLoadingVuex: { number: number }
-
+    type Mutations = GlobalMutations & {
       /**
        * 编辑器
        */
-      editor: {
-        SET_HELLO_EDITOR: string
-        test: undefined
-        test2?: string
+      editor: GlobalMutations & {
+        /**
+         * 编辑器
+         */
+        editor2: GlobalMutations & {
+          /**
+           * 编辑器
+           */
+          editor3: GlobalMutations
+        }
       }
     }
   }

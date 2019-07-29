@@ -1,13 +1,13 @@
 import { Tstore } from '@types'
 import { ActionTree, Store, MutationTree } from 'vuex'
 
-export type SniffMutationPayload<T> = T extends (state: any, payload: infer P) => any ? P: unknown
+export type SniffMutationPayload<T> = T extends (state: any, payload: infer P) => any ? P: T
 export type SniffMutationPayloadTree<S, M extends MutationTree<S>> = {
   [K in keyof M]: SniffMutationPayload<M[K]>
 }
 
 export type SniffActionPayload<T> = T extends (state: any, payload: infer P) => infer V ? { payload: P, value: V }: { payload: unknown, value: unknown }
-export type SniffActionPayloadTree<S, M extends ActionTree<S, any>> = {
+export type SniffActionPayloadTree<S, M extends ActionTree<S, Tstore.state>> = {
   [K in keyof M]: SniffActionPayload<M[K]>
 }
 
@@ -55,8 +55,8 @@ export function makeWrapper<T>(namespace: keyof Tstore.state = ('' as any)) {
     return mutationTree
   }
 
-  function createCommit<M extends MutationTree<T>>() {
-    type MutationPayloadTree = SniffMutationPayloadTree<T, M>
+  function createCommit<Mutation extends MutationTree<T>>() {
+    type MutationPayloadTree = SniffMutationPayloadTree<T, Mutation>
     function commit<M extends keyof MutationPayloadTree>(
       context: Store<any>,
       mutation: M,
@@ -66,14 +66,14 @@ export function makeWrapper<T>(namespace: keyof Tstore.state = ('' as any)) {
       context: Store<any>,
       path: P,
       mutation: M,
-      payload: MutationPayloadTree[P][M],
+      payload: SniffMutationPayloadTree<T, MutationPayloadTree[P]>[M],
     ): void
     function commit<P extends keyof MutationPayloadTree, P1 extends keyof MutationPayloadTree[P], M extends keyof MutationPayloadTree[P][P1]>(
       context: Store<any>,
       path: P,
       path1: P1,
       mutation: M,
-      payload: MutationPayloadTree[P][P1][M],
+      payload: SniffMutationPayloadTree<T, MutationPayloadTree[P][P1]>[M],
     ): void
     function commit<P extends keyof MutationPayloadTree, P1 extends keyof MutationPayloadTree[P], P2 extends keyof MutationPayloadTree[P][P1], M extends keyof MutationPayloadTree[P][P1][P2]>(
       context: Store<any>,
@@ -81,7 +81,7 @@ export function makeWrapper<T>(namespace: keyof Tstore.state = ('' as any)) {
       path1: P1,
       path2: P2,
       mutation: M,
-      payload: MutationPayloadTree[P][P1][P2][M],
+      payload: SniffMutationPayloadTree<T, MutationPayloadTree[P][P1][P2]>[M],
     ): void
     function commit(context: Store<any>, ...args: any[]) {
       if (!checkStore(context)) return

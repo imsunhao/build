@@ -1,4 +1,5 @@
 import { globalHelper } from 'src/store/helpers'
+import { Tstore } from '@types'
 
 export const mutations = globalHelper.makeMutations({
   SET_IS_MOBILE: (state, isMobile: boolean) => {
@@ -15,10 +16,14 @@ export const mutations = globalHelper.makeMutations({
 
 export default mutations
 
-export const commit = globalHelper.createCommit<typeof mutations>()
+export type TMutations = typeof mutations
+
+export const commit = globalHelper.createCommit<Tstore.Mutations>()
 export const getState = globalHelper.createGetState()
 
 // const store = this.store
 
 // commit(store, 'SET_IS_MOBILE', true)
-// commit(store, 'editor', 'test', undefined)
+// commit(store, 'editor', 'SET_IS_MOBILE', true)
+// commit(store, 'editor', 'editor2', 'SET_IS_MOBILE', true)
+// commit(store, 'editor', 'editor2', 'editor3', 'SET_IS_MOBILE', true)
