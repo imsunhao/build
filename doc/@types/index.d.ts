@@ -56,6 +56,17 @@ declare namespace Doc {
           test2: number
         }
       }
+
+      /**
+       * 单元测试使用
+       */
+      test?: {
+        test: string
+        deepTest: {
+          test1: string
+          test2: number
+        }
+      }
     }
 
     /**
