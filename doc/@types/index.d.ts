@@ -1,7 +1,12 @@
-import { Store } from 'vuex'
-import { TMutations as GlobalMutations } from 'src/store/mutations'
-
+/**
+ * Doc 全局类型
+ * * typescript namespace
+ */
 declare namespace Doc {
+  import { Store } from 'vuex'
+  import { TMutations as GlobalMutations } from 'src/store/mutations'
+  import { TActions as GlobalActions } from 'src/store/actions'
+
   type DictOf<T> = { [key: string]: T }
 
   /**
@@ -9,28 +14,6 @@ declare namespace Doc {
    *  * typescript namespace
    */
   namespace Tstore {
-    /**
-     * vuex 创建 工具函数
-     * * typescript namespace
-     */
-    namespace createUtils {
-      type ActionDescriptor = [any, any]
-
-      /**
-       * 用于声明 Actions Descriptors
-       */
-      type ActionsOfDescriptors<Context, Descriptor extends DictOf<ActionDescriptor>> = {
-        [K in keyof Descriptor]: (ctx: Context, payload: Descriptor[K][0]) => Descriptor[K][1]
-      }
-
-      /**
-       * 用于声明 Mutations
-       */
-      type ModuleMutations<State, PayloadTree> = {
-        [K in keyof PayloadTree]: (state: State, payload: PayloadTree[K]) => any
-      }
-    }
-
     /**
      * vuex state
      */
@@ -94,6 +77,26 @@ declare namespace Doc {
         }
       }
     }
+
+    /**
+     * vuex Action-tree
+     */
+    type Actions = GlobalActions & {
+      /**
+       * 编辑器
+       */
+      editor: GlobalActions & {
+        /**
+         * 编辑器
+         */
+        editor2: GlobalActions & {
+          /**
+           * 编辑器
+           */
+          editor3: GlobalActions
+        }
+      }
+    }
   }
 
   /**
@@ -126,3 +129,20 @@ declare namespace Doc {
 }
 
 export = Doc
+
+/**
+ * vuex 创建 工具函数
+ * * typescript namespace
+ */
+export namespace CreateVuex {
+  import { ActionTree, Store, MutationTree } from 'vuex'
+  type SniffMutationPayload<T> = T extends (state: any, payload: infer P) => any ? P : T
+  type SniffMutationPayloadTree<S, M extends MutationTree<S>> = { [K in keyof M]: SniffMutationPayload<M[K]> }
+  type SniffActionPayload<T> = T extends (state: any, payload: infer P) => infer V
+    ? { payload: P; value: V }
+    : { payload: unknown; value: unknown }
+  type SniffActionPayloadTree<S, M extends ActionTree<S, Tstore.state>> = { [K in keyof M]: SniffActionPayload<M[K]> }
+  type SniffActionPayloadPathTree<S, M extends ActionTree<S, Tstore.state>> = {
+    [K in keyof M]: SniffMutationPayload<M[K]>
+  }
+}

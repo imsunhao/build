@@ -24,6 +24,6 @@
     "keyofStringsOnly": true,
     "lib": ["dom", "es5", "es6", "scripthost", "es2018.promise", "webworker"]
   },
-  "include": ["tests", "src", "server", "src/**/*.vue", "@types/*"],
+  "include": ["tests", "src", "server", "src/**/*.vue", "@types"],
   "exclude": ["node_modules", "*node_modules*", "dist", "docs", ".tmp", "build"]
 }

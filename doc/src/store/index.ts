@@ -2,7 +2,7 @@ import { Tstore } from '@types'
 
 import Vue from 'vue'
 import Vuex from 'vuex'
-import actions from './actions'
+import actions, { dispatch } from './actions'
 import mutations, { commit, getState } from './mutations'
 import getters from './getters'
 import state from './state'
@@ -19,4 +19,4 @@ export function createStore() {
   })
 }
 
-export { commit, getState }
+export { commit, getState, dispatch }
