@@ -1,6 +1,5 @@
 module.exports = {
   browser: true,
-  setupFiles: ['jest-localstorage-mock', './tests/jest-setup.js'],
   verbose: true,
   moduleFileExtensions: ['js', 'ts', 'vue'],
   transform: {
