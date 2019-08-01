@@ -1,11 +1,12 @@
+import { Store } from 'vuex'
+import { TMutations as GlobalMutations } from 'src/store/mutations'
+import { TActions as GlobalActions } from 'src/store/actions'
+
 /**
  * Doc 全局类型
  * * typescript namespace
  */
 declare namespace Doc {
-  import { Store } from 'vuex'
-  import { TMutations as GlobalMutations } from 'src/store/mutations'
-  import { TActions as GlobalActions } from 'src/store/actions'
 
   type DictOf<T> = { [key: string]: T }
 
@@ -141,12 +142,12 @@ declare namespace Doc {
 
 export = Doc
 
+import { ActionTree, Store, MutationTree } from 'vuex'
 /**
  * vuex 创建 工具函数
  * * typescript namespace
  */
 export namespace CreateVuex {
-  import { ActionTree, Store, MutationTree } from 'vuex'
   type SniffMutationPayload<T> = T extends (state: any, payload: infer P) => any ? P : T
   type SniffMutationPayloadTree<S, M extends MutationTree<S>> = { [K in keyof M]: SniffMutationPayload<M[K]> }
   type SniffActionPayload<T> = T extends (state: any, payload: infer P) => infer V
