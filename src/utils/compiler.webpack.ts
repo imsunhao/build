@@ -349,7 +349,7 @@ function devCompilerExtensions(options: ConfigOptions.options, app?: Express) {
           const souce = mfs.readFileSync(resolve(outputPath, name), 'utf-8')
           extensions = requireFromString(souce).default
         } catch (error) {
-          consola.fatal('devCompilerExtensions', error)
+          consola.fatal('devCompilerExtensions', resolve(outputPath, name), error)
           return process.exit(1)
         }
         Object.keys(extensions).forEach(extensionKey => {

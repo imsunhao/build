@@ -307,6 +307,11 @@ declare namespace build {
       babelrc?: TransformOptions
 
       /**
+       * tsconfig PATH 配置
+       */
+      tsconfig?: string
+
+      /**
        * webpack 配置
        */
       webpack?: options.webpack
