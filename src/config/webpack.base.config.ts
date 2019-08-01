@@ -20,6 +20,19 @@ export function getBaseConfig(options: ConfigOptions.options) {
   const mode = options.webpack.mode || 'production'
   const isProd = mode === 'production'
   const base = options.webpack ? options.webpack.base || {} : {}
+  const tsLoader: any = {
+    loader: 'ts-loader',
+    options: {
+      appendTsSuffixTo: [/\.vue$/],
+      transpileOnly: true,
+      happyPackMode: true,
+    }
+  }
+  if (options.tsconfig) {
+    tsLoader.options.context = options.rootDir
+    tsLoader.options.configFile = options.tsconfig
+  }
+  // consola.fatal(tsLoader)
 
   const babelLoder = {
     loader: 'babel-loader',
@@ -96,16 +109,7 @@ export function getBaseConfig(options: ConfigOptions.options) {
           ]
       ).concat([
         new VueLoaderPlugin(),
-        makeHappyPack('ts', [
-          {
-            loader: 'ts-loader',
-            options: {
-              appendTsSuffixTo: [/\.vue$/],
-              transpileOnly: true,
-              happyPackMode: true
-            }
-          }
-        ]),
+        makeHappyPack('ts', [tsLoader]),
         makeHappyPack('babel', [babelLoder])
       ])
     },
