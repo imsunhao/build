@@ -1,8 +1,10 @@
 import { Tstore } from '@types'
 import { createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
-import { makeWrapper } from 'src/store/utils'
+import { vuexTypescriptHelper } from 'src/store/utils'
 import { merge } from 'lodash'
+
+const { makeWrapper } = vuexTypescriptHelper<Tstore.state>()
 
 describe('Vux base-utils.spec', () => {
   const defalutTestString = 'defalutTestString'
@@ -73,6 +75,18 @@ describe('Vux base-utils.spec', () => {
 
       expect(getState(store, 'test', 'test')).toEqual(testString)
     })
+
+    const getters = globalHelper.makeGetters({
+      getTest(state, getters, rootState, rootGetters) {
+        return state.test.test
+      }
+    })
+    const getGetters = globalHelper.createGetGetters<Tstore.Getters>()
+
+    it('get getter', () => {
+      const store = getStore<Tstore.state>({ getters })
+      expect(getGetters(store, 'getTest')).toEqual(defalutTestString)
+    })
   })
 
   describe('单模块测试', () => {
@@ -115,6 +129,18 @@ describe('Vux base-utils.spec', () => {
 
       expect(getState(store, 'test')).toEqual(testString)
     })
+
+    const getters = testHelper.makeGetters({
+      getTest(state, getters, rootState, rootGetters) {
+        return state.test
+      }
+    })
+    const getGetters = testHelper.createGetGetters<typeof getters>()
+
+    it('get getter', () => {
+      const store = getStore<Tstore.state>({ state: {}, modules: { test: { namespaced: true, state: getTestState(), getters }}})
+      expect(getGetters(store, 'getTest')).toEqual(defalutTestString)
+    })
   })
 
   describe('深模块(2层)测试', () => {
@@ -156,6 +182,18 @@ describe('Vux base-utils.spec', () => {
       dispatch(store, 'action_set', { test: testString })
 
       expect(getState(store, 'test1')).toEqual(testString)
+    })
+
+    const getters = testHelper.makeGetters({
+      getTest(state, getters, rootState, rootGetters) {
+        return state.test1
+      }
+    })
+    const getGetters = testHelper.createGetGetters<typeof getters>()
+
+    it('get getter', () => {
+      const store = getStore<Tstore.state>({ state: {}, modules: { test: { namespaced: true, state: {}, modules: { deepTest: { namespaced: true, state: getTestState().deepTest, getters }}}}})
+      expect(getGetters(store, 'getTest')).toEqual(defalutTestString)
     })
   })
 })
