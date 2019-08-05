@@ -1,5 +1,7 @@
 import { Tstore } from '@types'
-import { makeWrapper } from 'src/store/utils'
+import { vuexTypescriptHelper } from 'src/store/utils'
+
+const { makeWrapper } = vuexTypescriptHelper<Tstore.state>()
 
 export const globalHelper = makeWrapper<Tstore.state>()
 export const editorHelper = makeWrapper<Tstore.state['editor']>('editor')

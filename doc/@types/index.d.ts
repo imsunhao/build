@@ -1,6 +1,7 @@
 import { Store } from 'vuex'
 import { TMutations as GlobalMutations } from 'src/store/mutations'
 import { TActions as GlobalActions } from 'src/store/actions'
+import { TGetters as GlobalGetters } from 'src/store/getters'
 
 /**
  * Doc 全局类型
@@ -67,6 +68,17 @@ declare namespace Doc {
           test1: string
           test2: number
         }
+      }
+    }
+
+    /**
+     * vuex Getters-tree
+     */
+    type Getters = GlobalGetters & {
+      /**
+       * 编辑器
+       */
+      editor: GlobalGetters & {
       }
     }
 
@@ -142,7 +154,7 @@ declare namespace Doc {
 
 export = Doc
 
-import { ActionTree, Store, MutationTree } from 'vuex'
+import { ActionTree, Store, MutationTree, GetterTree } from 'vuex'
 /**
  * vuex 创建 工具函数
  * * typescript namespace
