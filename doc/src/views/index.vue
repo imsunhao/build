@@ -6,32 +6,19 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
-import { State } from 'vuex-class'
-import { Watch, Prop } from 'vue-property-decorator'
+import { value, computed, watch, onMounted } from 'vue-function-api'
 
 import { Trouter } from '@types'
 
 import { commit, getState } from 'src/store'
-import { isServer } from 'src/envs'
+import { isServer, hostGlobal } from 'src/envs'
 
-@Component({
-  components: {},
-})
-export default class APP extends Vue {
+type AsyncData = Trouter.asyncData.app
 
-  get hello() {
-    // return ''
-    return getState(this.$store, 'hello')
-  }
-
-  get testHotLoadingVuex() {
-    // return ''
-    return getState(this.$store, 'testHotLoadingVuex')
-  }
-
-  static asyncData({ store, serverStore }: Trouter.asyncData.index) {
+export default {
+  name: 'index',
+  props: {},
+  asyncData({ store, serverStore }: AsyncData) {
     console.log('asyncData', serverStore)
     if (!isServer) {
       console.log('static asyncData 在本地也会被执行一般 但是没有中间件提供数据支撑!')
@@ -39,14 +26,22 @@ export default class APP extends Vue {
     if (serverStore && serverStore.hello) {
       commit(store, 'SET_HELLO', serverStore)
     }
-  }
+  },
+  setup(props, context) {
+    const hello = computed(() => getState(hostGlobal.store, 'hello'))
+    const testHotLoadingVuex = computed(() => getState(hostGlobal.store, 'testHotLoadingVuex'))
 
-  mounted() {
-    console.log('init Views')
-  }
+    onMounted(() => {
+      console.log('init Views')
+    })
 
-  addTestHotLoadingVuex() {
-    commit(this.$store, 'SET_testHotLoadingVuex', { number: 1 })
-  }
+    return {
+      hello,
+      testHotLoadingVuex,
+      addTestHotLoadingVuex() {
+        commit(hostGlobal.store, 'SET_testHotLoadingVuex', { number: 1 })
+      }
+    }
+  },
 }
 </script>

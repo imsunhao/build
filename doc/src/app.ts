@@ -4,6 +4,9 @@ import App from 'src/App.vue'
 import { createRouter } from './router'
 import { createStore } from 'store'
 
+import { plugin } from 'vue-function-api'
+Vue.use(plugin)
+
 // Expose a factory function that creates a fresh set of store, router,
 // app instances on each call (which is called for each SSR request)
 /**

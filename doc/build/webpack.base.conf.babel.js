@@ -6,6 +6,7 @@ export default function(config, { resolve }) {
     },
     resolve: {
       alias: {
+        vue: resolve('node_modules/vue'),
         public: resolve('public'),
         src: resolve('src'),
         store$: resolve('src/store/index.ts')

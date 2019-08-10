@@ -35,14 +35,12 @@
     "tslib": "^1.9.3",
     "typescript": "^3.4.5",
     "vue": "^2.6.10",
-    "vue-class-component": "^6.3.2",
+    "vue-function-api": "^2.1.2",
     "vue-loader": "^15.4.2",
-    "vue-property-decorator": "^7.2.0",
     "vue-router": "^3.0.1",
     "vue-server-renderer": "^2.6.10",
     "vue-template-compiler": "^2.6.10",
     "vuex": "^3.0.1",
-    "vuex-class": "^0.3.1",
     "vuex-router-sync": "^5.0.0"
   },
   "devDependencies": {

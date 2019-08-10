@@ -1,6 +1,6 @@
 import { createApp } from './app'
 import { callComponentsHookWith } from 'src/router/router-util'
-import { isProduction } from 'src/envs'
+import { isProduction, hostGlobal } from 'src/envs'
 
 function isMobileUA(ua) {
   // 自己实现吧
@@ -28,6 +28,8 @@ export default context => {
     const isMobile = isMobileUA(headers['user-agent'])
 
     const { app, router, store } = createApp()
+
+    hostGlobal.store = store
 
     store.commit('SET_IS_MOBILE', isMobile)
 

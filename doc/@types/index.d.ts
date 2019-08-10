@@ -185,7 +185,7 @@ declare namespace Doc {
        * path
        *  * /
        */
-      interface index extends asyncData {
+      interface app extends asyncData {
         serverStore: {
           hello: string
         }
