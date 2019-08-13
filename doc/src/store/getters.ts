@@ -1,9 +1,22 @@
 import { globalHelper } from 'src/store/helpers'
 import { Tstore } from '@types'
 
+export const globalGetterTypeHelper = globalHelper.createGetterTypeHelper<Tstore.Getters>()
+const getterTypeHelper = globalHelper.createGetterTypeHelper<TGetters>()
+
 export const getters = globalHelper.makeGetters({
+  getTest2(state, getters, rootState, rootGetters) {
+    return 1
+  },
   getTest(state, getters, rootState, rootGetters) {
-    return state.hello
+    // const getters2 = getterTypeHelper(getters)
+    const getters2: number = getters.getTest2
+    rootGetters = globalGetterTypeHelper(rootGetters)
+
+    return {
+      hello: state.hello,
+      getTest: getters.getTest,
+    }
   }
 })
 

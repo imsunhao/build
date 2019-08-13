@@ -47,6 +47,16 @@ export function vuexTypescriptHelper<RootState>() {
       return getters
     }
 
+    function createGetterTypeHelper<GT extends TGetterTree>() {
+      type GetterTypeHelper = {
+        [K in keyof GT]: ReturnType<GT[K]>
+      }
+      function getterTypeHelper(getters: any) {
+        return getters as GetterTypeHelper
+      }
+      return getterTypeHelper
+    }
+
     function createGetGetters<GT extends TGetterTree>() {
       type Deep<T> = {
         [k in string]: T
@@ -185,6 +195,7 @@ export function vuexTypescriptHelper<RootState>() {
       createCommit,
       makeActions,
       createDispatch,
+      createGetterTypeHelper,
     }
   }
 
