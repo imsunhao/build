@@ -1,6 +1,6 @@
 import { createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
-import { makeWrapper } from 'src/store/utils'
+import { VuexStoreHelper } from 'src/store/utils'
 import { merge } from 'lodash'
 
 /**
@@ -75,6 +75,7 @@ namespace Tstore {
     }
   }
 }
+const { makeWrapper } = new VuexStoreHelper<Tstore.state, Tstore.getters>()
 
 describe('Vux base-utils.spec', () => {
   const defalutTestString = 'defalutTestString'
@@ -113,6 +114,7 @@ describe('Vux base-utils.spec', () => {
       },
     })
     const getState = globalHelper.createGetState()
+    const getGetter = globalHelper.createGetGetter()
     const commit = globalHelper.createCommit<typeof mutations>()
 
     it('commit getState', () => {

@@ -1,7 +1,31 @@
 import { ActionTree, Store, MutationTree, ActionContext } from 'vuex'
 
-export class VuexHelper<GlobalStates, GlobalGetters> {
-  makeWrapper<T, G extends { [k in string]: any }>(namespace: keyof GlobalStates | string[] = ('' as any)) {
+function isStore(context: Store<any>) {
+  return 'strict' in context
+}
+
+function checkStore(context: any, { namespace, args }) {
+  if (isStore(context)) {
+    checkNamespace(namespace, args)
+  }
+}
+
+function checkNamespace(namespace: string[], args: any[]) {
+  // TODO: 完善深层namespace解析
+  if (namespace) {
+    if (typeof namespace === 'string') {
+      args.unshift(namespace)
+    } else {
+      namespace = [ ...namespace ]
+      namespace.reverse().forEach(key => {
+        args.unshift(key)
+      })
+    }
+  }
+}
+
+export class VuexStoreHelper<GlobalStates, GlobalGetters> {
+  makeWrapper<T = GlobalStates, G = GlobalGetters>(namespace: keyof GlobalStates | string[] = ('' as any)) {
     type SniffMutationPayload<T> = T extends (state: any, payload: infer P) => any ? P : T
     type SniffMutationPayloadTree<S, M extends MutationTree<S>> = { [K in keyof M]: SniffMutationPayload<M[K]> }
     type SniffActionPayload<T> = T extends (state: any, payload: infer P) => infer V
@@ -15,8 +39,7 @@ export class VuexHelper<GlobalStates, GlobalGetters> {
     type GetterTree = {
       [K in keyof G]: (state: T, getters: G, rootState: GlobalStates, rootGetters: GlobalGetters) => G[K]
     }
-
-    const GetterTree: GetterTree = undefined as any
+    type TActionTree = ActionTree<T, GlobalStates>
 
     function createGetState() {
       function getState<P extends keyof T>(
@@ -42,7 +65,7 @@ export class VuexHelper<GlobalStates, GlobalGetters> {
         path3: P3,
       ): T[P][P1][P2][P3]
       function getState(context: TActionContext, ...args: string[]) {
-        this.checkStore(context, { namespace, args })
+        checkStore(context, { namespace, args })
         let result
         for (let index = 0; index < args.length; index++) {
           const key = args[index]
@@ -79,17 +102,15 @@ export class VuexHelper<GlobalStates, GlobalGetters> {
         path3: P3,
       ): G[P][P1][P2][P3]
       function getGetter(context: TActionContext, ...args: string[]) {
-        this.checkStore(context, { namespace, args })
-        let result
-        for (let index = 0; index < args.length; index++) {
-          const key = args[index]
-          if (!result) result = context.getters[key]
-          else result = result[key]
-          if (!result) return
-        }
-        return result
+        checkStore(context, { namespace, args })
+        const paths = args.join('/')
+        return context.getters[paths]
       }
       return getGetter
+    }
+
+    function makeGetters(getters: GetterTree) {
+      return getters
     }
 
     function makeMutations<M extends MutationTree<T>>(mutationTree: M) {
@@ -125,7 +146,7 @@ export class VuexHelper<GlobalStates, GlobalGetters> {
         payload: SniffMutationPayloadTree<T, MutationPayloadTree[P][P1][P2]>[M],
       ): void
       function commit(context: TActionContext, ...args: any[]) {
-        this.checkStore(context, { namespace, args })
+        checkStore(context, { namespace, args })
         if (args.length < 2) {
           console.error('commit args.length must > 2')
           return
@@ -137,8 +158,6 @@ export class VuexHelper<GlobalStates, GlobalGetters> {
 
       return commit
     }
-
-    type TActionTree = ActionTree<T, GlobalStates>
 
     function makeActions<A extends TActionTree>(actionTree: A) {
       return actionTree
@@ -174,7 +193,7 @@ export class VuexHelper<GlobalStates, GlobalGetters> {
         payload: SniffActionPayloadTree<ActionPayloadPathTree[P], AT>[M]['payload'],
       ): SniffActionPayloadTree<ActionPayloadPathTree[P], AT>[M]['value']
       function dispatch(context: TActionContext, ...args: any[]): any {
-        this.checkStore(context, { namespace, args })
+        checkStore(context, { namespace, args })
         if (args.length < 2) {
           console.error('commit args.length must > 2')
           return
@@ -188,37 +207,13 @@ export class VuexHelper<GlobalStates, GlobalGetters> {
     }
 
     return {
-      GetterTree,
       createGetState,
       createGetGetter,
+      makeGetters,
       makeMutations,
       createCommit,
       makeActions,
       createDispatch,
-    }
-  }
-
-  private isStore(context: Store<any>) {
-    return 'strict' in context
-  }
-
-  protected checkStore(context: any, { namespace, args }) {
-    if (this.isStore(context)) {
-      this.checkNamespace(namespace, args)
-    }
-  }
-
-  protected checkNamespace(namespace: keyof GlobalStates | string[], args: any[]) {
-    // TODO: 完善深层namespace解析
-    if (namespace) {
-      if (typeof namespace === 'string') {
-        args.unshift(namespace)
-      } else {
-        namespace = [ ...namespace ]
-        namespace.reverse().forEach(key => {
-          args.unshift(key)
-        })
-      }
     }
   }
 }

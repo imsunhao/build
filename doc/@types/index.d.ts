@@ -69,6 +69,60 @@ declare namespace Doc {
         }
       }
     }
+    /**
+     * vuex getters
+     */
+    interface getters {
+      /**
+       * 是否 使用 移动设备 访问
+       * * 来自服务器端
+       * * 这是一个例子
+       */
+      isMobile: boolean
+
+      /**
+       * 是否 使用 移动设备 访问
+       * * 来自 中间件-服务器端
+       * * 这是一个例子
+       */
+      hello: string
+
+      /**
+       * 测试 热加载 vuex
+       * * 来自 客户端
+       * * 这是一个例子
+       */
+      testHotLoadingVuex: number
+
+      /**
+       * 初始化 跳转访问 URL
+       * * 来自服务器端
+       * * 这是一个例子
+       */
+      initialReplaceStateUrl: string
+
+      /**
+       * 编辑器
+       */
+      editor?: {
+        test: string
+        deepTest: {
+          test1: string
+          test2: number
+        }
+      }
+
+      /**
+       * 单元测试使用
+       */
+      test?: {
+        test: string
+        deepTest: {
+          test1: string
+          test2: number
+        }
+      }
+    }
 
     /**
      * vuex Mutation-tree
@@ -141,20 +195,3 @@ declare namespace Doc {
 }
 
 export = Doc
-
-import { ActionTree, Store, MutationTree } from 'vuex'
-/**
- * vuex 创建 工具函数
- * * typescript namespace
- */
-export namespace CreateVuex {
-  type SniffMutationPayload<T> = T extends (state: any, payload: infer P) => any ? P : T
-  type SniffMutationPayloadTree<S, M extends MutationTree<S>> = { [K in keyof M]: SniffMutationPayload<M[K]> }
-  type SniffActionPayload<T> = T extends (state: any, payload: infer P) => infer V
-    ? { payload: P; value: V }
-    : { payload: unknown; value: unknown }
-  type SniffActionPayloadTree<S, M extends ActionTree<S, Tstore.state>> = { [K in keyof M]: SniffActionPayload<M[K]> }
-  type SniffActionPayloadPathTree<S, M extends ActionTree<S, Tstore.state>> = {
-    [K in keyof M]: SniffMutationPayload<M[K]>
-  }
-}
