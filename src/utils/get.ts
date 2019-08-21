@@ -1,6 +1,7 @@
 
 import { utils } from "@types";
 type BaseGetOptions = utils.Get.BaseGetOptions
+type insureType<T> = Exclude<T, undefined>
 
 /**
  * 安全获取对象的值 - 不报错
@@ -10,8 +11,8 @@ type BaseGetOptions = utils.Get.BaseGetOptions
  */
 export function getValue<T extends object> (obj: T): T
 export function getValue<T extends object, K1 extends keyof T> (obj: T, k1: K1): T[K1]
-export function getValue<T extends object, K1 extends keyof T, K2 extends keyof T[K1]> (obj: T, k1: K1, k2: K2): T[K1][K2]
-export function getValue<T extends object, K1 extends keyof T, K2 extends keyof T[K1], K3 extends keyof T[K1][K2]> (obj: T, k1: K1, k2: K2, k3: K3): T[K1][K2][K3]
+export function getValue<T extends object, K1 extends keyof T, K2 extends keyof insureType<T[K1]>> (obj: T, k1: K1, k2: K2): insureType<T[K1]>[K2]
+export function getValue<T extends object, K1 extends keyof T, K2 extends keyof insureType<T[K1]>, K3 extends keyof insureType<insureType<T[K1]>[K2]>> (obj: T, k1: K1, k2: K2, k3: K3): insureType<insureType<T[K1]>[K2]>[K3]
 export function getValue(obj: any, ...args: string[]) {
   return obj == null ? undefined : baseGet(obj, args)
 }
@@ -25,8 +26,8 @@ export function getValue(obj: any, ...args: string[]) {
  */
 export function getInsureValue<T extends object>(obj: T, options: BaseGetOptions): T
 export function getInsureValue<T extends object, K1 extends keyof T>(obj: T, options: BaseGetOptions, k1: K1): T[K1]
-export function getInsureValue<T extends object, K1 extends keyof T, K2 extends keyof T[K1]>(obj: T, options: BaseGetOptions, k1: K1, k2: K2): T[K1][K2]
-export function getInsureValue<T extends object, K1 extends keyof T, K2 extends keyof T[K1], K3 extends keyof T[K1][K2]>(obj: T, options: BaseGetOptions, k1: K1, k2: K2, k3: K3): T[K1][K2][K3]
+export function getInsureValue<T extends object, K1 extends keyof T, K2 extends keyof insureType<T[K1]>> (obj: T, options: BaseGetOptions, k1: K1, k2: K2): insureType<T[K1]>[K2]
+export function getInsureValue<T extends object, K1 extends keyof T, K2 extends keyof insureType<T[K1]>, K3 extends keyof insureType<insureType<T[K1]>[K2]>> (obj: T, options: BaseGetOptions, k1: K1, k2: K2, k3: K3): insureType<insureType<T[K1]>[K2]>[K3]
 export function getInsureValue(obj: any, options: BaseGetOptions = {}, ...args: string[]) {
   Object.assign(options, { strict: true })
   return obj == null ? undefined : baseGet(obj, args, options)
