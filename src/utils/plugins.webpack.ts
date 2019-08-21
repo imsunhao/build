@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from 'fs'
 import requireFromString from 'require-from-string'
 import consola from 'consola'
 import { compilerDll } from 'src/utils/compiler.webpack'
+import { getValue } from 'src/utils/get'
 
 export function getDllPlugin({
   path,
@@ -75,4 +76,13 @@ export async function getClientDllPlugin(options: ConfigOptions.options) {
   return {
     plugins
   }
+}
+
+/**
+ * 获取 alias
+ * - 主要是对 只存在于server端或者client端 插件 支持
+ * @param options build 通用 webpack 配置
+ */
+export function getExternals(options: ConfigOptions.options, type: 'client' | 'server') {
+  return getValue(options, 'exclude', type) || []
 }

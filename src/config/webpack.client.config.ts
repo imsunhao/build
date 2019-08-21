@@ -6,10 +6,12 @@ import webpack from 'webpack'
 import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin'
 
 import { ConfigOptions } from '@types'
-import { getClientDllPlugin } from 'src/utils/plugins.webpack'
+import { getClientDllPlugin, getExternals } from 'src/utils/plugins.webpack'
 
 export async function getClientConfig(options: ConfigOptions.options) {
   const client = options.webpack ? options.webpack.client || {} : {}
+  const externals = getExternals(options, 'client')
+
   return (merge as any)(
     getBaseConfig(options),
     {
@@ -17,6 +19,7 @@ export async function getClientConfig(options: ConfigOptions.options) {
       entry: {
         app: './src/entry-client.js'
       },
+      externals,
       output: {
         globalObject: 'this'
       },

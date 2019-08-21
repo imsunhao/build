@@ -7,6 +7,7 @@ import VueSSRServerPlugin from 'vue-server-renderer/server-plugin'
 import { getStyle } from 'src/utils/style.webpack'
 
 import { ConfigOptions } from '@types'
+import { getExternals } from 'src/utils/plugins.webpack'
 
 export function getServerConfig(options: ConfigOptions.options) {
   if (!(options.webpack && options.webpack.mode)) {
@@ -20,6 +21,7 @@ export function getServerConfig(options: ConfigOptions.options) {
     const whitelist = [/\.css$/, /\?vue&type=style/].concat(options.webpack.server.nodeExternalsWhitelist || [])
     const mode = options.webpack.mode || 'production'
     const isProd = mode === 'production'
+    const externals = getExternals(options, 'server')
     return (merge as any)(
       getBaseConfig(options),
       {
@@ -29,10 +31,13 @@ export function getServerConfig(options: ConfigOptions.options) {
         output: {
           libraryTarget: 'commonjs2'
         },
-        externals: nodeExternals({
-          // whitelist: /\.css$/
-          whitelist
-        }),
+        externals: [
+          nodeExternals({
+            // whitelist: /\.css$/
+            whitelist
+          }),
+          ...externals
+        ],
         performance: {
           maxEntrypointSize: 1024 * 1024 * 6,
           maxAssetSize: 1024 * 1024 * 3,

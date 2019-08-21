@@ -15,6 +15,26 @@ import { Trouter } from '@types'
 
 import { commit, getState } from 'src/store'
 import { isServer } from 'src/envs'
+import fastblur from '@bestminr/fastblur'
+
+let fastblurWasmModulePromise: Promise<typeof import('@bestminr/fastblur')>
+function getFastBlurModule(): Promise<typeof import('@bestminr/fastblur')> {
+  return import('@bestminr/fastblur').then((m) => {
+    if (fastblurWasmModulePromise) {
+      return fastblurWasmModulePromise
+    }
+    const wasmPath = require('@bestminr/fastblur/fastblur_bg.wasm') // 使用 file-loader 处理的时候是酱紫的
+    console.log('got module', m, wasmPath)
+    // wasm-bindgen 生成的 js 和 d.ts 不太对... 只好这样强行调 init 函数了
+    const initPromise = (m as any).default(wasmPath)
+    fastblurWasmModulePromise = initPromise.then(() => {
+      return m
+    })
+    return fastblurWasmModulePromise
+  }).catch((err) => {
+    console.log('err', err)
+  }) as any
+}
 
 @Component({
   components: {},
@@ -43,6 +63,7 @@ export default class APP extends Vue {
 
   mounted() {
     console.log('init Views')
+    getFastBlurModule()
   }
 
   addTestHotLoadingVuex() {

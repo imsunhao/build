@@ -317,6 +317,11 @@ declare namespace build {
       webpack?: options.webpack
 
       /**
+       * exclude 排除 第三方包
+       */
+      exclude?: options.exclude
+
+      /**
        * 服务器端 插件 配置
        * * 中间件
        * * 路由
@@ -353,6 +358,20 @@ declare namespace build {
         base?: Configuration
         client?: Configuration
         server?: serverConfig
+      }
+
+      /**
+       * exclude 排除 第三方包
+       */
+      interface exclude {
+        /**
+         * 排除 客户端 第三方包
+         */
+        client?: string[]
+        /**
+         * 排除 服务器端 第三方包
+         */
+        server?: string[]
       }
 
       interface serverConfig extends Configuration {

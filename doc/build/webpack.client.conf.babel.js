@@ -1,3 +1,4 @@
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 export default function(config, { resolve }) {
   return {
     entry: {
@@ -5,6 +6,9 @@ export default function(config, { resolve }) {
     },
     output: {
       globalObject: 'this',
-    }
+    },
+    plugins: [
+      // new BundleAnalyzerPlugin()
+    ]
   }
 }

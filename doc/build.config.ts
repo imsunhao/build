@@ -23,6 +23,10 @@ export default function(inject: ConfigOptions.getOptionsInject): ConfigOptions.o
   return {
     env: ['SERVER_ENV', 'ENV', 'NODE_ENV'],
     port,
+    exclude: {
+      client: ['globals'],
+      server: ['@bestminr/fastblur'],
+    },
     babelrc: {
       presets: [
         [
