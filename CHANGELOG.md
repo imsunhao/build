@@ -1,6 +1,25 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [1.6.21](https://github.com/imsunhao/build/compare/v1.6.20...v1.6.21) (2019-08-21)
+
+
+### Features
+
+* [构建] 添加 排除 第三方包 功能 ([aeb5584](https://github.com/imsunhao/build/commit/aeb5584))
+* doc 使用 ts进行配置 ([065e43b](https://github.com/imsunhao/build/commit/065e43b))
+* doc 调整 local启动参数 ([89fe889](https://github.com/imsunhao/build/commit/89fe889))
+* vuex Action 完善全局 dispatch ([7365ccf](https://github.com/imsunhao/build/commit/7365ccf))
+* vuex mutation 完善全局  commit ([c5b9adf](https://github.com/imsunhao/build/commit/c5b9adf))
+* 修正 test ([6e872b6](https://github.com/imsunhao/build/commit/6e872b6))
+* 完善 doc 例子 ([a678270](https://github.com/imsunhao/build/commit/a678270))
+* 完善 根据用户配置端口号 启动 ([48532ed](https://github.com/imsunhao/build/commit/48532ed))
+* 完善单元测试 测试类型 分离 ([76eb2f9](https://github.com/imsunhao/build/commit/76eb2f9))
+* 添加 tsconfig 扩展选项 ([0f10d10](https://github.com/imsunhao/build/commit/0f10d10))
+* 添加 vuex createDispatch ([102ea87](https://github.com/imsunhao/build/commit/102ea87))
+* 添加 VuexStoreHelper概念 ([40e85a6](https://github.com/imsunhao/build/commit/40e85a6))
+* 调整 vuex 增加 helpers 概念 ([4c9aadd](https://github.com/imsunhao/build/commit/4c9aadd))
 
 <a name="1.6.20"></a>
 ## [1.6.20](https://github.com/imsunhao/build/compare/v1.6.19...v1.6.20) (2019-06-20)
