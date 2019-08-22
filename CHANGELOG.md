@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.22](https://github.com/imsunhao/build/compare/v1.6.21...v1.6.22) (2019-08-22)
+
+
+### Features
+
+* [构建] 完善 排除-三方 添加warn 提醒功能 ([5e41702](https://github.com/imsunhao/build/commit/5e41702))
+
 ### [1.6.21](https://github.com/imsunhao/build/compare/v1.6.20...v1.6.21) (2019-08-21)
 
 
