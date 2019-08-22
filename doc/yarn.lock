@@ -643,9 +643,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@bestminr/build@1.6.18":
-  version "1.6.18"
-  resolved "https://registry.yarnpkg.com/@bestminr/build/-/build-1.6.18.tgz#a1a84c7174c282ed630b4a2390fb3bb61f87b752"
+"@bestminr/build@^1.6.22":
+  version "1.6.22"
+  resolved "https://registry.yarnpkg.com/@bestminr/build/-/build-1.6.22.tgz#e7825ee47afef4002b42bb580603401dd5c6ce76"
+  integrity sha512-vNkAwSp0Q3b2hAJ8swFr1RpohrevPS0WGUTD/yECpkhuEWTwXyBH2uVCpqJXi3m5o0NhEaO8feIJ7zG7escvdw==
   dependencies:
     "@babel/core" "^7.1.5"
     "@babel/plugin-proposal-class-properties" "^7.1.0"
@@ -695,10 +696,6 @@
     webpack-merge "^4.1.4"
     webpack-node-externals "^1.7.2"
     webpackbar "^3.1.3"
-
-"@bestminr/fastblur@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@bestminr/fastblur/-/fastblur-0.1.1.tgz#ed89586624ed668cdd15a6f9e25446019a91db6a"
 
 "@cnakazawa/watch@^1.0.3":
   version "1.0.3"
