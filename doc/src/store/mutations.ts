@@ -12,6 +12,9 @@ export const mutations = globalHelper.makeMutations({
   SET_testHotLoadingVuex: (state, { number }: { number: number }) => {
     state.testHotLoadingVuex += number * 1
   },
+  SET_VERSION: (state, { version }: Pick<Tstore.state, 'version'>) => {
+    state.version = version
+  },
 })
 
 export default mutations

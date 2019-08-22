@@ -20,6 +20,13 @@ declare namespace Doc {
      */
     interface state {
       /**
+       * 当前服务器版本
+       * * 来自服务器端
+       * * 这是一个例子
+       */
+      version: string
+
+      /**
        * 是否 使用 移动设备 访问
        * * 来自服务器端
        * * 这是一个例子

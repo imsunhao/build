@@ -1,6 +1,16 @@
 import { globalHelper } from 'src/store/helpers'
 import { Tstore } from '@types'
 
+import axios from 'axios'
+import { isServer, injectGlobal } from 'src/envs'
+import { commit, getState } from 'src/store'
+
+function get(url: string) {
+  if (isServer) url = `${injectGlobal.__INJECT_CONTEXT__.SERVER_HOST}${url}`
+  console.log('axios 发起请求:', url)
+  return axios.get(url)
+}
+
 export const actions = globalHelper.makeActions({
   GET_SERVER_DATA(ctx, { id }: { id: number }) {
     let resove
@@ -11,6 +21,19 @@ export const actions = globalHelper.makeActions({
       })
     }, 1000)
     return promise
+  },
+  GET_SERVER_VERSION(ctx) {
+    const version = getState(ctx, 'version')
+    if (version) {
+      console.log('version 已经被请求过了')
+      return
+    }
+
+    return get('/private/version').then(({ data }) => {
+      const version = data.version.join('.')
+      console.log('axios 获取当前版本号:', version)
+      commit(ctx, 'SET_VERSION', { version })
+    })
   }
 })
 
