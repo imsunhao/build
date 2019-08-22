@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.23](https://github.com/imsunhao/build/compare/v1.6.22...v1.6.23) (2019-08-22)
+
+
+### Bug Fixes
+
+* 解决 webpackHotUpdate is not defined ([40311e7](https://github.com/imsunhao/build/commit/40311e7))
+
+
+### Features
+
+* [doc] 开启store严格模式 ([720dcea](https://github.com/imsunhao/build/commit/720dcea))
+* [doc] 获取 服务器消息的例子 ([485950e](https://github.com/imsunhao/build/commit/485950e))
+* 集成 vue-function-api ([a962b41](https://github.com/imsunhao/build/commit/a962b41))
+
 ### [1.6.22](https://github.com/imsunhao/build/compare/v1.6.21...v1.6.22) (2019-08-22)
 
 
