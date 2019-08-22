@@ -6,11 +6,13 @@ import actions, { dispatch } from './actions'
 import mutations, { commit, getState } from './mutations'
 import getters from './getters'
 import state from './state'
+import { isProduction } from 'src/envs'
 
 Vue.use(Vuex)
 
 export function createStore() {
   return new Vuex.Store<Tstore.state>({
+    strict: !isProduction,
     state: state(),
     actions,
     mutations,
