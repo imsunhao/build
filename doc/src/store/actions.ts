@@ -22,11 +22,13 @@ export const actions = globalHelper.makeActions({
     }, 1000)
     return promise
   },
-  GET_SERVER_VERSION(ctx) {
-    const version = getState(ctx, 'version')
-    if (version) {
-      console.log('version 已经被请求过了')
-      return
+  GET_SERVER_VERSION(ctx, { isForce }: { isForce?: boolean }) {
+    if (!isForce) {
+      const version = getState(ctx, 'version')
+      if (version) {
+        console.log('version 已经被请求过了')
+        return
+      }
     }
 
     return get('/private/version').then(({ data }) => {

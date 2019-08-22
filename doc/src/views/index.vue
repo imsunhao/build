@@ -1,8 +1,11 @@
 <template>
 <div>
-  <h1>当前服务器版本为: {{ version }}</h1>
+  <h1>当前客户端版本为: {{ clientVersion }}</h1>
+  <h1>当前服务器版本为: {{ serverVersion }}</h1>
   <h1>serverStore = {{ hello }}</h1>
-  <button @click="addTestHotLoadingVuex">点击增加 testHotLoadingVuex = {{testHotLoadingVuex}}</button>
+  <p><button @click="addTestHotLoadingVuex">点击增加 testHotLoadingVuex = {{testHotLoadingVuex}}</button></p>
+  <p><button @click="refreshServerVersion">重新请求 服务器版本</button></p>
+  <p><router-link :to="{ name: 'editor' }"> 跳转到editor页面 </router-link></p>
 </div>
 </template>
 
@@ -28,13 +31,16 @@ export default {
       commit(store, 'SET_HELLO', serverStore)
     }
     return Promise.all([
-      dispatch(store, 'GET_SERVER_VERSION', undefined)
+      dispatch(store, 'GET_SERVER_VERSION', {})
     ])
   },
   setup(props, context) {
-    const hello = computed(() => getState(hostGlobal.store, 'hello'))
-    const version = computed(() => getState(hostGlobal.store, 'version'))
-    const testHotLoadingVuex = computed(() => getState(hostGlobal.store, 'testHotLoadingVuex'))
+    const store = hostGlobal.store
+
+    const hello = computed(() => getState(store, 'hello'))
+    const serverVersion = computed(() => getState(store, 'version'))
+    const clientVersion = computed(() => hostGlobal.__INJECT_ENV__.PACKAGE_VERSION)
+    const testHotLoadingVuex = computed(() => getState(store, 'testHotLoadingVuex'))
 
     onMounted(() => {
       console.log('init Views')
@@ -42,10 +48,14 @@ export default {
 
     return {
       hello,
-      version,
+      serverVersion,
+      clientVersion,
       testHotLoadingVuex,
       addTestHotLoadingVuex() {
-        commit(hostGlobal.store, 'SET_testHotLoadingVuex', { number: 1 })
+        commit(store, 'SET_testHotLoadingVuex', { number: 1 })
+      },
+      refreshServerVersion() {
+        dispatch(store, 'GET_SERVER_VERSION', { isForce: true })
       }
     }
   },

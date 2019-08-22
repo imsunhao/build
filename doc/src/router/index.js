@@ -5,6 +5,7 @@ Vue.use(Router)
 
 // Home Page
 const HomePage = () => import('../views/index.vue')
+const EditorPage = () => import('../views/Editor.vue')
 
 export function createRouter(store) {
   return new Router({
@@ -14,7 +15,13 @@ export function createRouter(store) {
     routes: [
       {
         path: '/',
+        name: 'home',
         component: HomePage,
+      },
+      {
+        path: '/editor',
+        name: 'editor',
+        component: EditorPage,
       },
     ],
   })
