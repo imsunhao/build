@@ -1,6 +1,8 @@
 import { Store } from 'vuex'
 import { TMutations as GlobalMutations } from 'src/store/mutations'
 import { TActions as GlobalActions } from 'src/store/actions'
+import { TMutations as EditorMutations } from 'src/store/editor/mutations'
+import { TActions as EditorActions } from 'src/store/editor/actions'
 
 /**
  * Doc 全局类型
@@ -56,10 +58,15 @@ declare namespace Doc {
 
       /**
        * 编辑器
+       * - 模块
        */
       editor?: {
         test: string
-        deepTest: {
+        /**
+         * 深层编辑器
+         * - 模块
+         */
+        deepTest?: {
           test1: string
           test2: number
         }
@@ -138,17 +145,7 @@ declare namespace Doc {
       /**
        * 编辑器
        */
-      editor: GlobalMutations & {
-        /**
-         * 编辑器
-         */
-        editor2: GlobalMutations & {
-          /**
-           * 编辑器
-           */
-          editor3: GlobalMutations
-        }
-      }
+      editor: EditorMutations
     }
 
     /**
@@ -158,17 +155,7 @@ declare namespace Doc {
       /**
        * 编辑器
        */
-      editor: GlobalActions & {
-        /**
-         * 编辑器
-         */
-        editor2: GlobalActions & {
-          /**
-           * 编辑器
-           */
-          editor3: GlobalActions
-        }
-      }
+      editor: EditorActions
     }
   }
 

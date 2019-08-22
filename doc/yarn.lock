@@ -643,10 +643,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@bestminr/build@^1.6.22":
-  version "1.6.22"
-  resolved "https://registry.yarnpkg.com/@bestminr/build/-/build-1.6.22.tgz#e7825ee47afef4002b42bb580603401dd5c6ce76"
-  integrity sha512-vNkAwSp0Q3b2hAJ8swFr1RpohrevPS0WGUTD/yECpkhuEWTwXyBH2uVCpqJXi3m5o0NhEaO8feIJ7zG7escvdw==
+"@bestminr/build@^1.6.23":
+  version "1.6.23"
+  resolved "https://registry.yarnpkg.com/@bestminr/build/-/build-1.6.23.tgz#2b7c3657b3c4705e84248cc47b8d781c4809e349"
+  integrity sha512-nUAgYQYVpG9kaHCUVJzWHHKW0ZmAFsJtGpIHBVszqgZNI71emj6lM61EwNmItO5zid0YxVUK5ovXiuQmf22gLg==
   dependencies:
     "@babel/core" "^7.1.5"
     "@babel/plugin-proposal-class-properties" "^7.1.0"
@@ -696,6 +696,11 @@
     webpack-merge "^4.1.4"
     webpack-node-externals "^1.7.2"
     webpackbar "^3.1.3"
+
+"@bestminr/vuex-utils@^0.2.1-alpha.0":
+  version "0.2.1-alpha.0"
+  resolved "https://registry.yarnpkg.com/@bestminr/vuex-utils/-/vuex-utils-0.2.1-alpha.0.tgz#33635ae80be1f045ec6f2d2b81f69b5d1b23e5b9"
+  integrity sha512-Y+zPZGI4f/HdosELo4Iwq5BeBwhMR6RvFxEcHhd5FDWEBg0O2ldedei5Ycu7p/kJCq68Ey6KiSKQV7Douct20g==
 
 "@cnakazawa/watch@^1.0.3":
   version "1.0.3"

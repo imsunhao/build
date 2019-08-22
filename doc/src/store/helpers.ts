@@ -1,13 +1,9 @@
 import { Tstore } from '@types'
-import { VuexStoreHelper } from 'src/store/utils'
+import { VuexStoreHelper } from '@bestminr/vuex-utils'
 
-import { VUEX_NS as editor } from 'src/store/editor'
-
-const { makeWrapper } = new VuexStoreHelper<Tstore.state, Tstore.getters>()
+export const { makeWrapper } = new VuexStoreHelper<Tstore.state, Tstore.getters>()
 
 export const globalHelper = makeWrapper()
-export const editorHelper = makeWrapper<Tstore.state[editor], Tstore.getters[editor]>(editor)
-
 /**
  * 例子 1
  */
