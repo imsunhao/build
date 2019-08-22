@@ -3,7 +3,7 @@ import { ConfigOptions } from '@types'
 import webpack from 'webpack'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 
-import { join } from 'path'
+import { join, resolve } from 'path'
 import { existsSync, readFileSync } from 'fs'
 import requireFromString from 'require-from-string'
 import consola from 'consola'
@@ -84,5 +84,13 @@ export async function getClientDllPlugin(options: ConfigOptions.options) {
  * @param options build 通用 webpack 配置
  */
 export function getExternals(options: ConfigOptions.options, type: 'client' | 'server') {
-  return getValue(options, 'exclude', type) || []
+  const externals = getValue(options, 'exclude', type) || []
+  const alias = externals.reduce((alias, name) => {
+    alias[name] = resolve(options.rootDir, './node_modules/@bestminr/build/dist/empty-module.js')
+    return alias
+  }, {} as any)
+  return {
+    alias,
+    externals,
+  }
 }

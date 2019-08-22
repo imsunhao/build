@@ -11,7 +11,8 @@ module.exports = {
   entry: {
     build: resolve('./src/bin/build.ts'),
     start: resolve('./src/bin/start.ts'),
-    dev: resolve('./src/bin/dev.ts')
+    dev: resolve('./src/bin/dev.ts'),
+    ['empty-module']: resolve('./src/utils/empty-module.js')
   },
   output: {
     path: resolve('./dist'),

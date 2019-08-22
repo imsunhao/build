@@ -18,10 +18,10 @@ export function getServerConfig(options: ConfigOptions.options) {
   }
   if (options.webpack.server) {
     const server = options.webpack.server.webpack || options.webpack.server || {}
-    const whitelist = [/\.css$/, /\?vue&type=style/].concat(options.webpack.server.nodeExternalsWhitelist || [])
     const mode = options.webpack.mode || 'production'
     const isProd = mode === 'production'
-    const externals = getExternals(options, 'server')
+    const { externals, alias } = getExternals(options, 'server')
+    const whitelist = [/\.css$/, /\?vue&type=style/].concat(options.webpack.server.nodeExternalsWhitelist || []).concat(externals as any)
     return (merge as any)(
       getBaseConfig(options),
       {
@@ -31,12 +31,14 @@ export function getServerConfig(options: ConfigOptions.options) {
         output: {
           libraryTarget: 'commonjs2'
         },
+        resolve: {
+          alias,
+        },
         externals: [
           nodeExternals({
             // whitelist: /\.css$/
             whitelist
           }),
-          ...externals
         ],
         performance: {
           maxEntrypointSize: 1024 * 1024 * 6,

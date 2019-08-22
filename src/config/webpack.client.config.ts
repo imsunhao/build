@@ -10,7 +10,7 @@ import { getClientDllPlugin, getExternals } from 'src/utils/plugins.webpack'
 
 export async function getClientConfig(options: ConfigOptions.options) {
   const client = options.webpack ? options.webpack.client || {} : {}
-  const externals = getExternals(options, 'client')
+  const { externals, alias } = getExternals(options, 'client')
 
   return (merge as any)(
     getBaseConfig(options),
@@ -18,6 +18,9 @@ export async function getClientConfig(options: ConfigOptions.options) {
       name: 'client',
       entry: {
         app: './src/entry-client.js'
+      },
+      resolve: {
+        alias,
       },
       externals,
       output: {
