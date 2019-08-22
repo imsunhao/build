@@ -91,7 +91,9 @@ function devCompiler({
 
   clientConfig.output.filename = '[name].js'
   clientConfig.plugins.push(
-    new webpack.HotModuleReplacementPlugin(),
+    new webpack.HotModuleReplacementPlugin({
+      multiStep: true,
+    }),
     new webpack.NoEmitOnErrorsPlugin()
   )
 

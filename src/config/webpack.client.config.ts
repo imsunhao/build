@@ -11,6 +11,8 @@ import { getClientDllPlugin, getExternals } from 'src/utils/plugins.webpack'
 export async function getClientConfig(options: ConfigOptions.options) {
   const client = options.webpack ? options.webpack.client || {} : {}
   const { externals, alias } = getExternals(options, 'client')
+  const mode = options.webpack.mode || 'production'
+  const isProd = mode === 'production'
 
   return (merge as any)(
     getBaseConfig(options),
@@ -27,6 +29,7 @@ export async function getClientConfig(options: ConfigOptions.options) {
         globalObject: 'this'
       },
       optimization: {
+        runtimeChunk: !isProd,
         minimizer: [
           new OptimizeCSSAssetsPlugin()
         ],
