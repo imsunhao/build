@@ -14,8 +14,11 @@ try {
   s = new Proxy(function() { return s }, {
     get(target, name) {
       if (!isRead) {
-        isRead = true
-        console.warn('exclude-server: 存在包试图在server端被调用,请自行检查.')
+        if (name === '__esModule' || typeof name === 'symbol' || name === 'name') {
+          return 'empty-module.js'
+        }
+        // isRead = true
+        console.warn('exclude-server: 存在包试图在server端被调用,请自行检查. 访问属性名称 =', name)
       }
       return s
     },
