@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.24](https://github.com/imsunhao/build/compare/v1.6.23...v1.6.24) (2019-08-23)
+
+
+### Features
+
+* [doc] 完善 asyncData 例子 ([54439aa](https://github.com/imsunhao/build/commit/54439aa))
+* 完善 empty-module 检查警告 ([b20a844](https://github.com/imsunhao/build/commit/b20a844))
+
 ### [1.6.23](https://github.com/imsunhao/build/compare/v1.6.22...v1.6.23) (2019-08-22)
 
 
