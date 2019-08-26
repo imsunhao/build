@@ -41,6 +41,7 @@ class DataValidationConfig {
     const { name, source, target } = config
     if (this.maps.has(name)) {
       console.warn('[DataValidationConfig] set repeat name', name)
+      return
     }
 
     const result = {
