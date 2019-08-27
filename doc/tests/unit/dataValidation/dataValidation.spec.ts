@@ -11,7 +11,7 @@ describe('DataValidation verify', () => {
     const dataValidation = getDataValidation()
     const testConfig: TDataValidationConfig<FTextColor, BTextColor> = {
       name: 'TextColor',
-      source: {
+      rules: {
         color_type: 'string',
         color: 'string',
         gradient: () => true,
@@ -30,7 +30,7 @@ describe('DataValidation verify', () => {
     const dataValidation = getDataValidation()
     const testConfig: TDataValidationConfig<FTextColor, BTextColor> = {
       name: 'TextColor',
-      source: {
+      rules: {
         color_type: {
           type: 'number',
           requried: true
@@ -53,7 +53,7 @@ describe('DataValidation verify', () => {
     const dataValidation = getDataValidation()
     const testConfig: TDataValidationConfig<FTextColor, BTextColor> = {
       name: 'TextColor',
-      source: {
+      rules: {
         color_type: {
           type: 'string',
           requried: true
@@ -75,7 +75,7 @@ describe('DataValidation verify', () => {
     const dataValidation = getDataValidation()
     const testConfig: TDataValidationConfig<FTextColor, BTextColor> = {
       name: 'TextColor',
-      source: {
+      rules: {
         color_type: {
           type: 'string',
           requried: true
@@ -95,7 +95,7 @@ describe('DataValidation verify', () => {
     const dataValidation = getDataValidation()
     const testConfig: TDataValidationConfig<FTextColor, BTextColor> = {
       name: 'TextColor',
-      source: {
+      rules: {
         color_type: 'string',
         color: 'string',
         gradient: () => false,
@@ -111,4 +111,68 @@ describe('DataValidation verify', () => {
     expect(key).toEqual('gradient')
   })
 
+})
+
+describe('DataValidation verify - runtime', () => {
+  it('success', () => {
+    const dataValidation = getDataValidation()
+    const testConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      name: 'TextColor',
+      rules: {
+        color_type: 'string',
+        color: 'string',
+        gradient: () => true,
+      },
+      runtime: {
+        rules(obj: FTextColor, rules) {
+          if (!obj.color_type) return rules
+          if (obj.color_type === 'solid') {
+            rules.color = {
+              type: 'string',
+              requried: true,
+            }
+          }
+          return rules
+        }
+      },
+    }
+    const obj: FTextColor = {
+      color_type: 'solid',
+      color: 'string',
+    }
+    dataValidation.config.set(testConfig)
+    const { verify } = dataValidation.use('TextColor')
+    const { result } = verify(obj)
+    expect(result).toEqual(true)
+  })
+  it('fail', () => {
+    const dataValidation = getDataValidation()
+    const testConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      name: 'TextColor',
+      rules: {
+        color_type: 'string',
+        color: 'string',
+        gradient: {
+          type: 'number'
+        },
+      },
+      runtime: {
+        rules(obj: FTextColor, rules) {
+          if (!obj.color_type) return rules
+          if (obj.color_type === 'solid') {} else {
+            rules.gradient.requried = true
+          }
+          return rules
+        }
+      },
+    }
+    const obj: FTextColor = {
+      color_type: 'gradient',
+    }
+    dataValidation.config.set(testConfig)
+    const { verify } = dataValidation.use('TextColor')
+    const { result, key } = verify(obj)
+    expect(result).toEqual(false)
+    expect(key).toEqual('gradient')
+  })
 })

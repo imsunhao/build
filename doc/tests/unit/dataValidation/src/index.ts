@@ -4,6 +4,14 @@ type DataValidationConstructor = {
   isSecurity?: boolean
 }
 
+function cloneDeep<T>(data: T): T {
+  if (typeof data !== 'object') return data
+  return Object.keys(data).reduce((t, o) => {
+    t[o] = cloneDeep(data[o])
+    return t
+  }, {}) as any
+}
+
 function configToConfigLocal(config: Config<any>): ConfigLocal<any> {
   if (!config) return
   if (typeof config !== 'object') {
@@ -38,15 +46,15 @@ class DataValidationConfig {
   }
 
   set(config: TDataValidationConfig<any, any>) {
-    const { name, source, target } = config
+    const { name, rules, target } = config
     if (this.maps.has(name)) {
       console.warn('[DataValidationConfig] set repeat name', name)
       return
     }
 
     const result = {
-      name,
-      source: configToConfigLocal(source),
+      ...config,
+      rules: configToConfigLocal(rules),
       target: configToConfigLocal(target),
     }
 
@@ -76,79 +84,90 @@ export class DataValidation {
       return DATA_VALIDATION
     }
   }
+  static baseVerify(data: any, rules: ConfigLocal<any>): TVerify {
+    const sourceMap = Object.keys(rules).reduce((t, k) => {
+      t[k] = true
+      return t
+    }, {})
+    const objKeys = Object.keys(data)
+    for (const ok of objKeys) {
+      const config = rules[ok]
+      const value = data[ok]
+      if (!config) {
+        console.log('[DataValidation] verify: 多余字段', ok)
+        return {
+          result: false,
+          key: ok,
+        }
+      }
+      delete sourceMap[ok]
+      if (config.callback && !config.callback(value))
+        return {
+          result: false,
+          config,
+          key: ok,
+          value,
+        }
+      else if (typeof value !== config.type)
+        return {
+          result: false,
+          config,
+          key: ok,
+          value,
+        }
+    }
+    const sourceKeys = Object.keys(sourceMap)
+    for (const sk of sourceKeys) {
+      const config = rules[sk]
+      if (config.requried)
+        return {
+          result: false,
+          config,
+          key: sk,
+        }
+      else if (config.callback && !config.callback())
+        return {
+          result: false,
+          config,
+          key: sk,
+        }
+    }
+    return {
+      result: true,
+    }
+  }
 
   use(configName: string) {
-    const { source } = this.config.get(configName)
+    const { rules: SOURCE, runtime } = this.config.get(configName)
     return {
-      verify(obj, {} = {}): TVerify {
-        if (typeof obj !== 'object') {
+      verify(data, {} = {}): TVerify {
+        if (typeof data !== 'object') {
           console.log('[DataValidation] verify arguments[0] must be a object')
           return
         }
-        const sourceMap = Object.keys(source).reduce((t, k) => {
-          t[k] = true
-          return t
-        }, {})
-        const objKeys = Object.keys(obj)
-        for (const ok of objKeys) {
-          const config = source[ok]
-          const value = obj[ok]
-          if (!config) {
-            console.log('[DataValidation] verify: 多余字段', ok)
-            return {
-              result: false,
-              key: ok,
-            }
-          }
-          delete sourceMap[ok]
-          if (config.callback && !config.callback(value))
-            return {
-              result: false,
-              config,
-              key: ok,
-              value,
-            }
-          else if (typeof value !== config.type)
-            return {
-              result: false,
-              config,
-              key: ok,
-              value,
-            }
+        let rules = cloneDeep(SOURCE)
+        if (runtime && runtime.rules) {
+          rules = runtime.rules(data, rules)
         }
-        const sourceKeys = Object.keys(sourceMap)
-        for (const sk of sourceKeys) {
-          const config = source[sk]
-          if (config.requried)
-            return {
-              result: false,
-              config,
-              key: sk,
-            }
-          else if (config.callback && !config.callback())
-            return {
-              result: false,
-              config,
-              key: sk,
-            }
-        }
-        return {
-          result: true,
-        }
+        return DataValidation.baseVerify(data, rules)
       },
     }
   }
 }
-
-export type TDataValidationConfig<S, T> = {
+type TDataValidationConfigBase<S, T> = {
   name: string
-  source: Config<S>
+  runtime?: {
+    rules: (data: any, rules: ConfigLocal<S>) => ConfigLocal<S>
+  }
+}
+
+export type TDataValidationConfig<S, T> = TDataValidationConfigBase<S, T> & {
+  rules: Config<S>
   target?: Config<T>
 }
 
-type TDataValidationConfigLocal<S, T> = {
-  name: string
-  source: ConfigLocal<S>
+type TDataValidationConfigLocal<S, T> = TDataValidationConfigBase<S, T> & {
+  rules: ConfigLocal<S>
   target?: ConfigLocal<T>
 }
 
