@@ -62,21 +62,73 @@ class DataValidationConfig {
   }
 }
 
+type TDataValidationMeta = {
+  verify: (data: any) => boolean
+}
+
+function getMeta(s: string) {
+  return {
+    verify(value: any) {
+      return typeof value === s
+    },
+  }
+}
+class DataValidationMeta {
+  maps = new Map<string, TDataValidationMeta>()
+
+  constructor() {
+    ['string', 'number', 'bigint', 'boolean', 'symbol', 'undefined', 'object', 'function'].forEach(key => {
+      this.set(key, getMeta(key))
+    })
+  }
+
+  has(key) {
+    return this.maps.has(key)
+  }
+
+  use(key, value) {
+    const meta = this.get(key)
+    if (meta) {
+      return meta.verify(value)
+    }
+  }
+
+  get(key) {
+    if (this.has(key)) {
+      return this.maps.get(key)
+    } else {
+      console.warn('[DataValidationMeta] get invalid key', key)
+    }
+  }
+
+  set(key: string, meta: TDataValidationMeta) {
+    if (this.has(key)) {
+      console.warn('[DataValidationMeta] set repeat key', key)
+      return
+    }
+
+    this.maps.set(key, meta)
+  }
+}
+
 export type TVerify = {
   result: boolean
   key?: string
   value?: any
-  config?: TConfig
+  rule?: TConfig
 }
 
 export class DataValidation {
-  config: DataValidationConfig = new DataValidationConfig()
+  config = new DataValidationConfig()
+  meta = new DataValidationMeta()
+
   constructor({ isSecurity }: DataValidationConstructor = {}) {
     if (!isSecurity) {
       console.error('[DataValidation] is single case, please use DataValidation.getInstance()')
       return
     }
   }
+
   static getInstance() {
     if (DATA_VALIDATION) return DATA_VALIDATION
     else {
@@ -84,16 +136,17 @@ export class DataValidation {
       return DATA_VALIDATION
     }
   }
-  static baseVerify(data: any, rules: ConfigLocal<any>): TVerify {
+
+  baseVerify(data: any, rules: ConfigLocal<any>): TVerify {
     const sourceMap = Object.keys(rules).reduce((t, k) => {
       t[k] = true
       return t
     }, {})
     const objKeys = Object.keys(data)
     for (const ok of objKeys) {
-      const config = rules[ok]
+      const rule = rules[ok]
       const value = data[ok]
-      if (!config) {
+      if (!rule) {
         console.log('[DataValidation] verify: 多余字段', ok)
         return {
           result: false,
@@ -101,34 +154,48 @@ export class DataValidation {
         }
       }
       delete sourceMap[ok]
-      if (config.callback && !config.callback(value))
+      if (rule.callback && !rule.callback(value))
         return {
           result: false,
-          config,
+          rule,
           key: ok,
           value,
         }
-      else if (typeof value !== config.type)
+      else if (rule.type && this.meta.has(rule.type)) {
+        if(!this.meta.use(rule.type, value))
         return {
           result: false,
-          config,
+          rule,
           key: ok,
           value,
         }
+      } else if (rule.type) {
+        const dataValidation = this.use(rule.type)
+        const result = dataValidation.verify(value)
+        if (!result.result) return {
+          result: false,
+          rule: {
+            ...rule,
+            rule: result.rule
+          },
+          key: `${ok}.${result.key}`,
+          value: result.value,
+        }
+      }
     }
     const sourceKeys = Object.keys(sourceMap)
     for (const sk of sourceKeys) {
-      const config = rules[sk]
-      if (config.requried)
+      const rule = rules[sk]
+      if (rule.requried)
         return {
           result: false,
-          config,
+          rule,
           key: sk,
         }
-      else if (config.callback && !config.callback())
+      else if (rule.callback && !rule.callback())
         return {
           result: false,
-          config,
+          rule,
           key: sk,
         }
     }
@@ -144,6 +211,8 @@ export class DataValidation {
 
   use(configName: string) {
     const { rules: SOURCE, runtime } = this.config.get(configName)
+    const { baseVerify } = this
+    const verify = baseVerify.bind(this)
     return {
       verify(data, {} = {}): TVerify {
         if (typeof data !== 'object') {
@@ -154,7 +223,7 @@ export class DataValidation {
         if (runtime && runtime.rules) {
           rules = runtime.rules(data, rules)
         }
-        return DataValidation.baseVerify(data, rules)
+        return verify(data, rules)
       },
     }
   }
@@ -166,7 +235,7 @@ type TDataValidationConfigBase<S, T> = {
   }
 }
 
-export type TDataValidationConfig<S, T> = TDataValidationConfigBase<S, T> & {
+export type TDataValidationConfig<S, T = any> = TDataValidationConfigBase<S, T> & {
   rules: Config<S>
   target?: Config<T>
 }
@@ -176,7 +245,7 @@ type TDataValidationConfigLocal<S, T> = TDataValidationConfigBase<S, T> & {
   target?: ConfigLocal<T>
 }
 
-type configAspType = 'string' | 'number' | 'undefined' | 'function' | 'symbol'
+type configAspType = TConfigKey | 'string' | 'number' | 'undefined' | 'function' | 'symbol'
 type configCallBack = (value?: any) => boolean
 
 type TConfig = {
@@ -184,10 +253,13 @@ type TConfig = {
   callback?: configCallBack
   default?: any
   requried?: boolean
+  rule?: TConfig
 }
 
+type TConfigKey = string
+
 type Config<T> = {
-  [P in keyof T]-?: configAspType | configCallBack | TConfig
+  [P in keyof T]-?:  configAspType | configCallBack | TConfig
 }
 
 type ConfigLocal<T> = {
