@@ -350,3 +350,93 @@ describe('DataValidation verify - rule nesting', () => {
     expect(key).toEqual('gradient.gradient_type')
   })
 })
+
+describe('DataValidation use cache', () => {
+  it('use simple', () => {
+    const dataValidation = getDataValidation()
+    dataValidation.meta.set('gradient_type', {
+      verify(data) {
+        return /linear|radial/.test(data)
+      }
+    })
+    const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
+      rules: {
+        gradient_angle: 'number',
+        gradient_type: 'gradient_type',
+        stops: () => true,
+      },
+    }
+    const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      rules: {
+        color_type: 'string',
+        color: 'color',
+        gradient: 'Gradient',
+      },
+    }
+    dataValidation.register('TextColor', textColorConfig)
+    dataValidation.register('Gradient', gradientConfig)
+
+    const { verify } = dataValidation.use('Gradient')
+    verify({})
+    expect(dataValidation.cache.maps.size).toEqual(1)
+  })
+
+  it('use rule nesting', () => {
+    const dataValidation = getDataValidation()
+    dataValidation.meta.set('gradient_type', {
+      verify(data) {
+        return /linear|radial/.test(data)
+      }
+    })
+    const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
+      rules: {
+        gradient_angle: 'number',
+        gradient_type: 'gradient_type',
+        stops: () => true,
+      },
+    }
+    const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      rules: {
+        color_type: 'string',
+        color: 'color',
+        gradient: 'Gradient',
+      },
+    }
+    dataValidation.register('TextColor', textColorConfig)
+    dataValidation.register('Gradient', gradientConfig)
+
+    const { verify } = dataValidation.use('TextColor')
+    verify({
+      gradient: {}
+    })
+    expect(dataValidation.cache.maps.size).toEqual(2)
+  })
+
+  it('use rule nesting - no verify', () => {
+    const dataValidation = getDataValidation()
+    dataValidation.meta.set('gradient_type', {
+      verify(data) {
+        return /linear|radial/.test(data)
+      }
+    })
+    const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
+      rules: {
+        gradient_angle: 'number',
+        gradient_type: 'gradient_type',
+        stops: () => true,
+      },
+    }
+    const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      rules: {
+        color_type: 'string',
+        color: 'color',
+        gradient: 'Gradient',
+      },
+    }
+    dataValidation.register('TextColor', textColorConfig)
+    dataValidation.register('Gradient', gradientConfig)
+
+    dataValidation.use('TextColor')
+    expect(dataValidation.cache.maps.size).toEqual(1)
+  })
+})

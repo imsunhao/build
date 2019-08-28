@@ -73,6 +73,7 @@ function getMeta(s: string) {
     },
   }
 }
+
 class DataValidationMeta {
   maps = new Map<string, TDataValidationMeta>()
 
@@ -111,6 +112,23 @@ class DataValidationMeta {
   }
 }
 
+class DataValidationCache {
+  maps = new Map<string, TUse>()
+
+  get(key) {
+    return this.maps.get(key)
+  }
+
+  set(key: string, data: TUse) {
+    if (this.maps.has(key)) {
+      console.warn('[DataValidationCache] set repeat key', key)
+      return
+    }
+    this.maps.set(key, data)
+  }
+
+}
+
 export type TVerify = {
   result: boolean
   key?: string
@@ -118,9 +136,14 @@ export type TVerify = {
   rule?: TConfig
 }
 
+type TUse = {
+  verify(data: any, {}?: {}): TVerify;
+}
+
 export class DataValidation {
   config = new DataValidationConfig()
   meta = new DataValidationMeta()
+  cache = new DataValidationCache()
 
   constructor({ isSecurity }: DataValidationConstructor = {}) {
     if (!isSecurity) {
@@ -209,11 +232,13 @@ export class DataValidation {
     this.config.set(config)
   }
 
-  use(configName: string) {
+  use(configName: string): TUse {
+    const catchResult = this.cache.get(configName)
+    if (catchResult) return catchResult
     const { rules: SOURCE, runtime } = this.config.get(configName)
     const { baseVerify } = this
     const verify = baseVerify.bind(this)
-    return {
+    const result = {
       verify(data, {} = {}): TVerify {
         if (typeof data !== 'object') {
           console.log('[DataValidation] verify arguments[0] must be a object')
@@ -226,6 +251,8 @@ export class DataValidation {
         return verify(data, rules)
       },
     }
+    this.cache.set(configName, result)
+    return result
   }
 }
 type TDataValidationConfigBase<S, T> = {
