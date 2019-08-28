@@ -28,10 +28,9 @@ function configToConfigLocal(config: Config<any>): ConfigLocal<any> {
     if (conf instanceof Array) {
       t[k] = {
         type: 'Array.string',
-        optionalList: conf
+        optionalList: conf,
       }
-    }
-    else if (typeof conf === 'object') {
+    } else if (typeof conf === 'object') {
       t[k] = conf
     } else if (typeof conf === 'function') {
       t[k] = {
@@ -41,6 +40,8 @@ function configToConfigLocal(config: Config<any>): ConfigLocal<any> {
       t[k] = {
         type: conf,
       }
+
+    if (t[k].requried !== false) t[k].requried = true
     return t
   }, {})
 }
@@ -89,7 +90,7 @@ class DataValidationMeta {
   maps = new Map<string, TDataValidationMeta>()
 
   constructor() {
-    ['string', 'number', 'bigint', 'boolean', 'symbol', 'undefined', 'object', 'function'].forEach(key => {
+    ;['string', 'number', 'bigint', 'boolean', 'symbol', 'undefined', 'object', 'function'].forEach(key => {
       this.set(key, getMeta(key))
     })
   }
@@ -137,7 +138,6 @@ class DataValidationCache {
     }
     this.maps.set(key, data)
   }
-
 }
 
 export type TVerify = {
@@ -148,7 +148,7 @@ export type TVerify = {
 }
 
 type TUse = {
-  verify(data: any, {}?: {}): TVerify;
+  verify(data: any, {  }?: {}): TVerify
 }
 
 export class DataValidation {
@@ -172,6 +172,7 @@ export class DataValidation {
   }
 
   baseVerify(data: any, rules: ConfigLocal<any>, config: TDataValidationConfigLocal<any, any>): TVerify {
+    const { extraField, strict } = config
     const sourceMap = Object.keys(rules).reduce((t, k) => {
       t[k] = true
       return t
@@ -181,13 +182,14 @@ export class DataValidation {
       const rule = rules[ok]
       const value = data[ok]
       if (!rule) {
-        if (config.extraField === 'allow') continue
+        if (extraField === 'allow') continue
         return {
           result: false,
           key: ok,
         }
       }
       delete sourceMap[ok]
+      if (!rule.requried && !strict) continue
       if (rule.callback && !rule.callback(value))
         return {
           result: false,
@@ -209,27 +211,28 @@ export class DataValidation {
             }
           }
         }
-      }
-      else if (rule.type && this.meta.has(rule.type)) {
-        if(!this.meta.use(rule.type, value))
-        return {
-          result: false,
-          rule,
-          key: ok,
-          value,
-        }
+      } else if (rule.type && this.meta.has(rule.type)) {
+        if (!this.meta.use(rule.type, value))
+          return {
+            result: false,
+            rule,
+            key: ok,
+            value,
+          }
       } else if (rule.type) {
+        if (rule.type === 'Gradient') debugger
         const dataValidation = this.use(rule.type)
         const result = dataValidation.verify(value)
-        if (!result.result) return {
-          result: false,
-          rule: {
-            ...rule,
-            rule: result.rule
-          },
-          key: `${ok}.${result.key}`,
-          value: result.value,
-        }
+        if (!result.result)
+          return {
+            result: false,
+            rule: {
+              ...rule,
+              rule: result.rule,
+            },
+            key: `${ok}.${result.key}`,
+            value: result.value,
+          }
       }
     }
     const sourceKeys = Object.keys(sourceMap)
@@ -274,6 +277,11 @@ export class DataValidation {
         let rules = cloneDeep(SOURCE)
         if (runtime && runtime.rules) {
           rules = runtime.rules(data, rules)
+          Object.keys(rules).forEach(key => {
+            if (rules[key].requried !== false) {
+              rules[key].requried = true
+            }
+          })
         }
         return verify(data, rules, config)
       },
@@ -288,6 +296,12 @@ type TDataValidationConfigBase<S, T> = {
    * 多余字段处理
    */
   extraField?: 'allow' | false
+  /**
+   * 是否为严格模式
+   * - 严格模式校验规则 即使 field不是必须的 也校验 正确性
+   * - 默认 否
+   */
+  strict?: boolean
   runtime?: {
     rules: (data: any, rules: ConfigLocal<S>) => ConfigLocal<S>
   }
@@ -308,10 +322,26 @@ type configCallBack = (value?: any) => boolean
 type configStringArray = string[]
 
 type TConfig = {
-  type?: configAspType
-  callback?: configCallBack
-  default?: any
+  /**
+   * requried
+   * - 优先级 1
+   * - 默认为 true
+   * - runtime 中 不指定 required 也会默认为 true
+   */
   requried?: boolean
+
+  /**
+   * callback
+   * - 优先级 2
+   */
+  callback?: configCallBack
+
+  /**
+   * type
+   * - 优先级 3
+   */
+  type?: configAspType
+  default?: any
   optionalList?: any[]
   rule?: TConfig
 }
@@ -319,7 +349,7 @@ type TConfig = {
 type TConfigKey = string
 
 type Config<T> = {
-  [P in keyof T]-?:  configAspType | configStringArray | configCallBack | TConfig
+  [P in keyof T]-?: configAspType | configStringArray | configCallBack | TConfig
 }
 
 type ConfigLocal<T> = {
