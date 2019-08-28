@@ -6,6 +6,11 @@ type DataValidationConstructor = {
 
 function cloneDeep<T>(data: T): T {
   if (typeof data !== 'object') return data
+  if (data instanceof Array) {
+    return data.map(d => {
+      return cloneDeep(d)
+    }) as any
+  }
   return Object.keys(data).reduce((t, o) => {
     t[o] = cloneDeep(data[o])
     return t
@@ -20,7 +25,13 @@ function configToConfigLocal(config: Config<any>): ConfigLocal<any> {
 
   return Object.keys(config).reduce((t, k) => {
     const conf = config[k]
-    if (typeof conf === 'object') {
+    if (conf instanceof Array) {
+      t[k] = {
+        type: 'Array.string',
+        optionalList: conf
+      }
+    }
+    else if (typeof conf === 'object') {
       t[k] = conf
     } else if (typeof conf === 'function') {
       t[k] = {
@@ -184,6 +195,21 @@ export class DataValidation {
           key: ok,
           value,
         }
+      else if (rule.type && /^Array\./.test(rule.type)) {
+        if (rule.optionalList) {
+          const result = rule.optionalList.find(v => {
+            return v === value
+          })
+          if (!result) {
+            return {
+              result: false,
+              rule,
+              key: ok,
+              value,
+            }
+          }
+        }
+      }
       else if (rule.type && this.meta.has(rule.type)) {
         if(!this.meta.use(rule.type, value))
         return {
@@ -286,6 +312,7 @@ type TConfig = {
   callback?: configCallBack
   default?: any
   requried?: boolean
+  optionalList?: any[]
   rule?: TConfig
 }
 
