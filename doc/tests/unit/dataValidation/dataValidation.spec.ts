@@ -20,7 +20,7 @@ describe('DataValidation verify', () => {
     const obj: FTextColor = {
       color_type: 'solid',
     }
-    dataValidation.config.set(testConfig)
+    dataValidation.register('TextColor', testConfig)
     const { verify } = dataValidation.use('TextColor')
     const { result } = verify(obj)
     expect(result).toEqual(true)
@@ -42,7 +42,7 @@ describe('DataValidation verify', () => {
     const obj: FTextColor = {
       color_type: 'solid',
     }
-    dataValidation.config.set(testConfig)
+    dataValidation.register('TextColor', testConfig)
     const { verify } = dataValidation.use('TextColor')
     const { result, key } = verify(obj)
     expect(result).toEqual(false)
@@ -65,7 +65,7 @@ describe('DataValidation verify', () => {
     const obj: FTextColor = {
       color_type: 'solid',
     }
-    dataValidation.config.set(testConfig)
+    dataValidation.register('TextColor', testConfig)
     const { verify } = dataValidation.use('TextColor')
     const { result } = verify(obj)
     expect(result).toEqual(true)
@@ -85,7 +85,7 @@ describe('DataValidation verify', () => {
       },
     }
     const obj = {}
-    dataValidation.config.set(testConfig)
+    dataValidation.register('TextColor', testConfig)
     const { verify } = dataValidation.use('TextColor')
     const { result } = verify(obj)
     expect(result).toEqual(false)
@@ -104,7 +104,7 @@ describe('DataValidation verify', () => {
     const obj: FTextColor = {
       color_type: 'solid',
     }
-    dataValidation.config.set(testConfig)
+    dataValidation.register('TextColor', testConfig)
     const { verify } = dataValidation.use('TextColor')
     const { result, key } = verify(obj)
     expect(result).toEqual(false)
@@ -140,7 +140,7 @@ describe('DataValidation verify - runtime', () => {
       color_type: 'solid',
       color: 'string',
     }
-    dataValidation.config.set(testConfig)
+    dataValidation.register('TextColor', testConfig)
     const { verify } = dataValidation.use('TextColor')
     const { result } = verify(obj)
     expect(result).toEqual(true)
@@ -169,7 +169,7 @@ describe('DataValidation verify - runtime', () => {
     const obj: FTextColor = {
       color_type: 'gradient',
     }
-    dataValidation.config.set(testConfig)
+    dataValidation.register('TextColor', testConfig)
     const { verify } = dataValidation.use('TextColor')
     const { result, key } = verify(obj)
     expect(result).toEqual(false)

@@ -137,6 +137,11 @@ export class DataValidation {
     }
   }
 
+  register(key: string, config: TDataValidationConfig<any, any>) {
+    config.name = key
+    this.config.set(config)
+  }
+
   use(configName: string) {
     const { rules: SOURCE, runtime } = this.config.get(configName)
     return {
@@ -155,7 +160,7 @@ export class DataValidation {
   }
 }
 type TDataValidationConfigBase<S, T> = {
-  name: string
+  name?: string
   runtime?: {
     rules: (data: any, rules: ConfigLocal<S>) => ConfigLocal<S>
   }
