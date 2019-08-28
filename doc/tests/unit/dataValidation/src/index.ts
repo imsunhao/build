@@ -160,7 +160,7 @@ export class DataValidation {
     }
   }
 
-  baseVerify(data: any, rules: ConfigLocal<any>): TVerify {
+  baseVerify(data: any, rules: ConfigLocal<any>, config: TDataValidationConfigLocal<any, any>): TVerify {
     const sourceMap = Object.keys(rules).reduce((t, k) => {
       t[k] = true
       return t
@@ -170,7 +170,7 @@ export class DataValidation {
       const rule = rules[ok]
       const value = data[ok]
       if (!rule) {
-        console.log('[DataValidation] verify: 多余字段', ok)
+        if (config.extraField === 'allow') continue
         return {
           result: false,
           key: ok,
@@ -235,7 +235,8 @@ export class DataValidation {
   use(configName: string): TUse {
     const catchResult = this.cache.get(configName)
     if (catchResult) return catchResult
-    const { rules: SOURCE, runtime } = this.config.get(configName)
+    const config = this.config.get(configName)
+    const { rules: SOURCE, runtime } = config
     const { baseVerify } = this
     const verify = baseVerify.bind(this)
     const result = {
@@ -248,7 +249,7 @@ export class DataValidation {
         if (runtime && runtime.rules) {
           rules = runtime.rules(data, rules)
         }
-        return verify(data, rules)
+        return verify(data, rules, config)
       },
     }
     this.cache.set(configName, result)
@@ -257,6 +258,10 @@ export class DataValidation {
 }
 type TDataValidationConfigBase<S, T> = {
   name?: string
+  /**
+   * 多余字段处理
+   */
+  extraField?: 'allow' | false
   runtime?: {
     rules: (data: any, rules: ConfigLocal<S>) => ConfigLocal<S>
   }
@@ -274,6 +279,7 @@ type TDataValidationConfigLocal<S, T> = TDataValidationConfigBase<S, T> & {
 
 type configAspType = TConfigKey | 'string' | 'number' | 'undefined' | 'function' | 'symbol'
 type configCallBack = (value?: any) => boolean
+type configStringArray = string[]
 
 type TConfig = {
   type?: configAspType
@@ -286,7 +292,7 @@ type TConfig = {
 type TConfigKey = string
 
 type Config<T> = {
-  [P in keyof T]-?:  configAspType | configCallBack | TConfig
+  [P in keyof T]-?:  configAspType | configStringArray | configCallBack | TConfig
 }
 
 type ConfigLocal<T> = {

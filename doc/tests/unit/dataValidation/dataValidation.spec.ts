@@ -111,6 +111,50 @@ describe('DataValidation verify', () => {
     expect(key).toEqual('gradient')
   })
 
+  it('extra field', () => {
+    const dataValidation = getDataValidation()
+    const testConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      name: 'TextColor',
+      rules: {
+        color_type: 'string',
+        color: 'string',
+        gradient: () => false,
+      },
+    }
+    const obj = {
+      color_type: 'solid',
+      color: 'solid',
+      color2: 'solid',
+    }
+    dataValidation.register('TextColor', testConfig)
+    const { verify } = dataValidation.use('TextColor')
+    const { result, key } = verify(obj)
+    expect(result).toEqual(false)
+    expect(key).toEqual('color2')
+  })
+
+  it('allow extra field', () => {
+    const dataValidation = getDataValidation()
+    const testConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      name: 'TextColor',
+      extraField: 'allow',
+      rules: {
+        color_type: 'string',
+        color: 'string',
+        gradient: () => true,
+      },
+    }
+    const obj = {
+      color_type: 'solid',
+      color: 'solid',
+      color2: 'solid',
+    }
+    dataValidation.register('TextColor', testConfig)
+    const { verify } = dataValidation.use('TextColor')
+    const { result } = verify(obj)
+    expect(result).toEqual(true)
+  })
+
 })
 
 describe('DataValidation verify - runtime', () => {
