@@ -27,7 +27,7 @@ function configToConfigLocal(config: Config<any>): ConfigLocal<any> {
     const conf = config[k]
     if (conf instanceof Array) {
       t[k] = {
-        type: 'Array.string',
+        type: 'Optional',
         optionalList: conf,
       }
     } else if (typeof conf === 'object') {
@@ -79,7 +79,7 @@ function getMeta(s: string): TDataValidationMeta {
     verify(value: any) {
       return typeof value === s
     },
-    fix: false
+    fix: false,
   }
 }
 
@@ -94,9 +94,8 @@ class DataValidationMeta {
       verify(value: any) {
         return value instanceof Array
       },
-      fix: false
+      fix: false,
     })
-
   }
 
   has(type) {
@@ -107,10 +106,10 @@ class DataValidationMeta {
     const meta = this.get(type)
     if (meta) {
       if (meta.prerequisites) {
-        if (typeof meta.prerequisites === 'string') meta.prerequisites = [ meta.prerequisites ]
+        if (typeof meta.prerequisites === 'string') meta.prerequisites = [meta.prerequisites]
         const length = meta.prerequisites.length
         for (let i = 0; i < length; i++) {
-          const t = meta.prerequisites[i];
+          const t = meta.prerequisites[i]
           const result = this.use(t, data, key, opts)
           if (!result) return false
         }
@@ -181,7 +180,7 @@ type TUse = {
   fix?: (data: any, opts?: {}) => TVerify
 }
 
-type baseVerifyOptions = TUse['verify'] extends (data: any, opts: infer T)=> any? T: unknown
+type baseVerifyOptions = TUse['verify'] extends (data: any, opts: infer T) => any ? T : unknown
 
 export class DataValidation {
   config = new DataValidationConfig()
@@ -203,7 +202,12 @@ export class DataValidation {
     }
   }
 
-  baseVerify(data: any, rules: ConfigLocal<any>, config: TDataValidationConfigLocal<any, any>, opts: baseVerifyOptions = {} ): TVerify {
+  baseVerify(
+    data: any,
+    rules: ConfigLocal<any>,
+    config: TDataValidationConfigLocal<any, any>,
+    opts: baseVerifyOptions = {},
+  ): TVerify {
     const { extraField, strict, fixes } = config
     const sourceMap = Object.keys(rules).reduce((t, k) => {
       t[k] = true
@@ -249,8 +253,7 @@ export class DataValidation {
           key: ok,
           value,
         }
-      }
-      else if (rule.type && /^Array\./.test(rule.type)) {
+      } else if (rule.type && rule.type === 'Optional') {
         if (rule.optionalList) {
           const result = rule.optionalList.find(v => {
             return v === value
@@ -262,6 +265,54 @@ export class DataValidation {
               rule,
               key: ok,
               value,
+            }
+          }
+        }
+      } else if (rule.type && rule.type === 'Array') {
+        if (!this.meta.use('Array', data, ok, opts)) {
+          /**
+           * TODO: array 暂时不支持 fix
+           */
+          return {
+            result: false,
+            rule,
+            key: ok,
+            value,
+          }
+        }
+        if (rule.itemType) {
+          if (this.meta.has(rule.itemType)) {
+            for (let i = 0; i < value.length; i++) {
+              if (!this.meta.use(rule.itemType, value[i], ok, opts)) {
+                /**
+                 * TODO: array 暂时不支持 fix
+                 */
+                return {
+                  result: false,
+                  rule,
+                  key: ok,
+                  value,
+                }
+              }
+            }
+          } else {
+            const dataValidation = this.use(rule.itemType)
+            for (let i = 0; i < value.length; i++) {
+              const deepResult = dataValidation.verify(value[i], opts)
+              if (!deepResult.result) {
+                /**
+                 * TODO: 现在还没想好怎么做deepValidation的自动修正
+                 */
+                return {
+                  result: false,
+                  rule: {
+                    ...rule,
+                    rule: deepResult.rule,
+                  },
+                  key: `${ok}[${i}].${deepResult.key}`,
+                  value: deepResult.value,
+                }
+              }
             }
           }
         }
@@ -278,7 +329,7 @@ export class DataValidation {
       } else if (rule.type) {
         const dataValidation = this.use(rule.type)
         const deepResult = dataValidation.verify(value, opts)
-        if (!deepResult.result)
+        if (!deepResult.result) {
           /**
            * TODO: 现在还没想好怎么做deepValidation的自动修正
            */
@@ -291,6 +342,7 @@ export class DataValidation {
             key: `${ok}.${deepResult.key}`,
             value: deepResult.value,
           }
+        }
       }
     }
     const sourceKeys = Object.keys(sourceMap)
@@ -320,6 +372,8 @@ export class DataValidation {
     const catchResult = this.cache.get(configName)
     if (catchResult) return catchResult
     const config = this.config.get(configName)
+    if (!config) throw new Error('[DataValidation] use 未知的 configName ' + configName)
+
     const { rules: SOURCE, runtime } = config
     const { baseVerify } = this
     const verify = baseVerify.bind(this)
@@ -342,7 +396,7 @@ export class DataValidation {
       },
       fix(data) {
         return result.verify(data, { fix: true })
-      }
+      },
     }
     this.cache.set(configName, result)
     return result
@@ -380,11 +434,10 @@ type TDataValidationMeta = Required<TDataValidationFix> & {
   verify: (data: any) => boolean
 }
 
-export type TDataValidationConfig<S, T = any> = TDataValidationConfigBase<S, T> &
-  TDataValidationFix & {
-    rules: Config<S>
-    target?: Config<T>
-  }
+export type TDataValidationConfig<S, T = any> = TDataValidationConfigBase<S, T> & {
+  rules: Config<S>
+  target?: Config<T>
+}
 
 type TDataValidationConfigLocal<S, T> = TDataValidationConfigBase<S, T> & {
   rules: ConfigLocal<S>
@@ -416,7 +469,20 @@ type TConfig = {
    */
   type?: configAspType
   default?: any
+
+  /**
+   * Optional 专用
+   * 值 必须 属于 optionalList
+   */
   optionalList?: any[]
+
+  /**
+   * Array专用
+   * - array item 的 类型
+   * - 不支持一个数组存在多类型
+   */
+  itemType?: string
+
   rule?: TConfig
 }
 

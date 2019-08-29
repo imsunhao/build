@@ -1,6 +1,6 @@
 export * from './base'
 
-type Gradient = GradientBase & {
+export type Gradient = GradientBase & {
   /**
    * 该位置颜色
    * * 是否必填: true
