@@ -2,6 +2,8 @@ import { TextColor as BTextColor } from './src/back'
 import { TextColor as FTextColor } from './src/front'
 import { TDataValidationConfig, DataValidation } from './src/index'
 
+const defaultColor = 'rgba(0, 0, 0, 0)'
+const defaultBackgroundColor = 'rgba(0, 0, 0, 1)'
 // --- start 验证数据完整性 ---
 describe('DataValidation verify', () => {
   it('success', () => {
@@ -298,6 +300,7 @@ describe('DataValidation verify - Meta', () => {
       verify(data) {
         return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
       },
+      fix: false
     })
     const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
       rules: {
@@ -328,6 +331,7 @@ describe('DataValidation verify - Meta', () => {
       verify(data) {
         return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
       },
+      fix: false
     })
     const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
       rules: {
@@ -377,6 +381,7 @@ describe('DataValidation verify - Meta', () => {
       verify(data) {
         return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
       },
+      fix: false
     })
     const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
       rules: {
@@ -397,6 +402,52 @@ describe('DataValidation verify - Meta', () => {
     expect(result).toEqual(false)
     expect(key).toEqual('color')
   })
+  it('meta prerequisite', () => {
+    const dataValidation = getDataValidation()
+    dataValidation.meta.set('Color', {
+      prerequisites: 'string',
+      verify(data) {
+        return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
+      },
+      fix: false
+    })
+    dataValidation.meta.set('BackgroundColor', {
+      prerequisites: ['Color'],
+      verify(data) {
+        return parseStringToRgba(data).a === 1
+      },
+      fix: false
+    })
+    const backgroundColorConfig: TDataValidationConfig<any, any> = {
+      rules: {
+        bcolor: 'BackgroundColor',
+        color: 'Color',
+      },
+    }
+    dataValidation.register('Background', backgroundColorConfig)
+
+    const { verify } = dataValidation.use('Background')
+
+    const test = verify({
+      color: defaultColor,
+      bcolor: defaultBackgroundColor,
+    })
+    expect(test.result).toEqual(true)
+
+    const test2 = verify({
+      color: defaultColor,
+      bcolor: defaultColor,
+    })
+    expect(test2.result).toEqual(false)
+    expect(test2.key).toEqual('bcolor')
+
+    const test3 = verify({
+      bcolor: defaultBackgroundColor,
+      color: 1,
+    })
+    expect(test3.result).toEqual(false)
+    expect(test3.key).toEqual('color')
+  })
 })
 
 describe('DataValidation verify - rule-nesting', () => {
@@ -406,6 +457,7 @@ describe('DataValidation verify - rule-nesting', () => {
       verify(data) {
         return /linear|radial/.test(data)
       },
+      fix: false
     })
     const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
       rules: {
@@ -448,6 +500,7 @@ describe('DataValidation verify - rule-nesting', () => {
       verify(data) {
         return /linear|radial/.test(data)
       },
+      fix: false
     })
     const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
       rules: {
@@ -574,6 +627,7 @@ describe('DataValidation use-cache', () => {
       verify(data) {
         return /linear|radial/.test(data)
       },
+      fix: false
     })
     const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
       rules: {
@@ -603,6 +657,7 @@ describe('DataValidation use-cache', () => {
       verify(data) {
         return /linear|radial/.test(data)
       },
+      fix: false
     })
     const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
       rules: {
@@ -634,6 +689,7 @@ describe('DataValidation use-cache', () => {
       verify(data) {
         return /linear|radial/.test(data)
       },
+      fix: false
     })
     const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
       rules: {
@@ -912,6 +968,93 @@ describe('DataValidation fix', () => {
     expect(test2.result).toEqual(true)
     expect(data2.color).toEqual('rgba(0, 0, 0, 1)')
 
+  })
+  it('fix meta prerequisite', () => {
+    const dataValidation = getDataValidation()
+    dataValidation.meta.set('Color', {
+      prerequisites: 'string',
+      verify(data) {
+        return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
+      },
+      fix() {
+        return {
+          result: true,
+          value: defaultColor
+        }
+      },
+    })
+    dataValidation.meta.set('BackgroundColor', {
+      prerequisites: ['Color'],
+      verify(data) {
+        return parseStringToRgba(data).a === 1
+      },
+      fix(data) {
+        const rgba = parseStringToRgba(data)
+        rgba.a = 1
+        return {
+          result: true,
+          value: rgbaToString(rgba)
+        }
+      },
+    })
+    const backgroundColorConfig: TDataValidationConfig<any, any> = {
+      strict: false,
+      rules: {
+        color: 'BackgroundColor'
+      },
+    }
+    dataValidation.register('Background', backgroundColorConfig)
+
+    const { fix: backgroundFix } = dataValidation.use('Background')
+    const data = {
+      color: 'x'
+    }
+
+    const test = backgroundFix(data)
+    expect(test.result).toEqual(true)
+    expect(data.color).toEqual('rgba(0, 0, 0, 1)')
+
+    const test2 = backgroundFix({
+      color: 1
+    })
+    expect(test2.result).toEqual(false)
+    expect(test2.key).toEqual('color')
+
+    dataValidation.meta.set('Color-NoFix', {
+      prerequisites: ['string'],
+      verify(data) {
+        return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
+      },
+      fix: false
+    })
+    dataValidation.meta.set('BackgroundColor-Nofix', {
+      prerequisites: ['Color-NoFix'],
+      verify(data) {
+        return parseStringToRgba(data).a === 1
+      },
+      fix(data) {
+        const rgba = parseStringToRgba(data)
+        rgba.a = 1
+        return {
+          result: true,
+          value: rgbaToString(rgba)
+        }
+      },
+    })
+    const backgroundColorConfig2: TDataValidationConfig<any, any> = {
+      strict: false,
+      rules: {
+        color: 'BackgroundColor-Nofix'
+      },
+    }
+    dataValidation.register('Background2', backgroundColorConfig2)
+    const { fix: backgroundFix2 } = dataValidation.use('Background2')
+
+    const test3 = backgroundFix2({
+      color: 'x'
+    })
+    expect(test3.result).toEqual(false)
+    expect(test3.key).toEqual('color')
   })
 })
 

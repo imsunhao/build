@@ -74,11 +74,12 @@ class DataValidationConfig {
   }
 }
 
-function getMeta(s: string) {
+function getMeta(s: string): TDataValidationMeta {
   return {
     verify(value: any) {
       return typeof value === s
     },
+    fix: false
   }
 }
 
@@ -89,17 +90,34 @@ class DataValidationMeta {
     ;['string', 'number', 'bigint', 'boolean', 'symbol', 'undefined', 'object', 'function'].forEach(type => {
       this.set(type, getMeta(type))
     })
+    this.set('Array', {
+      verify(value: any) {
+        return value instanceof Array
+      },
+      fix: false
+    })
+
   }
 
   has(type) {
     return this.maps.has(type)
   }
 
-  use(type, data, key, { fix }: baseVerifyOptions) {
+  use(type: string, data: any, key: string, opts: baseVerifyOptions) {
     const meta = this.get(type)
-    const value = data[key]
     if (meta) {
+      if (meta.prerequisites) {
+        if (typeof meta.prerequisites === 'string') meta.prerequisites = [ meta.prerequisites ]
+        const length = meta.prerequisites.length
+        for (let i = 0; i < length; i++) {
+          const t = meta.prerequisites[i];
+          const result = this.use(t, data, key, opts)
+          if (!result) return false
+        }
+      }
+      const value = data[key]
       const result = meta.verify(value)
+      const { fix } = opts
       if (!result && fix && meta.fix) {
         const fixResult = meta.fix(value)
         if (fixResult.result) {
@@ -354,10 +372,11 @@ type TDataValidationConfigBase<S, T> = {
 }
 
 type TDataValidationFix = {
-  fix?: (data: any) => TVerify
+  fix?: ((data: any) => TVerify) | false
 }
 
-type TDataValidationMeta = TDataValidationFix & {
+type TDataValidationMeta = Required<TDataValidationFix> & {
+  prerequisites?: string | string[]
   verify: (data: any) => boolean
 }
 
