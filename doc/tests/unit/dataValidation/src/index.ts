@@ -220,7 +220,6 @@ export class DataValidation {
             value,
           }
       } else if (rule.type) {
-        if (rule.type === 'Gradient') debugger
         const dataValidation = this.use(rule.type)
         const result = dataValidation.verify(value)
         if (!result.result)

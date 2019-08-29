@@ -6,6 +6,7 @@ function getDataValidation() {
   return new DataValidation({ isSecurity: true })
 }
 
+// --- start 验证数据完整性 ---
 describe('DataValidation verify', () => {
   it('success', () => {
     const dataValidation = getDataValidation()
@@ -402,7 +403,7 @@ describe('DataValidation verify - Meta', () => {
   })
 })
 
-describe('DataValidation verify - rule nesting', () => {
+describe('DataValidation verify - rule-nesting', () => {
   it('success', () => {
     const dataValidation = getDataValidation()
     dataValidation.meta.set('gradient_type', {
@@ -570,7 +571,7 @@ describe('DataValidation verify - rule nesting', () => {
   })
 })
 
-describe('DataValidation use cache', () => {
+describe('DataValidation use-cache', () => {
   it('use simple', () => {
     const dataValidation = getDataValidation()
     dataValidation.meta.set('gradient_type', {
@@ -807,3 +808,11 @@ describe('DataValidation strict', () => {
     expect(test2.key).toEqual('gradient.gradient_angle')
   })
 })
+// --- end 验证数据完整性 ---
+
+// --- start 数据自动修正 ---
+
+// --- end 数据自动修正 ---
+
+// --- start 数据更新 ---
+// --- end 数据更新 ---
