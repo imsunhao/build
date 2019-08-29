@@ -2,10 +2,6 @@ import { TextColor as BTextColor } from './src/back'
 import { TextColor as FTextColor } from './src/front'
 import { TDataValidationConfig, DataValidation } from './src/index'
 
-function getDataValidation() {
-  return new DataValidation({ isSecurity: true })
-}
-
 // --- start 验证数据完整性 ---
 describe('DataValidation verify', () => {
   it('success', () => {
@@ -31,8 +27,8 @@ describe('DataValidation verify', () => {
     }
     dataValidation.register('TextColor', testConfig)
     const { verify } = dataValidation.use('TextColor')
-    const { result } = verify(obj)
-    expect(result).toEqual(true)
+    const test = verify(obj)
+    expect(test.result).toEqual(true)
   })
 
   it('number', () => {
@@ -811,8 +807,140 @@ describe('DataValidation strict', () => {
 // --- end 验证数据完整性 ---
 
 // --- start 数据自动修正 ---
+describe('DataValidation fix', () => {
+  it('fix base', () => {
+    const defaultColor = 'rgba(0, 0, 0, 0)'
+    const dataValidation = getDataValidation()
+    dataValidation.meta.set('Color', {
+      verify(data) {
+        return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
+      },
+      fix() {
+        return {
+          result: true,
+          value: defaultColor
+        }
+      },
+    })
+    const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
+      strict: false,
+      rules: {
+        gradient_angle: 'number',
+        gradient_type: ['linear', 'radial'],
+        stops: stops => {
+          return stops instanceof Array && stops.length >= 2
+        },
+      },
+      runtime: {
+        rules(obj: FTextColor['gradient'], rules) {
+          if (!obj.gradient_type) return rules
+          if (obj.gradient_type === 'radial') {
+            rules.gradient_angle = {
+              callback(value) {
+                return value === 0
+              },
+            }
+          }
+          return rules
+        },
+      },
+    }
+    const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      strict: false,
+      rules: {
+        color_type: ['solid', 'gradient'],
+        color: {
+          type: 'Color',
+          requried: false,
+        },
+        gradient: {
+          type: 'Gradient',
+          requried: false,
+        },
+      },
+      runtime: {
+        rules(obj: FTextColor, rules) {
+          if (!obj.color_type) return rules
+          if (obj.color_type === 'solid') {
+            rules.color.requried = true
+          } else if (obj.color_type === 'gradient') {
+            rules.gradient.requried = true
+          }
+          return rules
+        },
+      },
+    }
+    dataValidation.register('TextColor', textColorConfig)
+    dataValidation.register('Gradient', gradientConfig)
+
+    const { fix: textFix } = dataValidation.use('TextColor')
+
+    const data = {
+      color_type: 'solid',
+      color: '111'
+    }
+    const test = textFix(data)
+    expect(test.result).toEqual(true)
+    expect(data.color).toEqual(defaultColor)
+
+    dataValidation.meta.set('Color.background', {
+      verify(data) {
+        return parseStringToRgba(data).a === 1
+      },
+      fix(data) {
+        const rgba = parseStringToRgba(data)
+        rgba.a = 1
+        return {
+          result: true,
+          value: rgbaToString(rgba)
+        }
+      },
+    })
+    const backgroundColorConfig: TDataValidationConfig<any, any> = {
+      strict: false,
+      rules: {
+        color: 'Color.background'
+      },
+    }
+    dataValidation.register('Background', backgroundColorConfig)
+
+    const { fix: backgroundFix } = dataValidation.use('Background')
+    const data2 = {
+      color: defaultColor
+    }
+    const test2 = backgroundFix(data2)
+    expect(test2.result).toEqual(true)
+    expect(data2.color).toEqual('rgba(0, 0, 0, 1)')
+
+  })
+})
 
 // --- end 数据自动修正 ---
 
 // --- start 数据更新 ---
 // --- end 数据更新 ---
+
+function getDataValidation() {
+  return new DataValidation({ isSecurity: true })
+}
+
+function makeRgbaByArray(arr) {
+  return {
+      r: arr[0],
+      g: arr[1],
+      b: arr[2],
+      a: arr.length > 3 ? arr[3] : 1,
+  };
+}
+function parseStringToRgba(input) {
+  input = input.replace('\u3002', '\u002e');
+  const matches = /rgba\((.*)\)/i.exec(input);
+  if (matches) {
+      const colorSegs = matches[1].split(',').map(s => parseFloat(s));
+      const rgba = makeRgbaByArray(colorSegs);
+      return rgba;
+  }
+}
+function rgbaToString(c) {
+  return `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
+}

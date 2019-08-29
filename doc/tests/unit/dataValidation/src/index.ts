@@ -74,10 +74,6 @@ class DataValidationConfig {
   }
 }
 
-type TDataValidationMeta = {
-  verify: (data: any) => boolean
-}
-
 function getMeta(s: string) {
   return {
     verify(value: any) {
@@ -90,37 +86,48 @@ class DataValidationMeta {
   maps = new Map<string, TDataValidationMeta>()
 
   constructor() {
-    ;['string', 'number', 'bigint', 'boolean', 'symbol', 'undefined', 'object', 'function'].forEach(key => {
-      this.set(key, getMeta(key))
+    ;['string', 'number', 'bigint', 'boolean', 'symbol', 'undefined', 'object', 'function'].forEach(type => {
+      this.set(type, getMeta(type))
     })
   }
 
-  has(key) {
-    return this.maps.has(key)
+  has(type) {
+    return this.maps.has(type)
   }
 
-  use(key, value) {
-    const meta = this.get(key)
+  use(type, data, key, { fix }: baseVerifyOptions) {
+    const meta = this.get(type)
+    const value = data[key]
     if (meta) {
-      return meta.verify(value)
+      const result = meta.verify(value)
+      if (!result && fix && meta.fix) {
+        const fixResult = meta.fix(value)
+        if (fixResult.result) {
+          data[key] = fixResult.value
+          return true
+        } else {
+          return false
+        }
+      }
+      return result
     }
   }
 
-  get(key) {
-    if (this.has(key)) {
-      return this.maps.get(key)
+  get(type) {
+    if (this.has(type)) {
+      return this.maps.get(type)
     } else {
-      console.warn('[DataValidationMeta] get invalid key', key)
+      console.warn('[DataValidationMeta] get invalid type', type)
     }
   }
 
-  set(key: string, meta: TDataValidationMeta) {
-    if (this.has(key)) {
-      console.warn('[DataValidationMeta] set repeat key', key)
+  set(type: string, meta: TDataValidationMeta) {
+    if (this.has(type)) {
+      console.warn('[DataValidationMeta] set repeat type', type)
       return
     }
 
-    this.maps.set(key, meta)
+    this.maps.set(type, meta)
   }
 }
 
@@ -148,8 +155,15 @@ export type TVerify = {
 }
 
 type TUse = {
-  verify(data: any, {  }?: {}): TVerify
+  verify(data: any, opts?: { fix?: boolean }): TVerify
+  /**
+   * 自动修正
+   * - 因为不会改变原始对象 这里不返回原始对象
+   */
+  fix?: (data: any, opts?: {}) => TVerify
 }
+
+type baseVerifyOptions = TUse['verify'] extends (data: any, opts: infer T)=> any? T: unknown
 
 export class DataValidation {
   config = new DataValidationConfig()
@@ -171,17 +185,33 @@ export class DataValidation {
     }
   }
 
-  baseVerify(data: any, rules: ConfigLocal<any>, config: TDataValidationConfigLocal<any, any>): TVerify {
-    const { extraField, strict } = config
+  baseVerify(data: any, rules: ConfigLocal<any>, config: TDataValidationConfigLocal<any, any>, opts: baseVerifyOptions = {} ): TVerify {
+    const { extraField, strict, fixes } = config
     const sourceMap = Object.keys(rules).reduce((t, k) => {
       t[k] = true
       return t
     }, {})
     const objKeys = Object.keys(data)
+    function autoFix(key, data) {
+      if (!opts.fix || !fixes) return false
+      const fix = fixes[key]
+      if (!fix) return false
+      const fixResult = fix(data[key])
+      if (fixResult.result) {
+        data[key] = fixResult.result
+        return true
+      }
+      return false
+    }
     for (const ok of objKeys) {
       const rule = rules[ok]
       const value = data[ok]
       if (!rule) {
+        /**
+         * 多余字段无法修复
+         * - 只能选择保留
+         * - 或者选择删除
+         */
         if (extraField === 'allow') continue
         return {
           result: false,
@@ -189,20 +219,26 @@ export class DataValidation {
         }
       }
       delete sourceMap[ok]
+      /**
+       * 不是严格模式 不会被修复
+       */
       if (!rule.requried && !strict) continue
-      if (rule.callback && !rule.callback(value))
+      if (rule.callback && !rule.callback(value)) {
+        if (autoFix(ok, data)) continue
         return {
           result: false,
           rule,
           key: ok,
           value,
         }
+      }
       else if (rule.type && /^Array\./.test(rule.type)) {
         if (rule.optionalList) {
           const result = rule.optionalList.find(v => {
             return v === value
           })
           if (!result) {
+            if (autoFix(ok, data)) continue
             return {
               result: false,
               rule,
@@ -212,43 +248,45 @@ export class DataValidation {
           }
         }
       } else if (rule.type && this.meta.has(rule.type)) {
-        if (!this.meta.use(rule.type, value))
+        if (!this.meta.use(rule.type, data, ok, opts)) {
+          if (autoFix(ok, data)) continue
           return {
             result: false,
             rule,
             key: ok,
             value,
           }
+        }
       } else if (rule.type) {
         const dataValidation = this.use(rule.type)
-        const result = dataValidation.verify(value)
-        if (!result.result)
+        const deepResult = dataValidation.verify(value, opts)
+        if (!deepResult.result)
+          /**
+           * TODO: 现在还没想好怎么做deepValidation的自动修正
+           */
           return {
             result: false,
             rule: {
               ...rule,
-              rule: result.rule,
+              rule: deepResult.rule,
             },
-            key: `${ok}.${result.key}`,
-            value: result.value,
+            key: `${ok}.${deepResult.key}`,
+            value: deepResult.value,
           }
       }
     }
     const sourceKeys = Object.keys(sourceMap)
     for (const sk of sourceKeys) {
       const rule = rules[sk]
-      if (rule.requried)
+      if (!rule.requried && !strict) continue
+      if (rule.requried) {
+        if (autoFix(sk, data)) continue
         return {
           result: false,
           rule,
           key: sk,
         }
-      else if (rule.callback && !rule.callback())
-        return {
-          result: false,
-          rule,
-          key: sk,
-        }
+      }
     }
     return {
       result: true,
@@ -267,8 +305,8 @@ export class DataValidation {
     const { rules: SOURCE, runtime } = config
     const { baseVerify } = this
     const verify = baseVerify.bind(this)
-    const result = {
-      verify(data, {} = {}): TVerify {
+    const result: TUse = {
+      verify(data, opts) {
         if (typeof data !== 'object') {
           console.log('[DataValidation] verify arguments[0] must be a object')
           return
@@ -282,8 +320,11 @@ export class DataValidation {
             }
           })
         }
-        return verify(data, rules, config)
+        return verify(data, rules, config, opts)
       },
+      fix(data) {
+        return result.verify(data, { fix: true })
+      }
     }
     this.cache.set(configName, result)
     return result
@@ -304,12 +345,27 @@ type TDataValidationConfigBase<S, T> = {
   runtime?: {
     rules: (data: any, rules: ConfigLocal<S>) => ConfigLocal<S>
   }
+  /**
+   * 自动修正策略
+   */
+  fixes?: {
+    [k in keyof S]?: TDataValidationFix['fix']
+  }
 }
 
-export type TDataValidationConfig<S, T = any> = TDataValidationConfigBase<S, T> & {
-  rules: Config<S>
-  target?: Config<T>
+type TDataValidationFix = {
+  fix?: (data: any) => TVerify
 }
+
+type TDataValidationMeta = TDataValidationFix & {
+  verify: (data: any) => boolean
+}
+
+export type TDataValidationConfig<S, T = any> = TDataValidationConfigBase<S, T> &
+  TDataValidationFix & {
+    rules: Config<S>
+    target?: Config<T>
+  }
 
 type TDataValidationConfigLocal<S, T> = TDataValidationConfigBase<S, T> & {
   rules: ConfigLocal<S>
