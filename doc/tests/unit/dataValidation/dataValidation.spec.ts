@@ -1113,8 +1113,15 @@ describe('DataValidation fix', () => {
     const test = textFix(data)
     expect(test.result).toEqual(true)
     expect(data.color).toEqual(defaultColor)
-
-    dataValidation.meta.set('Color.background', {
+    dataValidation.meta.set('Color', {
+      prerequisites: 'string',
+      verify(data) {
+        return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
+      },
+      fix: false,
+    })
+    dataValidation.meta.set('BackgroundColor', {
+      prerequisites: ['Color'],
       verify(data) {
         return parseStringToRgba(data).a === 1
       },
@@ -1127,10 +1134,11 @@ describe('DataValidation fix', () => {
         }
       },
     })
+
     const backgroundColorConfig: TDataValidationConfig<any, any> = {
       strict: false,
       rules: {
-        color: 'Color.background',
+        color: 'BackgroundColor',
       },
     }
     dataValidation.register('Background', backgroundColorConfig)
