@@ -1020,6 +1020,7 @@ describe('DataValidation strict', () => {
     expect(test2.key).toEqual('gradient.gradient_angle')
   })
 })
+
 // --- end 验证数据完整性 ---
 
 // --- start 数据自动修正 ---
@@ -1254,6 +1255,106 @@ describe('DataValidation fix', () => {
     expect(test2.result).toEqual(false)
     expect(test2.key).toEqual('color')
     expect(data.color).toEqual(defaultTestColor)
+  })
+  it('fix fail need rollback', () => {
+    const dataValidation = getDataValidation()
+    dataValidation.meta.set('Color', {
+      verify(data) {
+        return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
+      },
+      fix() {
+        return {
+          result: true,
+          value: defaultColor,
+        }
+      },
+    })
+    const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
+      strict: false,
+      rules: {
+        gradient_angle: 'number',
+        gradient_type: ['linear', 'radial'],
+        stops: stops => {
+          return stops instanceof Array && stops.length >= 2
+        },
+      },
+      fixes: {
+        gradient_angle() {
+          return {
+            result: true,
+            value: 0
+          }
+        }
+      },
+      runtime: {
+        rules(obj: FTextColor['gradient'], rules) {
+          if (!obj.gradient_type) return rules
+          if (obj.gradient_type === 'radial') {
+            rules.gradient_angle.callback = (value) => {
+              return value === 0
+            }
+          }
+          return rules
+        },
+      },
+    }
+    const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      strict: false,
+      rules: {
+        color_type: ['solid', 'gradient'],
+        color: {
+          type: 'Color',
+          requried: false,
+        },
+        gradient: {
+          type: 'Gradient',
+          requried: false,
+        },
+      },
+      runtime: {
+        rules(obj: FTextColor, rules) {
+          if (!obj.color_type) return rules
+          if (obj.color_type === 'solid') {
+            rules.color.requried = true
+          } else if (obj.color_type === 'gradient') {
+            rules.gradient.requried = true
+          }
+          return rules
+        },
+      },
+    }
+    dataValidation.register('TextColor', textColorConfig)
+    dataValidation.register('Gradient', gradientConfig)
+
+    const { fix } = dataValidation.use('TextColor')
+
+    const data: FTextColor = {
+      color_type: 'gradient',
+      gradient: {
+        gradient_angle: 10,
+        gradient_type: 'radial',
+        stops: getDefaultStops()
+      }
+    }
+
+    const test = fix(data)
+    expect(test.result).toEqual(true)
+    expect(data.gradient.gradient_angle).toEqual(0)
+
+    const testStops = getDefaultStops()
+    testStops.pop()
+    const data2 = {
+      color_type: 'gradient',
+      gradient: {
+        gradient_angle: 10,
+        gradient_type: 'radial',
+        stops: testStops
+      }
+    }
+    const test2 = fix(data2)
+    expect(test2.result).toEqual(false)
+    expect(test2.key).toEqual('gradient.stops')
+    expect(data2.gradient.gradient_angle).toEqual(10)
   })
 })
 // --- end 数据自动修正 ---
