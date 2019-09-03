@@ -2,6 +2,10 @@ export * from './base'
 
 export type Gradient = GradientBase & {
   /**
+   * 索引
+   */
+  index: number
+  /**
    * 该位置颜色
    * * 是否必填: true
    * * 允许为空: false

@@ -17,6 +17,33 @@ function cloneDeep<T>(data: T): T {
   }, {}) as any
 }
 
+function mergeBase(src, target, { isSimple }: any = {}) {
+  if (typeof target !== 'object' || typeof src !== 'object') return target
+  Object.keys(target).forEach(t => {
+    if (typeof target[t] === 'object' && typeof src[t] === 'object') {
+      if (isSimple) return
+      src[t] = mergeBase(src[t], target[t])
+    } else {
+      src[t] = target[t]
+    }
+  })
+  return src
+}
+
+function merge(...args) {
+  return args.reduce((t, o) => {
+    if (t === o) return t
+    return mergeBase(t, cloneDeep(o))
+  }, args[0])
+}
+
+function mergeSimple(...args) {
+  return args.reduce((t, o) => {
+    if (t === o) return t
+    return mergeBase(t, cloneDeep(o), { isSimple: true })
+  }, args[0])
+}
+
 function configToConfigLocal(config: Config<any>): ConfigLocal<any> {
   if (!config) return
   if (typeof config !== 'object') {
@@ -164,6 +191,125 @@ class DataValidationCache {
   }
 }
 
+class Stack<T> {
+  items: T[] = []
+  get isAmpty() {
+    return this.items.length === 0
+  }
+  push(element: T) {
+    this.items.push(element)
+  }
+  pop() {
+    return this.items.pop()
+  }
+  peek() {
+    return this.items[this.items.length - 1]
+  }
+  clear() {
+    this.items = []
+  }
+  size() {
+    return this.items.length
+  }
+}
+
+class DataValidationTransaction {
+  stack = new Stack<THistory>()
+  isRollbacking = false
+  isBeginning = false
+  data: any
+
+  record(key: string, oldValue: any) {
+    const { isRollbacking, isBeginning } = this
+    if (!isBeginning) {
+      console.warn('[DataValidationHistory] record need start')
+      return
+    }
+    if (isRollbacking) {
+      throw new Error('[DataValidationHistory] record isRollbacking')
+    }
+    this.stack.push({
+      key,
+      cloneDeepValue: cloneDeep(oldValue),
+      oldValue: oldValue,
+    })
+  }
+
+  rollback() {
+    const { data, isBeginning } = this
+    if (!isBeginning) {
+      console.warn('[DataValidationHistory] rollback need start')
+      return
+    }
+    this.isRollbacking = true
+    let historyRecord = this.stack.pop()
+    while (historyRecord) {
+      const { key, oldValue, cloneDeepValue } = historyRecord
+      if (oldValue instanceof Array) {
+        /**
+         * 现在对于 Array
+         * 直接替换掉原始对象
+         */
+        data[key] = cloneDeepValue
+      } else if (typeof oldValue === 'object' && typeof data[key] === 'object') {
+        const objMap = Object.keys(data[key]).reduce((t, k) => {
+          t.set(k, true)
+          return t
+        }, new Map())
+        Object.keys(cloneDeepValue).forEach(k => {
+          /**
+           * 过于深层的数据不会保留原始对象
+           */
+          data[key] = cloneDeepValue[k]
+          if (objMap.has(key)) {
+            objMap.delete(key)
+          }
+        })
+        for (const k of objMap.keys()) {
+          delete data[k]
+        }
+      } else if (typeof oldValue === 'object' && typeof data[key] !== 'object') {
+        data[key] = oldValue
+      } else {
+        data[key] = cloneDeepValue
+      }
+      historyRecord = this.stack.pop()
+    }
+    this.isRollbacking = false
+  }
+
+  start(data: any) {
+    if (typeof data !== 'object') {
+      console.warn('[DataValidationHistory] start data must be a object')
+      return
+    }
+    this.data = data
+    this.isBeginning = true
+  }
+
+  clear() {
+    this.isBeginning = false
+    this.isRollbacking = false
+    this.data = undefined
+    this.stack.clear()
+  }
+
+  success() {
+    this.clear()
+  }
+
+  fail() {
+    this.rollback()
+    this.clear()
+  }
+}
+
+type THistory = {
+  key: string
+  oldValue: any
+  cloneDeepValue: any
+}
+
 export type TVerify = {
   result: boolean
   key?: string
@@ -172,12 +318,20 @@ export type TVerify = {
 }
 
 type TUse = {
-  verify(data: any, opts?: { fix?: boolean }): TVerify
+  verify(data: any, opts?: { fix?: boolean, update?: boolean, updateData?: any }): TVerify
+
   /**
    * 自动修正
-   * - 因为不会改变原始对象 这里不返回原始对象
+   * - 一定会改变原始对象
    */
   fix?: (data: any, opts?: {}) => TVerify
+
+  /**
+   * 自动修正
+   * - 一定会改变原始对象
+   * - 不会改变 updateData 对象
+   */
+  update?: (data: any, updateData: any, opts?: {}) => TVerify
 }
 
 type baseVerifyOptions = TUse['verify'] extends (data: any, opts: infer T) => any ? T : unknown
@@ -208,25 +362,55 @@ export class DataValidation {
     config: TDataValidationConfigLocal<any, any>,
     opts: baseVerifyOptions = {},
   ): TVerify {
+    const transaction = new DataValidationTransaction()
+    transaction.start(data)
     const { extraField, strict, fixes } = config
     const sourceMap = Object.keys(rules).reduce((t, k) => {
       t[k] = true
       return t
     }, {})
     const objKeys = Object.keys(data)
-    function autoFix(key, data) {
+    function beforeFail() {
+      transaction.fail()
+    }
+    function beforSetData(key) {
+      transaction.record(key, data[key])
+    }
+    function setData(key, value) {
+      data[key] = value
+    }
+    function autoFix(key) {
       if (!opts.fix || !fixes) return false
       const fix = fixes[key]
       if (!fix) return false
       const fixResult = fix(data[key])
       if (fixResult.result) {
-        data[key] = fixResult.result
+        beforSetData(key)
+        setData(key, fixResult.value)
+        return true
+      }
+      return false
+    }
+    function autoUpdate(key) {
+      if (!opts.update) return false
+      const updateData = cloneDeep(opts.updateData)
+      const updates = config.updates || {}
+      const update = updates[key]
+      if (typeof data[key] === 'object' && !update) return true
+      if (updateData && update) {
+        beforSetData(key)
+        setData(key, update(data[key], updateData[key]))
+        return true
+      } else if (updateData && updateData.hasOwnProperty(key)) {
+        beforSetData(key)
+        setData(key, updateData[key])
         return true
       }
       return false
     }
     for (const ok of objKeys) {
       const rule = rules[ok]
+      autoUpdate(ok)
       const value = data[ok]
       if (!rule) {
         /**
@@ -235,6 +419,7 @@ export class DataValidation {
          * - 或者选择删除
          */
         if (extraField === 'allow') continue
+        beforeFail()
         return {
           result: false,
           key: ok,
@@ -245,21 +430,15 @@ export class DataValidation {
        * 不是严格模式 不会被修复
        */
       if (!rule.requried && !strict) continue
-      if (rule.callback && !rule.callback(value)) {
-        if (autoFix(ok, data)) continue
-        return {
-          result: false,
-          rule,
-          key: ok,
-          value,
-        }
-      } else if (rule.type && rule.type === 'Optional') {
+
+      if (rule.type && rule.type === 'Optional') {
         if (rule.optionalList) {
           const result = rule.optionalList.find(v => {
             return v === value
           })
           if (!result) {
-            if (autoFix(ok, data)) continue
+            if (autoFix(ok)) continue
+            beforeFail()
             return {
               result: false,
               rule,
@@ -270,6 +449,7 @@ export class DataValidation {
         }
       } else if (rule.type && rule.type === 'Array') {
         if (!this.meta.use('Array', data, ok, opts)) {
+          beforeFail()
           /**
            * TODO: array 暂时不支持 fix
            */
@@ -284,6 +464,7 @@ export class DataValidation {
           if (this.meta.has(rule.itemType)) {
             for (let i = 0; i < value.length; i++) {
               if (!this.meta.use(rule.itemType, value[i], ok, opts)) {
+                beforeFail()
                 /**
                  * TODO: array 暂时不支持 fix
                  */
@@ -300,6 +481,7 @@ export class DataValidation {
             for (let i = 0; i < value.length; i++) {
               const deepResult = dataValidation.verify(value[i], opts)
               if (!deepResult.result) {
+                beforeFail()
                 /**
                  * TODO: 现在还没想好怎么做deepValidation的自动修正
                  */
@@ -318,7 +500,8 @@ export class DataValidation {
         }
       } else if (rule.type && this.meta.has(rule.type)) {
         if (!this.meta.use(rule.type, data, ok, opts)) {
-          if (autoFix(ok, data)) continue
+          if (autoFix(ok)) continue
+          beforeFail()
           return {
             result: false,
             rule,
@@ -328,8 +511,17 @@ export class DataValidation {
         }
       } else if (rule.type) {
         const dataValidation = this.use(rule.type)
-        const deepResult = dataValidation.verify(value, opts)
+        let options = opts
+        if (opts.update && opts.updateData) {
+          const updateData = opts.updateData ? opts.updateData[ok] : undefined
+          options = {
+            ...opts,
+            updateData,
+          }
+        }
+        const deepResult = dataValidation.verify(value, options)
         if (!deepResult.result) {
+          beforeFail()
           /**
            * TODO: 现在还没想好怎么做deepValidation的自动修正
            */
@@ -344,13 +536,26 @@ export class DataValidation {
           }
         }
       }
+
+      if (rule.callback && !rule.callback(value)) {
+        if (autoFix(ok)) continue
+        beforeFail()
+        return {
+          result: false,
+          rule,
+          key: ok,
+          value,
+        }
+      }
     }
     const sourceKeys = Object.keys(sourceMap)
     for (const sk of sourceKeys) {
+      const updateResult = autoUpdate(sk)
       const rule = rules[sk]
       if (!rule.requried && !strict) continue
-      if (rule.requried) {
-        if (autoFix(sk, data)) continue
+      if (!updateResult && rule.requried) {
+        if (autoFix(sk)) continue
+        beforeFail()
         return {
           result: false,
           rule,
@@ -358,6 +563,7 @@ export class DataValidation {
         }
       }
     }
+    transaction.success()
     return {
       result: true,
     }
@@ -378,14 +584,19 @@ export class DataValidation {
     const { baseVerify } = this
     const verify = baseVerify.bind(this)
     const result: TUse = {
-      verify(data, opts) {
+      verify(data, opts = {}) {
         if (typeof data !== 'object') {
           console.log('[DataValidation] verify arguments[0] must be a object')
           return
         }
         let rules = cloneDeep(SOURCE)
         if (runtime && runtime.rules) {
-          rules = runtime.rules(data, rules)
+          let runtimeData = data
+          if (opts.update) {
+            if (runtime.deep) runtimeData = merge({}, data, opts.updateData)
+            else runtimeData = mergeSimple({}, data, opts.updateData)
+          }
+          rules = runtime.rules(runtimeData, rules)
           Object.keys(rules).forEach(key => {
             if (rules[key].requried !== false) {
               rules[key].requried = true
@@ -397,6 +608,12 @@ export class DataValidation {
       fix(data) {
         return result.verify(data, { fix: true })
       },
+      update(data, updateData) {
+        return result.verify(data, {
+          update: true,
+          updateData,
+        })
+      }
     }
     this.cache.set(configName, result)
     return result
@@ -415,6 +632,12 @@ type TDataValidationConfigBase<S, T> = {
    */
   strict?: boolean
   runtime?: {
+    /**
+     * 是否启用深层次的数据支持
+     * - 作用于 update
+     * - 如果你在runtime中计算rules需要依赖一个深层数据 此选项必须为true
+     */
+    deep?: boolean
     rules: (data: any, rules: ConfigLocal<S>) => ConfigLocal<S>
   }
   /**
@@ -423,13 +646,23 @@ type TDataValidationConfigBase<S, T> = {
   fixes?: {
     [k in keyof S]?: TDataValidationFix['fix']
   }
+  /**
+   * 数据更新策略
+   */
+  updates?: {
+    [k in keyof S]?: TDataValidationUpdate['update']
+  }
 }
 
 type TDataValidationFix = {
   fix?: ((data: any) => TVerify) | false
 }
 
-type TDataValidationMeta = Required<TDataValidationFix> & {
+type TDataValidationUpdate = {
+  update?: ((data: any, updateData: any) => any)
+}
+
+type TDataValidationMeta = Required<TDataValidationFix> & TDataValidationUpdate & {
   prerequisites?: string | string[]
   verify: (data: any) => boolean
 }
@@ -458,16 +691,17 @@ type TConfig = {
   requried?: boolean
 
   /**
-   * callback
+   * type
    * - 优先级 2
+   */
+  type?: configAspType
+
+  /**
+   * callback
+   * - 优先级 最低
    */
   callback?: configCallBack
 
-  /**
-   * type
-   * - 优先级 3
-   */
-  type?: configAspType
   default?: any
 
   /**

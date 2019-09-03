@@ -469,6 +469,7 @@ describe('DataValidation verify Array', () => {
   }
   const gradientStopConfig: TDataValidationConfig<FGradient, BGradient> = {
     rules: {
+      index: 'number',
       color: 'RgbaColor',
       position: 'number',
     },
@@ -502,7 +503,7 @@ describe('DataValidation verify Array', () => {
     rules: {
       color_type: ['solid', 'gradient'],
       color: {
-        type: 'FColor',
+        type: 'Color',
         requried: false,
       },
       gradient: {
@@ -534,26 +535,7 @@ describe('DataValidation verify Array', () => {
       gradient: {
         gradient_angle: 10,
         gradient_type: 'linear',
-        stops: [
-          {
-            position: 0,
-            color: {
-              r: 0,
-              g: 0,
-              b: 0,
-              a: 0,
-            },
-          },
-          {
-            position: 100,
-            color: {
-              r: 0,
-              g: 0,
-              b: 0,
-              a: 0,
-            },
-          },
-        ],
+        stops: getDefaultStops(),
       },
     }
     const test = verify(data)
@@ -569,6 +551,7 @@ describe('DataValidation verify Array', () => {
         gradient_type: 'linear',
         stops: [
           {
+            index: 0,
             position: 0,
             color: {
               r: 0,
@@ -578,6 +561,7 @@ describe('DataValidation verify Array', () => {
             },
           },
           {
+            index: 1,
             position: 100,
             color: {
               r: 'x',
@@ -1113,13 +1097,6 @@ describe('DataValidation fix', () => {
     const test = textFix(data)
     expect(test.result).toEqual(true)
     expect(data.color).toEqual(defaultColor)
-    dataValidation.meta.set('Color', {
-      prerequisites: 'string',
-      verify(data) {
-        return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
-      },
-      fix: false,
-    })
     dataValidation.meta.set('BackgroundColor', {
       prerequisites: ['Color'],
       verify(data) {
@@ -1282,8 +1259,225 @@ describe('DataValidation fix', () => {
 // --- end 数据自动修正 ---
 
 // --- start 数据更新 ---
-describe('DataValidation update', () => {})
+describe('DataValidation update', () => {
+  const dataValidation = getDataValidation()
+  dataValidation.meta.set('Color', {
+    prerequisites: ['string'],
+    verify(data) {
+      return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
+    },
+    fix: false,
+  })
+  const rgbaColorConfig: TDataValidationConfig<FGradient['color'], any> = {
+    rules: {
+      r: 'number',
+      g: 'number',
+      b: 'number',
+      a: 'number',
+    },
+  }
+  const gradientStopConfig: TDataValidationConfig<FGradient, BGradient> = {
+    rules: {
+      index: 'number',
+      color: 'RgbaColor',
+      position: 'number',
+    },
+  }
+  const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
+    strict: false,
+    rules: {
+      gradient_angle: 'number',
+      gradient_type: ['linear', 'radial'],
+      stops: {
+        type: 'Array',
+        itemType: 'GradientStop',
+        callback(list) {
+          return list.length > 2
+        }
+      },
+    },
+    updates: {
+      stops(data: FGradient[], updateData: FGradient[]) {
+        if (!data) return updateData
+        if (!updateData) return
+        updateData.forEach(updateStop => {
+          const dataStop = data.find(stop => stop.index === updateStop.index)
+          if (dataStop) {
+            if (updateStop.color) {
+             dataStop.color.r = updateStop.color.r
+             dataStop.color.g = updateStop.color.g
+             dataStop.color.b = updateStop.color.b
+             dataStop.color.a = updateStop.color.a
+            }
+            if (updateStop.hasOwnProperty('position')) {
+             dataStop.position = updateStop.position
+            }
+          } else {
+           data.push(updateStop)
+          }
+        })
+        while (data.length > updateData.length) {
+          data.pop()
+        }
+        return data
+      }
+    },
+    runtime: {
+      rules(obj: FTextColor['gradient'], rules) {
+        if (!obj.gradient_type) return rules
+        if (obj.gradient_type === 'radial') {
+          rules.gradient_angle = {
+            callback(value) {
+              return value === 0
+            },
+          }
+        }
+        return rules
+      },
+    },
+  }
+  const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+    strict: false,
+    rules: {
+      color_type: ['solid', 'gradient'],
+      color: {
+        type: 'Color',
+        requried: false,
+      },
+      gradient: {
+        type: 'Gradient',
+        requried: false,
+      },
+    },
+    runtime: {
+      rules(obj: FTextColor, rules) {
+        if (!obj.color_type) return rules
+        if (obj.color_type === 'solid') {
+          rules.color.requried = true
+        } else if (obj.color_type === 'gradient') {
+          rules.gradient.requried = true
+        }
+        return rules
+      },
+    },
+  }
+  dataValidation.register('RgbaColor', rgbaColorConfig)
+  dataValidation.register('GradientStop', gradientStopConfig)
+  dataValidation.register('TextColor', textColorConfig)
+  dataValidation.register('Gradient', gradientConfig)
+
+  it('update base', () => {
+    const { update } = dataValidation.use('TextColor')
+    const data: FTextColor = {
+      color_type: 'solid',
+      color: defaultColor,
+    }
+    const test = update(data, {
+      color_type: 'gradient',
+      gradient: {
+        gradient_angle: 0,
+        gradient_type: 'radial',
+        stops: getDefaultStops()
+      }
+    })
+    expect(test.result).toEqual(true)
+    expect(data.color_type).toEqual('gradient')
+    expect(data.color).toEqual(defaultColor)
+    expect(data.gradient.gradient_angle).toEqual(0)
+    expect(data.gradient.gradient_type).toEqual('radial')
+    expect(data.gradient.stops).toEqual(getDefaultStops())
+  })
+  it('update array add', () => {
+    const { update } = dataValidation.use('TextColor')
+    const data: FTextColor = {
+      color_type: 'gradient',
+      color: defaultColor,
+      gradient: {
+        gradient_angle: 0,
+        gradient_type: 'radial',
+        stops: getDefaultStops()
+      }
+    }
+    const testStops = getDefaultStops()
+    testStops.push({
+      index: 2,
+      position: 50,
+      color: {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 1,
+      },
+    })
+    const test = update(data, {
+      gradient: {
+        gradient_angle: 10,
+        gradient_type: 'linear',
+        stops: testStops
+      }
+    })
+    expect(test.result).toEqual(true)
+    expect(data.color_type).toEqual('gradient')
+    expect(data.color).toEqual(defaultColor)
+    expect(data.gradient.gradient_angle).toEqual(10)
+    expect(data.gradient.gradient_type).toEqual('linear')
+    expect(data.gradient.stops[2].position).toEqual(50)
+  })
+  it('update fail need rollback', () => {
+    const { update } = dataValidation.use('TextColor')
+    const data: FTextColor = {
+      color_type: 'gradient',
+      color: defaultColor,
+      gradient: {
+        gradient_angle: 0,
+        gradient_type: 'radial',
+        stops: getDefaultStops()
+      }
+    }
+    const testStops = getDefaultStops()
+    const stops1 = testStops.pop()
+    const test = update(data, {
+      gradient: {
+        gradient_angle: 10,
+        gradient_type: 'linear',
+        stops: testStops
+      }
+    })
+    expect(test.result).toEqual(false)
+    expect(test.key).toEqual('gradient.stops')
+    expect(data.color_type).toEqual('gradient')
+    expect(data.color).toEqual(defaultColor)
+    expect(data.gradient.gradient_angle).toEqual(0)
+    expect(data.gradient.gradient_type).toEqual('radial')
+    expect(data.gradient.stops[1]).toEqual(stops1)
+  })
+})
 // --- end 数据更新 ---
+
+function getDefaultStops() {
+  return [
+    {
+      index: 0,
+      position: 0,
+      color: {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 0,
+      },
+    },
+    {
+      index: 1,
+      position: 100,
+      color: {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 0,
+      },
+    },
+  ]
+}
 
 function getDataValidation() {
   return new DataValidation({ isSecurity: true })
