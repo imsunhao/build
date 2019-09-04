@@ -1,3 +1,11 @@
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer U> ?
+  Array<DeepPartial<U>> :
+  T[P] extends ReadonlyArray<infer U> ?
+  ReadonlyArray<DeepPartial<U>> :
+  DeepPartial<T[P]>
+}
+
 let DATA_VALIDATION: DataValidation
 
 type DataValidationConstructor = {
@@ -32,6 +40,7 @@ function mergeBase(src, target, { isSimple }: any = {}) {
 
 function merge(...args) {
   return args.reduce((t, o) => {
+    if (!o) return t
     if (t === o) return t
     return mergeBase(t, cloneDeep(o))
   }, args[0])
@@ -39,6 +48,7 @@ function merge(...args) {
 
 function mergeSimple(...args) {
   return args.reduce((t, o) => {
+    if (!o) return t
     if (t === o) return t
     return mergeBase(t, cloneDeep(o), { isSimple: true })
   }, args[0])
@@ -129,7 +139,7 @@ class DataValidationMeta {
     return this.maps.has(type)
   }
 
-  use(type: string, data: any, key: string, opts: baseVerifyOptions) {
+  use<T>(type: string, data: T, key: string, opts: TBaseVerifyOptions<T> = {}) {
     const meta = this.get(type)
     if (meta) {
       if (meta.prerequisites) {
@@ -231,7 +241,7 @@ class DataValidationTransaction {
     this.stack.push({
       key,
       cloneDeepValue: cloneDeep(oldValue),
-      oldValue: oldValue,
+      oldValue,
     })
   }
 
@@ -317,24 +327,26 @@ export type TVerify = {
   rule?: TConfig
 }
 
+type TDefaultValues<T> = { defaultValues?: DeepPartial<T> }
+
 type TUse = {
-  verify(data: any, opts?: { fix?: boolean, update?: boolean, updateData?: any }): TVerify
+  verify<T>(data: T, opts?: TBaseVerifyOptions<T>): TVerify
 
   /**
    * 自动修正
    * - 一定会改变原始对象
    */
-  fix?: (data: any, opts?: {}) => TVerify
+  fix?: <T>(data: T, opts?: TDefaultValues<T>) => TVerify
 
   /**
    * 自动修正
    * - 一定会改变原始对象
    * - 不会改变 updateData 对象
    */
-  update?: (data: any, updateData: any, opts?: {}) => TVerify
+  update?: <T>(data: T, updateData: DeepPartial<T>, opts?: TDefaultValues<T> & {}) => TVerify
 }
 
-type baseVerifyOptions = TUse['verify'] extends (data: any, opts: infer T) => any ? T : unknown
+type TBaseVerifyOptions<T> = TDefaultValues<T> & { fix?: boolean, update?: boolean, updateData?: any }
 
 export class DataValidation {
   config = new DataValidationConfig()
@@ -356,11 +368,11 @@ export class DataValidation {
     }
   }
 
-  baseVerify(
-    data: any,
+  baseVerify<T>(
+    data: T,
     rules: ConfigLocal<any>,
     config: TDataValidationConfigLocal<any, any>,
-    opts: baseVerifyOptions = {},
+    opts: TBaseVerifyOptions<T> = {},
   ): TVerify {
     const transaction = new DataValidationTransaction()
     transaction.start(data)
@@ -378,6 +390,26 @@ export class DataValidation {
     }
     function setData(key, value) {
       data[key] = value
+    }
+    function getDeepOptions(key: string, i: number = -1) {
+      let options = opts
+      if (options.update && options.updateData) {
+        let updateData = options.updateData ? options.updateData[key] : undefined
+        if (i !== -1) updateData = updateData[i]
+        options = {
+          ...options,
+          updateData,
+        }
+      }
+      if (options.defaultValues && options.defaultValues.hasOwnProperty(key)) {
+        let defaultValues = options.defaultValues[key]
+        if (i !== -1) defaultValues = defaultValues[i]
+        options = {
+          ...options,
+          defaultValues,
+        }
+      }
+      return options
     }
     function autoFix(key) {
       if (!opts.fix || !fixes) return false
@@ -397,7 +429,7 @@ export class DataValidation {
       const updates = config.updates || {}
       const update = updates[key]
       if (typeof data[key] === 'object' && !update) return true
-      if (updateData && update) {
+      if (updateData && update && updateData.hasOwnProperty(key)) {
         beforSetData(key)
         setData(key, update(data[key], updateData[key]))
         return true
@@ -408,10 +440,138 @@ export class DataValidation {
       }
       return false
     }
+    function hasDefaultValue(key) {
+      if (opts.defaultValues && opts.defaultValues.hasOwnProperty(key)) {
+        beforSetData(key)
+        setData(key, opts.defaultValues[key])
+        return true
+      }
+      return false
+    }
+    const checkRule = (rule: TConfig, key): TVerify => {
+      const value = data[key]
+      /**
+       * 不是严格模式 不会被修复
+       */
+      if (!rule.requried && !strict) return { result: true }
+
+      if (rule.type && rule.type === 'Optional') {
+        if (rule.optionalList) {
+          const result = rule.optionalList.find(v => {
+            return v === value
+          })
+          if (!result) {
+            if (autoFix(key)) return { result: true }
+            if (hasDefaultValue(key)) return { result: true }
+            beforeFail()
+            return {
+              result: false,
+              rule,
+              key,
+              value,
+            }
+          }
+        }
+      } else if (rule.type && rule.type === 'Array') {
+        if (!this.meta.use('Array', data, key, opts)) {
+          beforeFail()
+          /**
+           * TODO: array 暂时不支持 fix
+           */
+          return {
+            result: false,
+            rule,
+            key,
+            value,
+          }
+        }
+        if (rule.itemType) {
+          if (this.meta.has(rule.itemType)) {
+            for (let i = 0; i < value.length; i++) {
+              if (!this.meta.use(rule.itemType, value[i], key, opts)) {
+                beforeFail()
+                /**
+                 * TODO: array 暂时不支持 fix
+                 */
+                return {
+                  result: false,
+                  rule,
+                  key,
+                  value,
+                }
+              }
+            }
+          } else {
+            const dataValidation = this.use(rule.itemType)
+            for (let i = 0; i < value.length; i++) {
+              const deepResult = dataValidation.verify(value[i], getDeepOptions(key, i))
+              if (!deepResult.result) {
+                beforeFail()
+                /**
+                 * TODO: 现在还没想好怎么做deepValidation的自动修正
+                 */
+                return {
+                  result: false,
+                  rule: {
+                    ...rule,
+                    rule: deepResult.rule,
+                  },
+                  key: `${key}[${i}].${deepResult.key}`,
+                  value: deepResult.value,
+                }
+              }
+            }
+          }
+        }
+      } else if (rule.type && this.meta.has(rule.type)) {
+        if (!this.meta.use(rule.type, data, key, opts)) {
+          if (autoFix(key)) return { result: true }
+          if (hasDefaultValue(key)) return { result: true }
+          beforeFail()
+          return {
+            result: false,
+            rule,
+            key,
+            value,
+          }
+        }
+      } else if (rule.type) {
+        const dataValidation = this.use(rule.type)
+        const deepResult = dataValidation.verify(value, getDeepOptions(key))
+        if (!deepResult.result) {
+          beforeFail()
+          /**
+           * TODO: 现在还没想好怎么做deepValidation的自动修正
+           */
+          return {
+            result: false,
+            rule: {
+              ...rule,
+              rule: deepResult.rule,
+            },
+            key: `${key}.${deepResult.key}`,
+            value: deepResult.value,
+          }
+        }
+      }
+
+      if (rule.callback && !rule.callback(value)) {
+        if (autoFix(key)) return { result: true }
+        if (hasDefaultValue(key)) return { result: true }
+        beforeFail()
+        return {
+          result: false,
+          rule,
+          key,
+          value,
+        }
+      }
+
+      return { result: true }
+    }
     for (const ok of objKeys) {
       const rule = rules[ok]
       autoUpdate(ok)
-      const value = data[ok]
       if (!rule) {
         /**
          * 多余字段无法修复
@@ -426,135 +586,27 @@ export class DataValidation {
         }
       }
       delete sourceMap[ok]
-      /**
-       * 不是严格模式 不会被修复
-       */
-      if (!rule.requried && !strict) continue
-
-      if (rule.type && rule.type === 'Optional') {
-        if (rule.optionalList) {
-          const result = rule.optionalList.find(v => {
-            return v === value
-          })
-          if (!result) {
-            if (autoFix(ok)) continue
-            beforeFail()
-            return {
-              result: false,
-              rule,
-              key: ok,
-              value,
-            }
-          }
-        }
-      } else if (rule.type && rule.type === 'Array') {
-        if (!this.meta.use('Array', data, ok, opts)) {
-          beforeFail()
-          /**
-           * TODO: array 暂时不支持 fix
-           */
-          return {
-            result: false,
-            rule,
-            key: ok,
-            value,
-          }
-        }
-        if (rule.itemType) {
-          if (this.meta.has(rule.itemType)) {
-            for (let i = 0; i < value.length; i++) {
-              if (!this.meta.use(rule.itemType, value[i], ok, opts)) {
-                beforeFail()
-                /**
-                 * TODO: array 暂时不支持 fix
-                 */
-                return {
-                  result: false,
-                  rule,
-                  key: ok,
-                  value,
-                }
-              }
-            }
-          } else {
-            const dataValidation = this.use(rule.itemType)
-            for (let i = 0; i < value.length; i++) {
-              const deepResult = dataValidation.verify(value[i], opts)
-              if (!deepResult.result) {
-                beforeFail()
-                /**
-                 * TODO: 现在还没想好怎么做deepValidation的自动修正
-                 */
-                return {
-                  result: false,
-                  rule: {
-                    ...rule,
-                    rule: deepResult.rule,
-                  },
-                  key: `${ok}[${i}].${deepResult.key}`,
-                  value: deepResult.value,
-                }
-              }
-            }
-          }
-        }
-      } else if (rule.type && this.meta.has(rule.type)) {
-        if (!this.meta.use(rule.type, data, ok, opts)) {
-          if (autoFix(ok)) continue
-          beforeFail()
-          return {
-            result: false,
-            rule,
-            key: ok,
-            value,
-          }
-        }
-      } else if (rule.type) {
-        const dataValidation = this.use(rule.type)
-        let options = opts
-        if (opts.update && opts.updateData) {
-          const updateData = opts.updateData ? opts.updateData[ok] : undefined
-          options = {
-            ...opts,
-            updateData,
-          }
-        }
-        const deepResult = dataValidation.verify(value, options)
-        if (!deepResult.result) {
-          beforeFail()
-          /**
-           * TODO: 现在还没想好怎么做deepValidation的自动修正
-           */
-          return {
-            result: false,
-            rule: {
-              ...rule,
-              rule: deepResult.rule,
-            },
-            key: `${ok}.${deepResult.key}`,
-            value: deepResult.value,
-          }
-        }
-      }
-
-      if (rule.callback && !rule.callback(value)) {
-        if (autoFix(ok)) continue
-        beforeFail()
-        return {
-          result: false,
-          rule,
-          key: ok,
-          value,
-        }
+      const checkRuleResult = checkRule(rule, ok)
+      if (!checkRuleResult.result) {
+        return checkRuleResult
       }
     }
     const sourceKeys = Object.keys(sourceMap)
     for (const sk of sourceKeys) {
-      const updateResult = autoUpdate(sk)
       const rule = rules[sk]
       if (!rule.requried && !strict) continue
-      if (!updateResult && rule.requried) {
+      /**
+       * 如果 sk 不是必须的那么也没有必要更新数据
+       */
+      const updateResult = autoUpdate(sk)
+      if (updateResult) {
+        const checkRuleResult = checkRule(rule, sk)
+        if (!checkRuleResult.result) {
+          return checkRuleResult
+        }
+      } else if (rule.requried) {
         if (autoFix(sk)) continue
+        if (hasDefaultValue(sk)) continue
         beforeFail()
         return {
           result: false,
@@ -593,8 +645,8 @@ export class DataValidation {
         if (runtime && runtime.rules) {
           let runtimeData = data
           if (opts.update) {
-            if (runtime.deep) runtimeData = merge({}, data, opts.updateData)
-            else runtimeData = mergeSimple({}, data, opts.updateData)
+            if (runtime.deep) runtimeData = merge({}, data, opts.updateData, opts.defaultValues)
+            else runtimeData = mergeSimple({}, data, opts.updateData, opts.defaultValues)
           }
           rules = runtime.rules(runtimeData, rules)
           Object.keys(rules).forEach(key => {
@@ -605,11 +657,15 @@ export class DataValidation {
         }
         return verify(data, rules, config, opts)
       },
-      fix(data) {
-        return result.verify(data, { fix: true })
-      },
-      update(data, updateData) {
+      fix(data, opts = {}) {
         return result.verify(data, {
+          ...opts,
+          fix: true,
+        })
+      },
+      update(data, updateData, opts = {}) {
+        return result.verify(data, {
+          ...opts,
           update: true,
           updateData,
         })

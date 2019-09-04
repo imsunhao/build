@@ -1,6 +1,6 @@
 import { TextColor as BTextColor, Gradient as BGradient } from './src/back'
 import { TextColor as FTextColor, Gradient as FGradient } from './src/front'
-import { TDataValidationConfig, DataValidation } from './src/index'
+import { TDataValidationConfig, DataValidation, DeepPartial } from './src/index'
 
 const defaultColor = 'rgba(0, 0, 0, 0)'
 const defaultBackgroundColor = 'rgba(0, 0, 0, 1)'
@@ -1356,9 +1356,137 @@ describe('DataValidation fix', () => {
     expect(test2.key).toEqual('gradient.stops')
     expect(data2.gradient.gradient_angle).toEqual(10)
   })
+  describe('default value', () => {
+    const dataValidation = getDataValidation()
+    dataValidation.meta.set('Color', {
+      verify(data) {
+        return /rgba\(\d, \d*, \d*, \d*\)/.test(data)
+      },
+      fix() {
+        return {
+          result: true,
+          value: defaultColor,
+        }
+      },
+    })
+    const gradientConfig: TDataValidationConfig<FTextColor['gradient']> = {
+      strict: false,
+      rules: {
+        gradient_angle: 'number',
+        gradient_type: ['linear', 'radial'],
+        stops: stops => {
+          return stops instanceof Array && stops.length >= 2
+        },
+      },
+      fixes: {
+        gradient_angle() {
+          return {
+            result: true,
+            value: 0
+          }
+        }
+      },
+      runtime: {
+        rules(obj: FTextColor['gradient'], rules) {
+          if (!obj.gradient_type) return rules
+          if (obj.gradient_type === 'radial') {
+            rules.gradient_angle.callback = (value) => {
+              return value === 0
+            }
+          }
+          return rules
+        },
+      },
+    }
+    const textColorConfig: TDataValidationConfig<FTextColor, BTextColor> = {
+      strict: false,
+      rules: {
+        color_type: ['solid', 'gradient'],
+        color: {
+          type: 'Color',
+          requried: false,
+        },
+        gradient: {
+          type: 'Gradient',
+          requried: false,
+        },
+      },
+      runtime: {
+        rules(obj: FTextColor, rules) {
+          if (!obj.color_type) return rules
+          if (obj.color_type === 'solid') {
+            rules.color.requried = true
+          } else if (obj.color_type === 'gradient') {
+            rules.gradient.requried = true
+          }
+          return rules
+        },
+      },
+    }
+    dataValidation.register('TextColor', textColorConfig)
+    dataValidation.register('Gradient', gradientConfig)
+
+    it('base', () => {
+      const { fix } = dataValidation.use('TextColor')
+      const data: FTextColor = {
+        color_type: 'solid'
+      }
+      const test = fix(data, {
+        defaultValues: {
+          color: defaultColor
+        }
+      })
+      expect(test.result).toEqual(true)
+      expect(data.color).toEqual(defaultColor)
+    })
+
+    it('deep value', () => {
+      const { fix } = dataValidation.use('TextColor')
+      const data: FTextColor = {
+        color_type: 'gradient'
+      }
+      const test = fix(data, {
+        defaultValues: {
+          color: defaultColor,
+          gradient: {
+            gradient_angle: 0,
+            gradient_type: 'linear',
+            stops: getDefaultStops()
+          }
+        }
+      })
+      expect(test.result).toEqual(true)
+      expect(data.gradient.gradient_angle).toEqual(0)
+      expect(data.gradient.gradient_type).toEqual('linear')
+      expect(data.gradient.stops).toEqual(getDefaultStops())
+    })
+
+    it('deep 2 value', () => {
+      const { fix } = dataValidation.use('TextColor')
+      const data: DeepPartial<FTextColor> = {
+        color_type: 'gradient',
+        gradient: {
+          gradient_angle: 10,
+        }
+      }
+      const test = fix(data, {
+        defaultValues: {
+          color: defaultColor,
+          gradient: {
+            gradient_angle: 0,
+            gradient_type: 'linear',
+            stops: getDefaultStops()
+          }
+        }
+      })
+      expect(test.result).toEqual(true)
+      expect(data.gradient.gradient_angle).toEqual(10)
+      expect(data.gradient.gradient_type).toEqual('linear')
+      expect(data.gradient.stops).toEqual(getDefaultStops())
+    })
+  })
 })
 // --- end 数据自动修正 ---
-
 // --- start 数据更新 ---
 describe('DataValidation update', () => {
   const dataValidation = getDataValidation()
@@ -1393,7 +1521,7 @@ describe('DataValidation update', () => {
         type: 'Array',
         itemType: 'GradientStop',
         callback(list) {
-          return list.length > 2
+          return list.length >= 2 && list.length <= 5
         }
       },
     },
@@ -1405,16 +1533,16 @@ describe('DataValidation update', () => {
           const dataStop = data.find(stop => stop.index === updateStop.index)
           if (dataStop) {
             if (updateStop.color) {
-             dataStop.color.r = updateStop.color.r
-             dataStop.color.g = updateStop.color.g
-             dataStop.color.b = updateStop.color.b
-             dataStop.color.a = updateStop.color.a
+              dataStop.color.r = updateStop.color.r
+              dataStop.color.g = updateStop.color.g
+              dataStop.color.b = updateStop.color.b
+              dataStop.color.a = updateStop.color.a
             }
             if (updateStop.hasOwnProperty('position')) {
-             dataStop.position = updateStop.position
+              dataStop.position = updateStop.position
             }
           } else {
-           data.push(updateStop)
+            data.push(updateStop)
           }
         })
         while (data.length > updateData.length) {
@@ -1466,7 +1594,6 @@ describe('DataValidation update', () => {
   dataValidation.register('GradientStop', gradientStopConfig)
   dataValidation.register('TextColor', textColorConfig)
   dataValidation.register('Gradient', gradientConfig)
-
   it('update base', () => {
     const { update } = dataValidation.use('TextColor')
     const data: FTextColor = {
@@ -1551,6 +1678,76 @@ describe('DataValidation update', () => {
     expect(data.gradient.gradient_angle).toEqual(0)
     expect(data.gradient.gradient_type).toEqual('radial')
     expect(data.gradient.stops[1]).toEqual(stops1)
+  })
+  describe('update default value', () => {
+    it('base', () => {
+      const { update } = dataValidation.use('TextColor')
+      const data: FTextColor = {
+        color_type: 'gradient'
+      }
+      const test = update(data, {
+        color_type: 'solid'
+      }, {
+        defaultValues: {
+          color: defaultColor
+        }
+      })
+      expect(test.result).toEqual(true)
+      expect(data.color).toEqual(defaultColor)
+    })
+
+    it('deep value', () => {
+      const { update } = dataValidation.use('TextColor')
+      const data: FTextColor = {
+        color_type: 'solid',
+        color: 'x',
+      }
+      const test = update(data, {
+        color_type: 'gradient'
+      }, {
+        defaultValues: {
+          color: defaultColor,
+          gradient: {
+            gradient_angle: 0,
+            gradient_type: 'linear',
+            stops: getDefaultStops()
+          }
+        }
+      })
+      expect(test.result).toEqual(true)
+      expect(data.color_type).toEqual('gradient')
+      expect(data.color).toEqual('x')
+      expect(data.gradient.gradient_angle).toEqual(0)
+      expect(data.gradient.gradient_type).toEqual('linear')
+      expect(data.gradient.stops).toEqual(getDefaultStops())
+    })
+    it('deep 2 value', () => {
+      const { update } = dataValidation.use('TextColor')
+      const data: DeepPartial<FTextColor> = {
+        color_type: 'solid',
+        color: defaultColor,
+      }
+      const test = update(data, {
+        color_type: 'gradient',
+        gradient: {
+          gradient_angle: 10,
+        }
+      }, {
+        defaultValues: {
+          color: defaultColor,
+          gradient: {
+            gradient_angle: 0,
+            gradient_type: 'linear',
+            stops: getDefaultStops()
+          }
+        }
+      })
+      expect(test.result).toEqual(true)
+      expect(data.color).toEqual(defaultColor)
+      expect(data.gradient.gradient_angle).toEqual(10)
+      expect(data.gradient.gradient_type).toEqual('linear')
+      expect(data.gradient.stops).toEqual(getDefaultStops())
+    })
   })
 })
 // --- end 数据更新 ---
