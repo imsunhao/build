@@ -12,7 +12,8 @@ module.exports = {
     build: resolve('./src/bin/build.ts'),
     start: resolve('./src/bin/start.ts'),
     dev: resolve('./src/bin/dev.ts'),
-    ['empty-module']: resolve('./src/utils/empty-module.js')
+    'bootstrap-storybook': resolve('./src/bin/bootstrap-storybook.ts'),
+    'empty-module': resolve('./src/utils/empty-module.js')
   },
   output: {
     path: resolve('./dist'),

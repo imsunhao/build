@@ -3,4 +3,4 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'development'
 
 const argv = require('./utils').getArgv()
 
-require('../dist/dev').start(argv)
+require('../dist/bootstrap-storybook').bootstrapStorybook(argv)

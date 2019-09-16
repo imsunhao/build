@@ -151,6 +151,33 @@ export function compiler(
   }
 }
 
+export function compilerConfigSync(
+  configOptions: BuildService.parsedArgs.config,
+  mode: ConfigOptions.webpackMode
+) {
+  const entryName = `${mode === 'none' ? 'production' : mode}_config`
+  const { entry, output } = configOptions
+  if (!(entry && output)) {
+    consola.fatal('[compilerConfigSync]: entry or output is undefined')
+    return process.exit(1)
+  }
+  const path = resolve(output, `${entryName}.js`)
+  let config: any = {}
+  if (existsSync(path)) {
+    try {
+      const souce = readFileSync(path, 'utf-8')
+      config = requireFromString(souce)
+    } catch (error) {
+      consola.fatal('[compilerConfigSync]', error)
+      return process.exit(1)
+    }
+    return config
+  } else {
+    consola.fatal('[compilerConfigSync]: path is unExist!', path)
+    return process.exit(1)
+  }
+}
+
 /**
  * webpack 编译 配置文件
  * @param configOptions 配置文件 设置

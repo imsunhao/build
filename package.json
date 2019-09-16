@@ -30,8 +30,10 @@
   "bin": {
     "service:start": "./bin/start",
     "service:build": "./bin/build",
-    "service:dev": "./bin/dev"
+    "service:dev": "./bin/dev",
+    "bootstrap:storybook": "./bin/storybook"
   },
+  "main": "./dist/index.js",
   "typings": "@types/index.d.ts",
   "repository": {
     "type": "git",
@@ -111,6 +113,7 @@
     "babel-loader": "^8.0.4",
     "babel-plugin-component": "^1.1.1",
     "babel-preset-latest-node": "^2.0.0-beta.3",
+    "babel-preset-vue": "^2.0.2",
     "base64url": "^3.0.1",
     "compression": "^1.7.3",
     "consola": "2.2.4",

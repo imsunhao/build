@@ -6,14 +6,12 @@ import webpack from 'webpack'
 import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin'
 
 import { ConfigOptions } from '@types'
-import { getClientDllPlugin, getExternals } from 'src/utils/plugins.webpack'
+import { getClientDllPlugin, getExternals, getClientDllPluginSync } from 'src/utils/plugins.webpack'
 
-export async function getClientConfig(options: ConfigOptions.options) {
-  const client = options.webpack ? options.webpack.client || {} : {}
+function baseGetClientConfig(options: ConfigOptions.options) {
   const { externals, alias } = getExternals(options, 'client')
   const mode = options.webpack.mode || 'production'
   const isProd = mode === 'production'
-
   return (merge as any)(
     getBaseConfig(options),
     {
@@ -52,7 +50,27 @@ export async function getClientConfig(options: ConfigOptions.options) {
       ]
     },
     getStyle(options, { isServer: false }),
+  )
+}
+
+export async function getClientConfig(options: ConfigOptions.options) {
+  const client = options.webpack ? options.webpack.client || {} : {}
+
+  return (merge as any)(
+    baseGetClientConfig(options),
     await getClientDllPlugin(options),
     client,
   )
+}
+
+
+export function getClientConfigSync(options: ConfigOptions.options) {
+  const client = options.webpack ? options.webpack.client || {} : {}
+
+  return (merge as any)(
+    baseGetClientConfig(options),
+    getClientDllPluginSync(options),
+    client,
+  )
+
 }

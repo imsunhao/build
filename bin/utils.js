@@ -114,5 +114,5 @@ function getArgv() {
 }
 
 module.exports = {
-  getArgv
+  getArgv,
 }

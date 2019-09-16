@@ -18,7 +18,7 @@
 - 开发项目 `service:dev`
 - 打包项目 `service:build`
 - 启动项目 `service:start`
-- 检查构建 `service:ci`
+- storybook webpack扩展支持 `build-storybook`
 
 ### 命令参数 帮助 -h
 
@@ -33,7 +33,7 @@
 
 ### 技术栈
 
-- vue 2.5
+- vue 2.6
 - vue-property-decorator
 - vue-router
 - vue-server-renderer
@@ -43,8 +43,13 @@
 - webpack 4
 - express 4
 - babel 7
+- storybook 5
 
 ### 特性
+
+#### 内置支持 storybook
+
+- 方便开发组件
 
 #### 支持 SSR 使用 webpack4 打包 css 无法提取的问题
 

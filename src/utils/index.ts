@@ -1,7 +1,7 @@
 import { resolve } from 'path'
 import { ConfigOptions, BuildService } from '@types'
 
-import { getClientConfig, getServerConfig } from 'src/config'
+import { getClientConfig, getServerConfig, getClientConfigSync } from 'src/config'
 import { existsSync, readFileSync } from 'fs'
 import consola from 'consola'
 import { createResolve } from 'src/utils/path'
@@ -13,7 +13,7 @@ import compression from 'compression'
 import proxyMiddleware from 'http-proxy-middleware'
 import LRU from 'lru-cache'
 import HappyPack from 'happypack'
-import { compilerConfig, compilerDll } from 'src/utils/compiler.webpack'
+import { compilerConfig, compilerDll, compilerConfigSync } from 'src/utils/compiler.webpack'
 
 /**
  * 获取 根目录 地址
@@ -133,18 +133,12 @@ function setVersion(options: ConfigOptions.options) {
   }
 }
 
-/**
- * 设置 webpack
- * @param options build 通用 webpack 配置
- * @param mode webpack 环境
- */
-async function setWebpack(
+function baseSetWebpack(
   options: ConfigOptions.options,
   mode: ConfigOptions.webpackMode
 ) {
   options.webpack = options.webpack || {}
   options.webpack.mode = mode
-  options.webpack.client = await getClientConfig(options)
   options.webpack.server = getServerConfig(options)
   // const isProduction = mode ? mode !== 'development' : true
   // if (!isProduction) {
@@ -156,6 +150,34 @@ async function setWebpack(
   }
   path = path.slice(rootDirLength)
   process.env.PUBLIC_PATH = path
+  return options
+}
+
+/**
+ * 设置 webpack
+ * @param options build 通用 webpack 配置
+ * @param mode webpack 环境
+ */
+async function setWebpack(
+  options: ConfigOptions.options,
+  mode: ConfigOptions.webpackMode
+) {
+  options.webpack.client = await getClientConfig(options)
+  baseSetWebpack(options, mode)
+  return options
+}
+
+/**
+ * 同步 设置 webpack
+ * @param options build 通用 webpack 配置
+ * @param mode webpack 环境
+ */
+export function setWebpackSync(
+  options: ConfigOptions.options,
+  mode: ConfigOptions.webpackMode
+) {
+  options.webpack.client = getClientConfigSync(options)
+  baseSetWebpack(options, mode)
   return options
 }
 
@@ -205,6 +227,50 @@ function getInjectContext(configOptions: BuildService.parsedArgs.config) {
     }
   }
   return injectContext
+}
+
+export function getUserConfigSync(
+  mode: ConfigOptions.webpackMode,
+  argv: BuildService.parsedArgs
+) {
+  const configOptions = getConfigFileOptions(argv)
+  const injectContext = getInjectContext(configOptions)
+  const rootDir = getRootDir(argv)
+
+  let options: any
+
+  if (existsSync(configOptions.entry || '')) {
+    options = compilerConfigSync(configOptions, mode)
+    if (!options) {
+      options = {}
+    } else {
+      const args: ConfigOptions.getOptionsInject = {
+        argv,
+        mode,
+        resolve: createResolve(rootDir),
+        injectContext
+      }
+      options = options.default(args)
+      options.rootDir = options.rootDir || rootDir
+    }
+    if (options.default) {
+      options = options.default
+    }
+  } else if (argv['config-file'] !== 'buildService.config.js') {
+    consola.fatal('Could not load config file: ' + argv['config-file'])
+    return process.exit(1)
+  }
+
+  if (!options.injectContext) {
+    options.injectContext = injectContext
+  } else {
+    options.injectContext = {
+      ...injectContext,
+      ...options.injectContext
+    }
+  }
+
+  return options
 }
 
 /**
@@ -529,9 +595,7 @@ export class RouterStackManagement {
     this.router = app._router
     this.startIndex = this.stack.length - 1
     consola.info(
-      `RouterStackManagement 已经初始化完成 当前 startIndex = ${
-        this.startIndex
-      }`
+      `RouterStackManagement 已经初始化完成 当前 startIndex = ${this.startIndex}`
     )
   }
 
@@ -573,9 +637,7 @@ export class RouterStackManagement {
       stack.splice(current.index, 1, stack.pop())
       current.hotUpDateCount++
       consola.info(
-        `stack Index = ${index} currentIndex = ${
-          current.index
-        } 已经更新, 当前更新次数 = ${current.hotUpDateCount}`
+        `stack Index = ${index} currentIndex = ${current.index} 已经更新, 当前更新次数 = ${current.hotUpDateCount}`
       )
     }
   }

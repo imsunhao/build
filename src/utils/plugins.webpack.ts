@@ -41,21 +41,14 @@ export function getDllPlugin({
     ]
   }
 }
-/**
- * 获取 客户端dll插件
- * @param options build 通用 webpack 配置
- */
-export async function getClientDllPlugin(options: ConfigOptions.options) {
+
+function baseGetClientDllPlugin(options: ConfigOptions.options) {
   if (!(options.webpack && options.webpack.dll && options.webpack.base))
     return {}
   const dll = options.webpack.dll
   const webpackConfig = options.webpack.base
   const nameArr = Object.keys(dll.entry)
   const plugins: any[] = []
-
-  if (!existsSync(dll.path)) {
-    await compilerDll(options)
-  }
 
   nameArr.forEach(name => {
     const path = join(dll.path, `/${name}.manifest.json`)
@@ -70,12 +63,38 @@ export async function getClientDllPlugin(options: ConfigOptions.options) {
         })
       )
     } else {
-      consola.fatal('path is not find!', path)
+      consola.fatal('[getClientDllPlugin] path is not find!', path)
     }
   })
   return {
     plugins
   }
+
+}
+
+/**
+ * 获取 客户端dll插件
+ * @param options build 通用 webpack 配置
+ */
+export async function getClientDllPlugin(options: ConfigOptions.options) {
+  if (!(options.webpack && options.webpack.dll && options.webpack.base))
+    return {}
+  const dll = options.webpack.dll
+  if (!existsSync(dll.path)) {
+    await compilerDll(options)
+  }
+  return baseGetClientDllPlugin(options)
+}
+
+export function getClientDllPluginSync(options: ConfigOptions.options) {
+  if (!(options.webpack && options.webpack.dll && options.webpack.base))
+    return {}
+  const dll = options.webpack.dll
+  if (!existsSync(dll.path)) {
+    consola.fatal('[getClientDllPluginSync] dll.path is not find!', dll.path)
+    process.exit(1)
+  }
+  return baseGetClientDllPlugin(options)
 }
 
 /**
