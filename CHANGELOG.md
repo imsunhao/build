@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.27](https://github.com/imsunhao/build/compare/v1.6.26...v1.6.27) (2019-09-17)
+
+
+### Features
+
+* 拆分 start ([c0324a4](https://github.com/imsunhao/build/commit/c0324a4))
+* 移除 storybook 依赖项 ([387c672](https://github.com/imsunhao/build/commit/387c672))
+
 ### [1.6.26](https://github.com/imsunhao/build/compare/v1.6.25...v1.6.26) (2019-09-17)
 
 
