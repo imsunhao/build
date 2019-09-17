@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.25](https://github.com/imsunhao/build/compare/v1.6.24...v1.6.25) (2019-09-17)
+
+
+### Features
+
+* 添加 storybook 的支持 ([1d1325f](https://github.com/imsunhao/build/commit/1d1325f))
+
 ### [1.6.24](https://github.com/imsunhao/build/compare/v1.6.23...v1.6.24) (2019-08-23)
 
 
