@@ -4,8 +4,7 @@
   "license": "MIT",
   "scripts": {
     "publish": "npm publish --access=public",
-    "dev": "webpack --config webpack.js --watch --progress",
-    "build": "cross-env NODE_ENV=production webpack --config webpack.js",
+    "dev": "node script/build.js",
     "version": "standard-version -r patch",
     "test:init": "mkdir -p ~/Documents/imsunhao/lib/build/doc/node_modules/@bestminr/build  && ln -s ~/Documents/imsunhao/lib/build  ~/Documents/imsunhao/lib/build/doc/node_modules/@bestminr/build ",
     "test:reTest": "rm -rf ~/Documents/imsunhao/lib/build/doc/node_modules/@bestminr/build  && ln -s ~/Documents/imsunhao/lib/build  ~/Documents/imsunhao/lib/build/doc/node_modules/@bestminr/build ",
@@ -28,7 +27,6 @@
     "ssr"
   ],
   "bin": {
-    "service:start": "./bin/start",
     "service:build": "./bin/build",
     "service:dev": "./bin/dev",
     "bootstrap:storybook": "./bin/storybook"
@@ -69,6 +67,7 @@
     "@types/webpack-node-externals": "^1.6.3",
     "@types/webpackbar": "^2.6.0",
     "cross-env": "^5.2.0",
+    "lodash": "^4.17.15",
     "typescript": "^3.1.6",
     "vue": "^2.6.10",
     "vue-loader": "^15.4.2",

@@ -2,6 +2,6 @@
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production'
 
-const argv = require('./utils').getArgv()
+const argv = require('../../bin/utils').getArgv()
 
 require('../dist/start').start(argv)

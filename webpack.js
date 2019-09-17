@@ -10,7 +10,6 @@ module.exports = {
   target: 'node',
   entry: {
     build: resolve('./src/bin/build.ts'),
-    start: resolve('./src/bin/start.ts'),
     dev: resolve('./src/bin/dev.ts'),
     'bootstrap-storybook': resolve('./src/bin/bootstrap-storybook.ts'),
     'empty-module': resolve('./src/utils/empty-module.js')
