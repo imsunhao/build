@@ -7,7 +7,7 @@ import { join, resolve } from 'path'
 import { existsSync, readFileSync } from 'fs'
 import requireFromString from 'require-from-string'
 import consola from 'consola'
-import { compilerDll } from 'src/utils/compiler.webpack'
+import { compilerDll } from 'src-utils-compiler'
 import { getValue } from 'src/utils/get'
 
 export function getDllPlugin({

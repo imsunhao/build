@@ -22,6 +22,7 @@ module.exports = {
     extensions: ['.ts', '.js'],
     alias: {
       'src.config': resolve('./src/config'),
+      'src-utils-compiler$': resolve('./src/utils/compiler.webpack'),
       'src-config-webpack.config.config$': resolve(
         './src/config/webpack.config.config'
       ),

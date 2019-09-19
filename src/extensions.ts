@@ -1,7 +1,7 @@
 import { BuildService } from '@types'
 import { Express } from 'express'
 import { getConfig, routerStackManagement } from 'src/utils'
-import { compilerExtensions } from 'src/utils/compiler.webpack.ts'
+import { compilerExtensions } from 'src-utils-compiler'
 import requireFromString from 'require-from-string'
 import consola from 'consola'
 import { readFileSync } from 'fs'

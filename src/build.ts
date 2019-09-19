@@ -1,5 +1,5 @@
 import { getConfig } from 'src/utils'
-import { compiler } from 'src/utils/compiler.webpack.ts'
+import { compiler } from 'src-utils-compiler'
 
 export function serverBuild() {
   const config = getConfig()

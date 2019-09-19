@@ -4,11 +4,13 @@ import { getRender } from 'src/utils/render'
 import { createBundleRenderer } from 'vue-server-renderer'
 import path from 'path'
 import { readFileSync } from 'fs'
-import chokidar from 'chokidar'
 import cookieParser from 'cookie-parser'
 import { getConfig, BASE_RENDER_OPTIONS } from 'src/utils'
-import { compiler } from 'src/utils/compiler.webpack.ts'
 import consola from 'consola'
+
+
+import { compiler } from 'src-utils-compiler'
+import chokidar from 'chokidar'
 
 /**
  * dev 服务器渲染 服务

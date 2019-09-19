@@ -12,7 +12,36 @@ import express, { Express, Router } from 'express'
 import compression from 'compression'
 import proxyMiddleware from 'http-proxy-middleware'
 import LRU from 'lru-cache'
-import { compilerConfig, compilerDll, compilerConfigSync } from 'src/utils/compiler.webpack'
+import { compilerConfig, compilerDll } from 'src-utils-compiler'
+
+import requireFromString from 'require-from-string'
+
+function compilerConfigSync(
+  configOptions: BuildService.parsedArgs.config,
+  mode: ConfigOptions.webpackMode
+) {
+  const entryName = `${mode === 'none' ? 'production' : mode}_config`
+  const { entry, output } = configOptions
+  if (!(entry && output)) {
+    consola.fatal('[compilerConfigSync]: entry or output is undefined')
+    return process.exit(1)
+  }
+  const path = resolve(output, `${entryName}.js`)
+  let config: any = {}
+  if (existsSync(path)) {
+    try {
+      const souce = readFileSync(path, 'utf-8')
+      config = requireFromString(souce)
+    } catch (error) {
+      consola.fatal('[compilerConfigSync]', error)
+      return process.exit(1)
+    }
+    return config
+  } else {
+    consola.fatal('[compilerConfigSync]: path is unExist!', path)
+    return process.exit(1)
+  }
+}
 
 /**
  * 获取 根目录 地址
