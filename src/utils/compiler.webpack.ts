@@ -2,9 +2,9 @@ import { ConfigOptions, BuildService } from '@types'
 import MFS from 'memory-fs'
 import webpack from 'webpack'
 import consola from 'consola'
-import { getConfigConfig } from 'src/config/webpack.config.config'
-import { getDllConfig } from 'src/config/webpack.dll.config'
-import { getExtensionsConfig } from 'src/config/webpack.extensions.config'
+import { getConfigConfig } from 'src-config-webpack.config.config'
+import { getDllConfig } from 'src-config-webpack.dll.config'
+import { getExtensionsConfig } from 'src-config-webpack.extensions.config'
 import requireFromString from 'require-from-string'
 import { resolve } from 'path'
 import { readFileSync, existsSync } from 'fs'
@@ -41,7 +41,9 @@ function prodCompiler({
   })
 
   clientCompiler.run((err, stats) => {
-    consola.log(stats.toString())
+    console.log(stats.toString({
+      colors: true,
+    }))
   })
 
   const serverCompiler = getCompiler(serverConfig)
@@ -49,8 +51,9 @@ function prodCompiler({
     serverCompilerDone({ stats })
   })
   serverCompiler.run((err, stats) => {
-    consola.log(
+    console.log(
       stats.toString({
+        colors: true,
         errors: false,
         warnings: false
       })
@@ -271,8 +274,9 @@ export function compilerDll(options: ConfigOptions.options): Promise<any> {
 
     compiler.run((err, stats) => {
       {
-        consola.log(
+        console.log(
           stats.toString({
+            colors: true,
             all: false,
             assets: true
           })
@@ -328,8 +332,9 @@ function prodCompilerExtensions(options: ConfigOptions.options) {
         if (err) {
           consola.fatal(err)
         } else {
-          consola.log(
+          console.log(
             stats.toString({
+              colors: true,
               all: false,
               assets: true
             })

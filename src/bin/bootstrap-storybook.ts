@@ -18,7 +18,7 @@ export function bootstrapStorybook(argv: BuildService.parsedArgs) {
 
   delete config.webpack
 
-  config.mode = process.env.NODE_ENV
+  ;(config as any).mode = process.env.NODE_ENV
 
   const template = `#!/usr/bin/env node
 const path = require('path')

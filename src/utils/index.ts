@@ -1,7 +1,7 @@
 import { resolve } from 'path'
 import { ConfigOptions, BuildService } from '@types'
 
-import { getClientConfig, getServerConfig, getClientConfigSync } from 'src/config'
+import { getClientConfig, getServerConfig, getClientConfigSync } from 'src.config'
 import { existsSync, readFileSync } from 'fs'
 import consola from 'consola'
 import { createResolve } from 'src/utils/path'
@@ -12,7 +12,6 @@ import express, { Express, Router } from 'express'
 import compression from 'compression'
 import proxyMiddleware from 'http-proxy-middleware'
 import LRU from 'lru-cache'
-import HappyPack from 'happypack'
 import { compilerConfig, compilerDll, compilerConfigSync } from 'src/utils/compiler.webpack'
 
 /**
@@ -75,7 +74,7 @@ let buildServiceConfig: ConfigOptions.options
  * 设置 Babelrc
  * @param options build 通用 webpack 配置
  */
-function setBabelrc(options: ConfigOptions.options) {
+export function setBabelrc(options: ConfigOptions.options) {
   const babelPlugins = [
     [
       'component',
@@ -117,7 +116,7 @@ function setBabelrc(options: ConfigOptions.options) {
  * 设置 版本号
  * @param options build 通用 webpack 配置
  */
-function setVersion(options: ConfigOptions.options) {
+export function setVersion(options: ConfigOptions.options) {
   if (options.version) return options
   try {
     const PACKAGE = JSON.parse(
@@ -134,11 +133,8 @@ function setVersion(options: ConfigOptions.options) {
 }
 
 function baseSetWebpack(
-  options: ConfigOptions.options,
-  mode: ConfigOptions.webpackMode
+  options: ConfigOptions.options
 ) {
-  options.webpack = options.webpack || {}
-  options.webpack.mode = mode
   options.webpack.server = getServerConfig(options)
   // const isProduction = mode ? mode !== 'development' : true
   // if (!isProduction) {
@@ -162,8 +158,10 @@ async function setWebpack(
   options: ConfigOptions.options,
   mode: ConfigOptions.webpackMode
 ) {
+  options.webpack = options.webpack || {}
+  options.webpack.mode = mode
   options.webpack.client = await getClientConfig(options)
-  baseSetWebpack(options, mode)
+  baseSetWebpack(options)
   return options
 }
 
@@ -176,8 +174,9 @@ export function setWebpackSync(
   options: ConfigOptions.options,
   mode: ConfigOptions.webpackMode
 ) {
+  options.webpack.mode = mode
   options.webpack.client = getClientConfigSync(options)
-  baseSetWebpack(options, mode)
+  baseSetWebpack(options)
   return options
 }
 
@@ -198,7 +197,7 @@ function completeArgvByUserConfig(
  * 设置 静态文件后缀
  * @param options build 通用 webpack 配置
  */
-function setStaticFileExts(options: ConfigOptions.options) {
+export function setStaticFileExts(options: ConfigOptions.options) {
   if (!options.staticFileExts || options.staticFileExts.constructor !== Array) {
     options.staticFileExts = []
   }
@@ -232,7 +231,7 @@ function getInjectContext(configOptions: BuildService.parsedArgs.config) {
 export function getUserConfigSync(
   mode: ConfigOptions.webpackMode,
   argv: BuildService.parsedArgs
-) {
+): ConfigOptions.options {
   const configOptions = getConfigFileOptions(argv)
   const injectContext = getInjectContext(configOptions)
   const rootDir = getRootDir(argv)
@@ -362,7 +361,7 @@ export async function initConfig(
 
   setVersion(options)
 
-  buildServiceConfig = options
+  setBuildServiceConfig(options)
 
   argv = completeArgvByUserConfig(argv, options)
 
@@ -394,16 +393,24 @@ async function checkDll(
 /**
  * 获取 BuildService 配置
  */
-export function getConfig() {
-  if (!buildServiceConfig) {
+export function getConfig(config?: any): ConfigOptions.options {
+  if (!config && !buildServiceConfig) {
     consola.error('getConfig', 'config not init')
+    return process.exit(1)
   }
-  return buildServiceConfig
+  return config || buildServiceConfig
+}
+
+export function setBuildServiceConfig(config: ConfigOptions.options) {
+  if (buildServiceConfig) {
+    consola.error('[setBuildServiceConfig]', 'config has init')
+    return process.exit(1)
+  }
+  buildServiceConfig = config
 }
 
 /**
  * 初始化 服务器
- * @param {*} BuildService.serverInitOptions
  * @return express实例: app
  */
 export function serverInit() {
@@ -678,14 +685,3 @@ export class RouterStackManagement {
  * Express 路由 栈管理中心 实例
  */
 export const routerStackManagement = new RouterStackManagement()
-
-/**
- * 制作 HappyPack plugin
- */
-export function makeHappyPack(id: any, loaders: any) {
-  return new HappyPack({
-    id,
-    threads: 4,
-    loaders
-  })
-}
