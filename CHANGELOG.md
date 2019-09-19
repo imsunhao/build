@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/imsunhao/build/compare/v1.6.27...v1.7.0) (2019-09-19)
+
+
+### Features
+
+* 分离 start 命令 ([14389cb](https://github.com/imsunhao/build/commit/14389cb))
+
 ### [1.6.27](https://github.com/imsunhao/build/compare/v1.6.26...v1.6.27) (2019-09-17)
 
 
