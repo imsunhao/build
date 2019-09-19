@@ -1,6 +1,6 @@
 {
   "name": "@bestminr/start",
-  "version": "1.6.27-alpha.9",
+  "version": "1.7.0",
   "license": "MIT",
   "files": [
     "bin/*",
