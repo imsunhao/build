@@ -1,6 +1,6 @@
 const webpack = require('webpack')
 const config = require('../webpack')
-const startConfig = require('../lib/start/webpack')
+const startConfig = require('../packages/start/webpack')
 
 const mainCompiler = webpack(config)
 
