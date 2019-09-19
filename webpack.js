@@ -1,6 +1,5 @@
 const path = require('path')
 const nodeExternals = require('webpack-node-externals')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const resolve = p => path.resolve(__dirname, '.', p)
 
@@ -23,17 +22,25 @@ module.exports = {
     extensions: ['.ts', '.js'],
     alias: {
       'src.config': resolve('./src/config'),
-      'src-config-webpack.config.config$': resolve('./src/config/webpack.config.config'),
-      'src-config-webpack.dll.config$': resolve('./src/config/webpack.dll.config'),
-      'src-config-webpack.extensions.config$': resolve('./src/config/webpack.extensions.config'),
+      'src-config-webpack.config.config$': resolve(
+        './src/config/webpack.config.config'
+      ),
+      'src-config-webpack.dll.config$': resolve(
+        './src/config/webpack.dll.config'
+      ),
+      'src-config-webpack.extensions.config$': resolve(
+        './src/config/webpack.extensions.config'
+      ),
       src: resolve('./src'),
       config: resolve('./config')
     }
   },
-  externals: nodeExternals({
-    // whitelist: /\.css$/
-    whitelist: [/\.css$/, /\?vue&type=style/]
-  }),
+  externals: [
+    nodeExternals({
+      // whitelist: /\.css$/
+      whitelist: [/\.css$/, /\?vue&type=style/]
+    })
+  ],
   module: {
     rules: [
       {

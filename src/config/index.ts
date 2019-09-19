@@ -1,5 +1,6 @@
 import { getClientConfig, getClientConfigSync } from './webpack.client.config'
 import { getServerConfig } from './webpack.server.config'
+import HappyPack from 'happypack'
 
 export { getClientConfig, getServerConfig, getClientConfigSync }
 
@@ -7,7 +8,6 @@ export { getClientConfig, getServerConfig, getClientConfigSync }
  * 制作 HappyPack plugin
  */
 export function makeHappyPack(id: any, loaders: any) {
-  const HappyPack = require('HappyPack')
   return new HappyPack({
     id,
     threads: 4,
