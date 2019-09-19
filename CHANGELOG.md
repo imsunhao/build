@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.3](https://github.com/imsunhao/build/compare/v1.7.2...v1.7.3) (2019-09-19)
+
+
+### Features
+
+* [dp] remove chokidar ([76c5430](https://github.com/imsunhao/build/commit/76c5430))
+
 ## [1.7.0](https://github.com/imsunhao/build/compare/v1.6.27...v1.7.0) (2019-09-19)
 
 
