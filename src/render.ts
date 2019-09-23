@@ -184,7 +184,14 @@ export function serverRender(app: Express) {
         )
       )
 
-      const publicPath = (config.injectContext ? config.injectContext.STATIC_HOST : '') || config.webpack.client.output.publicPath
+      const STATIC_HOST = config.injectContext ? config.injectContext.STATIC_HOST : ''
+      const env = ['SERVER_ENV', 'PUBLIC_PATH'].reduce(function(obj, key) {
+        obj[key] = process.env[key]
+        return obj
+      }, {} as any)
+
+      const publicPath = env.SERVER_ENV !== 'local' ? STATIC_HOST + env.PUBLIC_PATH : env.PUBLIC_PATH
+
       if (!publicPath) {
         consola.fatal('[serverRender] publicPath is undefined')
         return process.exit(1)
