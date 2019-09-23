@@ -8,6 +8,7 @@ module.exports = {
   devtool: false,
   target: 'node',
   entry: {
+    index: resolve('./src/index.ts'),
     build: resolve('./src/bin/build.ts'),
     dev: resolve('./src/bin/dev.ts'),
     'bootstrap-storybook': resolve('./src/bin/bootstrap-storybook.ts'),
