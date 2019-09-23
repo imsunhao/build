@@ -161,6 +161,15 @@ export function setVersion(options: ConfigOptions.options) {
   }
 }
 
+export function setPublicPath(rootDir, path) {
+  if (path[path.length - 1] !== '/') {
+    path += '/'
+  }
+  const rootDirLength = rootDir ? rootDir.length : 0
+  path = path.slice(rootDirLength)
+  process.env.PUBLIC_PATH = path
+}
+
 function baseSetWebpack(
   options: ConfigOptions.options
 ) {
@@ -168,13 +177,7 @@ function baseSetWebpack(
   // const isProduction = mode ? mode !== 'development' : true
   // if (!isProduction) {
   // }
-  const rootDirLength = options.rootDir ? options.rootDir.length : 0
-  let path = (options.webpack.client as any).output.path
-  if (path[path.length - 1] !== '/') {
-    path += '/'
-  }
-  path = path.slice(rootDirLength)
-  process.env.PUBLIC_PATH = path
+  setPublicPath(options.rootDir, (options.webpack.client as any).output.path)
   return options
 }
 

@@ -1,4 +1,4 @@
-import { getUserConfigSync, serverInit, serverStart, setStaticFileExts, setVersion, setBuildServiceConfig } from 'src/utils'
+import { getUserConfigSync, serverInit, serverStart, setStaticFileExts, setVersion, setBuildServiceConfig, setPublicPath } from 'src/utils'
 
 import { BuildService } from '@types'
 import consola from 'consola'
@@ -19,7 +19,12 @@ async function main(argv: BuildService.parsedArgs) {
 
   setBuildServiceConfig(options)
 
-  process.env.PUBLIC_PATH = options.injectContext.STATIC_HOST || ''
+  if (options.webpack && options.webpack.base && options.webpack.base.output && options.webpack.base.output.path) {
+    setPublicPath(options.rootDir, options.webpack.base.output.path)
+  } else {
+    console.warn('未找到用户设置的 options.webpack.base.output.path. PUBLIC_PATH = injectContext.STATIC_HOST')
+    process.env.PUBLIC_PATH = options.injectContext.STATIC_HOST || ''
+  }
 
   const app = serverInit()
 
