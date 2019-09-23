@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.6](https://github.com/imsunhao/build/compare/v1.7.5...v1.7.6) (2019-09-23)
+
+
+### Features
+
+* 修正 服务器端 public Path ([a2ba473](https://github.com/imsunhao/build/commit/a2ba473))
+
 ### [1.7.5](https://github.com/imsunhao/build/compare/v1.7.4...v1.7.5) (2019-09-23)
 
 
