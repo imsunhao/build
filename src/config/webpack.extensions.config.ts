@@ -3,6 +3,7 @@ import merge from 'webpack-merge'
 import nodeExternals from 'webpack-node-externals'
 import webpack from 'webpack'
 import consola from 'consola'
+import { babelLoder } from './webpack.config.config'
 import { getCommonConfig } from './webpack.common.config'
 
 export function getExtensionsConfig(
@@ -22,13 +23,6 @@ export function getExtensionsConfig(
       'getExtensionsConfig options.extensions.entry or options.babelrc is undefined'
     )
     return process.exit(1)
-  }
-
-  const babelLoder = {
-    loader: 'babel-loader',
-    options: {
-      presets: [['latest-node', { target: 'current' }]]
-    }
   }
 
   let resolve = {}

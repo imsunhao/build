@@ -3,10 +3,20 @@ import webpack from 'webpack'
 import merge from 'webpack-merge'
 import { getCommonConfig } from './webpack.common.config'
 
-const babelLoder = {
+export const babelLoder = {
   loader: 'babel-loader',
   options: {
-    presets: [['latest-node', { target: 'current' }]]
+    presets: [
+      [
+        '@babel/preset-env',
+        {
+          targets: {
+            node: 'current'
+          },
+          corejs: { version: 3 }
+        }
+      ]
+    ]
   }
 }
 

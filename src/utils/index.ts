@@ -1,7 +1,11 @@
 import { resolve } from 'path'
 import { ConfigOptions, BuildService } from '@types'
 
-import { getClientConfig, getServerConfig, getClientConfigSync } from 'src.config'
+import {
+  getClientConfig,
+  getServerConfig,
+  getClientConfigSync
+} from 'src.config'
 import { existsSync, readFileSync } from 'fs'
 import consola from 'consola'
 import { createResolve } from 'src/utils/path'
@@ -115,7 +119,8 @@ export function setBabelrc(options: ConfigOptions.options) {
     [
       '@babel/plugin-transform-runtime',
       {
-        helpers: false
+        helpers: false,
+        corejs: 3
       }
     ],
     '@babel/plugin-syntax-flow',
@@ -170,9 +175,7 @@ export function setPublicPath(rootDir, path) {
   process.env.PUBLIC_PATH = path
 }
 
-function baseSetWebpack(
-  options: ConfigOptions.options
-) {
+function baseSetWebpack(options: ConfigOptions.options) {
   options.webpack.server = getServerConfig(options)
   // const isProduction = mode ? mode !== 'development' : true
   // if (!isProduction) {

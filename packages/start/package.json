@@ -19,6 +19,7 @@
     "npm": ">=5.0.0"
   },
   "dependencies": {
+    "@babel/runtime-corejs3": "^7.6.2",
     "base64url": "^3.0.1",
     "compression": "^1.7.3",
     "consola": "2.2.4",
