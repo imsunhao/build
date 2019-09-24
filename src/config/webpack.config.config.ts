@@ -12,8 +12,7 @@ export const babelLoder = {
         {
           targets: {
             node: 'current'
-          },
-          corejs: { version: 3 }
+          }
         }
       ]
     ]
