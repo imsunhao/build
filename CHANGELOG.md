@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.9](https://github.com/imsunhao/build/compare/v1.7.8...v1.7.9) (2019-09-24)
+
+
+### Features
+
+* 补充 core-js 依赖 ([805a99d](https://github.com/imsunhao/build/commit/805a99d))
+
 ### [1.7.8](https://github.com/imsunhao/build/compare/v1.7.7...v1.7.8) (2019-09-24)
 
 
