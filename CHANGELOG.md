@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.8](https://github.com/imsunhao/build/compare/v1.7.7...v1.7.8) (2019-09-24)
+
+
+### Features
+
+* 进一步完善 corejs3 ([54fe645](https://github.com/imsunhao/build/commit/54fe645))
+
 ### [1.7.7](https://github.com/imsunhao/build/compare/v1.7.6...v1.7.7) (2019-09-24)
 
 
