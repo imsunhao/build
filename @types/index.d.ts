@@ -237,6 +237,7 @@ declare namespace build {
    */
   namespace ConfigOptions {
     type webpackMode = 'development' | 'production' | 'none'
+    type webpackConfigMode =  webpackMode | 'svg'
 
     /**
      * getStyle 额外参数
@@ -250,7 +251,7 @@ declare namespace build {
      */
     interface getOptionsInject {
       argv: BuildService.parsedArgs
-      mode: ConfigOptions.webpackMode
+      mode: ConfigOptions.webpackConfigMode
 
       /**
        * 注入的上下文
@@ -358,6 +359,7 @@ declare namespace build {
         base?: Configuration
         client?: Configuration
         server?: serverConfig
+        svg?: serverConfig
       }
 
       /**
@@ -376,6 +378,10 @@ declare namespace build {
 
       interface serverConfig extends Configuration {
         nodeExternalsWhitelist: any[]
+        webpack: Configuration
+      }
+
+      interface svgConfig extends Configuration {
         webpack: Configuration
       }
 

@@ -28,6 +28,7 @@
   ],
   "bin": {
     "service:build": "./bin/build",
+    "service:build-svg": "./bin/build-svg",
     "service:dev": "./bin/dev",
     "bootstrap:storybook": "./bin/storybook"
   },

@@ -2,6 +2,7 @@ import { resolve } from 'path'
 import { ConfigOptions, BuildService } from '@types'
 
 import {
+  getSvgConfig,
   getClientConfig,
   getServerConfig,
   getClientConfigSync
@@ -191,12 +192,17 @@ function baseSetWebpack(options: ConfigOptions.options) {
  */
 async function setWebpack(
   options: ConfigOptions.options,
-  mode: ConfigOptions.webpackMode
+  mode: ConfigOptions.webpackConfigMode
 ) {
   options.webpack = options.webpack || {}
-  options.webpack.mode = mode
-  options.webpack.client = await getClientConfig(options)
-  baseSetWebpack(options)
+  if (mode === 'svg') {
+    options.webpack.mode = 'development'
+    options.webpack.svg = getSvgConfig(options)
+  } else {
+    options.webpack.mode = mode
+    options.webpack.client = await getClientConfig(options)
+    baseSetWebpack(options)
+  }
   return options
 }
 
@@ -317,7 +323,7 @@ export function getUserConfigSync(
 async function getUserConfig(
   configOptions: BuildService.parsedArgs.config,
   injectContext: any,
-  mode: ConfigOptions.webpackMode,
+  mode: ConfigOptions.webpackConfigMode,
   argv: BuildService.parsedArgs
 ) {
   const rootDir = getRootDir(argv)
@@ -399,6 +405,30 @@ export async function initConfig(
   setBuildServiceConfig(options)
 
   argv = completeArgvByUserConfig(argv, options)
+
+  return options
+}
+
+export async function simpleInitConfig(
+  argv: BuildService.parsedArgs,
+  mode: ConfigOptions.webpackConfigMode
+) {
+  const configOptions = getConfigFileOptions(argv)
+
+  const options: ConfigOptions.options = await getUserConfig(
+    configOptions,
+    {},
+    mode,
+    argv
+  )
+
+  await setWebpack(options, mode)
+
+  options.buildVersion = argv.version
+
+  setVersion(options)
+
+  setBuildServiceConfig(options)
 
   return options
 }

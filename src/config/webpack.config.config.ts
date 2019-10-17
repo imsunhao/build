@@ -19,11 +19,7 @@ export const babelLoder = {
   }
 }
 
-export function getConfigConfig({
-  rootDir
-}: {
-  rootDir: string
-}): webpack.Configuration {
+export function getConfigConfig({ rootDir }: { rootDir: string }): webpack.Configuration {
   return (merge as any)(getCommonConfig('development'), {
     name: 'config',
     devtool: false,

@@ -154,13 +154,28 @@ export function compiler(
   }
 }
 
+
+export function svgCompiler(config: ConfigOptions.options.svgConfig) {
+  const compiler = getCompiler(config)
+  compiler.run((err, stats) => {
+    console.log(
+      stats.toString({
+        colors: true,
+        errors: false,
+        warnings: false
+      })
+    )
+    showError(stats, { isdev: false })
+  })
+}
+
 /**
  * webpack 编译 配置文件
  * @param configOptions 配置文件 设置
  */
 export function compilerConfig(
   configOptions: BuildService.parsedArgs.config,
-  mode: ConfigOptions.webpackMode,
+  mode: ConfigOptions.webpackConfigMode,
   { rootDir }: { rootDir: string }
 ): Promise<() => webpack.Configuration> {
   return new Promise(function(this: any, done) {
@@ -172,7 +187,7 @@ export function compilerConfig(
       consola.fatal('compilerConfig: entry or output is undefined')
       return process.exit(1)
     }
-
+    if (mode === 'svg') mode = 'development'
     webpackConfig.mode = mode
     webpackConfig.entry = {
       [entryName]: entry

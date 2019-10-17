@@ -57,7 +57,7 @@ export function getServerConfig(options: ConfigOptions.options) {
     )
   } else {
     consola.fatal(
-      'getServerConfig options.webpack.server is undefined'
+      '[getServerConfig] options.webpack.server is undefined'
     )
     return process.exit(1)
   }

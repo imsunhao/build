@@ -1,5 +1,6 @@
 import { getConfig } from 'src/utils'
-import { compiler } from 'src-utils-compiler'
+import { compiler, svgCompiler } from 'src-utils-compiler'
+import consola from 'consola'
 
 export function serverBuild() {
   const config = getConfig()
@@ -16,4 +17,16 @@ export function serverBuild() {
     },
     'production'
   )
+}
+
+export function svgBuild() {
+  const config = getConfig()
+  const svgConfig: any = config.webpack ? config.webpack.svg || {} : {}
+
+  if (svgConfig) {
+    svgCompiler(svgConfig)
+  } else {
+    consola.fatal('[svgBuild] svgConfig is undefined!')
+    return process.exit(1)
+  }
 }
