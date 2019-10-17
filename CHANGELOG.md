@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.2](https://github.com/imsunhao/build/compare/v1.8.1...v1.8.2) (2019-10-17)
+
+
+### Features
+
+* 完成 custom build 移除单独的 svg build ([8fdeb17](https://github.com/imsunhao/build/commit/8fdeb17))
+
 ### [1.8.1](https://github.com/imsunhao/build/compare/v1.8.0...v1.8.1) (2019-10-17)
 
 
