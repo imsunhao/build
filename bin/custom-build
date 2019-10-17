@@ -4,4 +4,4 @@ process.env.SPRITE = true
 
 const argv = require('./utils').getArgv()
 
-require('../dist/build-svg').start(argv)
+require('../dist/custom-build').start(argv)

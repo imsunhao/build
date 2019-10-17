@@ -155,7 +155,7 @@ export function compiler(
 }
 
 
-export function svgCompiler(config: ConfigOptions.options.svgConfig) {
+export function svgCompiler(config: ConfigOptions.options.customConfig) {
   const compiler = getCompiler(config)
   compiler.run((err, stats) => {
     console.log(
@@ -175,7 +175,7 @@ export function svgCompiler(config: ConfigOptions.options.svgConfig) {
  */
 export function compilerConfig(
   configOptions: BuildService.parsedArgs.config,
-  mode: ConfigOptions.webpackConfigMode,
+  mode: ConfigOptions.webpackMode,
   { rootDir }: { rootDir: string }
 ): Promise<() => webpack.Configuration> {
   return new Promise(function(this: any, done) {
@@ -187,7 +187,6 @@ export function compilerConfig(
       consola.fatal('compilerConfig: entry or output is undefined')
       return process.exit(1)
     }
-    if (mode === 'svg') mode = 'development'
     webpackConfig.mode = mode
     webpackConfig.entry = {
       [entryName]: entry

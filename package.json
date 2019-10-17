@@ -28,9 +28,9 @@
   ],
   "bin": {
     "service:build": "./bin/build",
-    "service:build-svg": "./bin/build-svg",
+    "service:custom-build": "./bin/custom-build",
     "service:dev": "./bin/dev",
-    "bootstrap:storybook": "./bin/storybook"
+    "service:bootstrap-storybook": "./bin/storybook"
   },
   "main": "./dist/index.js",
   "typings": "@types/index.d.ts",

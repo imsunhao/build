@@ -2,7 +2,7 @@ import { resolve } from 'path'
 import { ConfigOptions, BuildService } from '@types'
 
 import {
-  getSvgConfig,
+  getCustomConfig,
   getClientConfig,
   getServerConfig,
   getClientConfigSync
@@ -192,18 +192,28 @@ function baseSetWebpack(options: ConfigOptions.options) {
  */
 async function setWebpack(
   options: ConfigOptions.options,
-  mode: ConfigOptions.webpackConfigMode
+  mode: ConfigOptions.webpackMode
 ) {
   options.webpack = options.webpack || {}
-  if (mode === 'svg') {
-    options.webpack.mode = 'development'
-    options.webpack.svg = getSvgConfig(options)
-  } else {
-    options.webpack.mode = mode
-    options.webpack.client = await getClientConfig(options)
-    baseSetWebpack(options)
-  }
+  options.webpack.mode = mode
+  options.webpack.client = await getClientConfig(options)
+  baseSetWebpack(options)
   return options
+}
+
+function setCustomBuild(
+  options: ConfigOptions.options,
+  argv: BuildService.parsedArgs,
+  mode: ConfigOptions.webpackMode
+) {
+  const target = argv.target
+  if (!target) {
+    consola.fatal('[setCustomBuild] target is undefined!')
+    return process.exit(1)
+  }
+  options.webpack = options.webpack || {}
+  options.webpack.mode = mode
+  options.customBuild = getCustomConfig(options, target)
 }
 
 /**
@@ -323,7 +333,7 @@ export function getUserConfigSync(
 async function getUserConfig(
   configOptions: BuildService.parsedArgs.config,
   injectContext: any,
-  mode: ConfigOptions.webpackConfigMode,
+  mode: ConfigOptions.webpackMode,
   argv: BuildService.parsedArgs
 ) {
   const rootDir = getRootDir(argv)
@@ -409,9 +419,9 @@ export async function initConfig(
   return options
 }
 
-export async function simpleInitConfig(
+export async function customBuildInitConfig(
   argv: BuildService.parsedArgs,
-  mode: ConfigOptions.webpackConfigMode
+  mode: ConfigOptions.webpackMode
 ) {
   const configOptions = getConfigFileOptions(argv)
 
@@ -422,7 +432,7 @@ export async function simpleInitConfig(
     argv
   )
 
-  await setWebpack(options, mode)
+  await setCustomBuild(options, argv, mode)
 
   options.buildVersion = argv.version
 

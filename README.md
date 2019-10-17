@@ -18,7 +18,8 @@
 - 开发项目 `service:dev`
 - 打包项目 `service:build`
 - 启动项目 `service:start`
-- storybook webpack扩展支持 `build-storybook`
+- storybook webpack扩展支持 `service:bootstrap-storybook`
+- 定制打包 webpack支持 `service:custom-buid`
 
 ### 命令参数 帮助 -h
 

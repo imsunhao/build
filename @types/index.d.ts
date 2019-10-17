@@ -58,6 +58,11 @@ declare namespace build {
        * * 仅仅打包dll
        */
       dll: boolean
+
+      /**
+       * 定制打包 名称
+       */
+      target: string
     }
 
     namespace parsedArgs {
@@ -182,11 +187,7 @@ declare namespace build {
          */
         publicPath?: string
       }
-      type renderFn = (
-        req: BuildService.Request,
-        res: expressResponse,
-        next: NextFunction
-      ) => void
+      type renderFn = (req: BuildService.Request, res: expressResponse, next: NextFunction) => void
       type updateType = 'bundle' | 'clientManifest' | 'template'
     }
 
@@ -213,12 +214,22 @@ declare namespace build {
        * dev compiler 参数
        */
       interface devCompilerOptions extends compilerBaseOptions {
-        clientCompilerDone: (
-          { devMiddleware, stats }: { devMiddleware: any; stats: webpack.Stats }
-        ) => void
-        serverCompilerDone: (
-          { err, stats, mfs }: { err: any; stats: webpack.Stats; mfs: MFS }
-        ) => void
+        clientCompilerDone: ({
+          devMiddleware,
+          stats
+        }: {
+          devMiddleware: any
+          stats: webpack.Stats
+        }) => void
+        serverCompilerDone: ({
+          err,
+          stats,
+          mfs
+        }: {
+          err: any
+          stats: webpack.Stats
+          mfs: MFS
+        }) => void
         app: Express
       }
 
@@ -237,7 +248,6 @@ declare namespace build {
    */
   namespace ConfigOptions {
     type webpackMode = 'development' | 'production' | 'none'
-    type webpackConfigMode =  webpackMode | 'svg'
 
     /**
      * getStyle 额外参数
@@ -251,7 +261,7 @@ declare namespace build {
      */
     interface getOptionsInject {
       argv: BuildService.parsedArgs
-      mode: ConfigOptions.webpackConfigMode
+      mode: ConfigOptions.webpackMode
 
       /**
        * 注入的上下文
@@ -318,6 +328,11 @@ declare namespace build {
       webpack?: options.webpack
 
       /**
+       * 定制打包 配置
+       */
+      customBuild?: options.customBuild
+
+      /**
        * exclude 排除 第三方包
        */
       exclude?: options.exclude
@@ -359,7 +374,13 @@ declare namespace build {
         base?: Configuration
         client?: Configuration
         server?: serverConfig
-        svg?: serverConfig
+      }
+
+      /**
+       * 定制打包 配置
+       */
+      type customBuild = {
+        [key in string]: Configuration
       }
 
       /**
@@ -381,7 +402,7 @@ declare namespace build {
         webpack: Configuration
       }
 
-      interface svgConfig extends Configuration {
+      interface customConfig extends Configuration {
         webpack: Configuration
       }
 

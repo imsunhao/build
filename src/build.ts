@@ -19,14 +19,14 @@ export function serverBuild() {
   )
 }
 
-export function svgBuild() {
+export function customBuild() {
   const config = getConfig()
-  const svgConfig: any = config.webpack ? config.webpack.svg || {} : {}
+  const customConfig: any = config.customBuild || {}
 
-  if (svgConfig) {
-    svgCompiler(svgConfig)
+  if (customConfig) {
+    svgCompiler(customConfig)
   } else {
-    consola.fatal('[svgBuild] svgConfig is undefined!')
+    consola.fatal('[customBuild] customConfig is undefined!')
     return process.exit(1)
   }
 }

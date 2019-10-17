@@ -1,9 +1,9 @@
 import { getClientConfig, getClientConfigSync } from './webpack.client.config'
-import { getSvgConfig } from './webpack.svg.config'
+import { getCustomConfig } from './webpack.custom-build.config'
 import { getServerConfig } from './webpack.server.config'
 import HappyPack from 'happypack'
 
-export { getClientConfig, getServerConfig, getClientConfigSync, getSvgConfig }
+export { getClientConfig, getServerConfig, getClientConfigSync, getCustomConfig }
 
 /**
  * 制作 HappyPack plugin

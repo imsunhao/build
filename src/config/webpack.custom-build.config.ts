@@ -4,31 +4,39 @@ import consola from 'consola'
 
 import { ConfigOptions } from '@types'
 
-export function getSvgConfig(options: ConfigOptions.options) {
+export function getCustomConfig(options: ConfigOptions.options, target: string) {
   if (!(options.webpack && options.webpack.mode)) {
     consola.fatal(
-      '[getSvgConfig] options.webpack or options.webpack.mode is undefined'
+      '[getCustomConfig] options.webpack or options.webpack.mode is undefined'
     )
     return process.exit(1)
   }
-  if (options.webpack.svg) {
-    const svg = options.webpack.svg.webpack || options.webpack.svg || {}
+
+  if (!(options.customBuild && options.customBuild[target])) {
+    consola.fatal(
+      `[getCustomConfig] options.customBuild or options.customBuild[${target}] is undefined`
+    )
+    return process.exit(1)
+  }
+
+  if (options.customBuild[target]) {
+    const customBuild = options.customBuild[target] || {}
     const mode = options.webpack.mode || 'production'
     const base: any = options.webpack ? options.webpack.base || {} : {}
     return (merge as any)(
       getCommonBaseConfig(options),
       {
-        name: 'svg',
+        name: target,
         mode,
         devtool: false,
         output: base.output,
         resolve: base.resolve
       },
-      svg
+      customBuild
     )
   } else {
     consola.fatal(
-      '[getServerConfig] options.webpack.svg is undefined'
+      `[getServerConfig] options.webpack[${target}] is undefined`
     )
     return process.exit(1)
   }

@@ -10,7 +10,7 @@ module.exports = {
   entry: {
     index: resolve('./src/index.ts'),
     build: resolve('./src/bin/build.ts'),
-    'build-svg': resolve('./src/bin/build-svg.ts'),
+    'custom-build': resolve('./src/bin/custom-build.ts'),
     dev: resolve('./src/bin/dev.ts'),
     'bootstrap-storybook': resolve('./src/bin/bootstrap-storybook.ts'),
     'empty-module': resolve('./src/utils/empty-module.js')

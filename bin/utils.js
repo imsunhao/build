@@ -9,6 +9,7 @@ function getArgv() {
     h: 'help',
     e: 'entry',
     o: 'output',
+    t: 'target',
     d: 'dll',
     c: 'config-file',
     fd: 'fileDescriptor',
@@ -16,7 +17,7 @@ function getArgv() {
     cl: 'clear',
     v: 'version'
   }
-  const string = ['H', 'c', 'fd', 'e', 'o', 'ic']
+  const string = ['H', 'c', 'fd', 'e', 'o', 'ic', 't']
   const argv = parseArgs(process.argv.slice(2), {
     alias,
     boolean: ['h', 'd', 'v', 'cl'],
