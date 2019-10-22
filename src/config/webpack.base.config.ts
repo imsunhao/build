@@ -67,16 +67,6 @@ export function getCommonBaseConfig(options: ConfigOptions.options) {
               preserveWhitespace: false
             }
           }
-        },
-        {
-          test: /\.js$/,
-          loader: 'happypack/loader?id=babel',
-          exclude: /node_modules/
-        },
-        {
-          test: /\.tsx?$/,
-          loader: 'happypack/loader?id=ts',
-          exclude: /node_modules/
         }
       ]
     },

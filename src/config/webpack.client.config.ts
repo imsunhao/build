@@ -12,6 +12,29 @@ function baseGetClientConfig(options: ConfigOptions.options) {
   const { externals, alias } = getExternals(options, 'client')
   const mode = options.webpack.mode || 'production'
   const isProd = mode === 'production'
+  const client = options.webpack ? options.webpack.client || {} : {}
+  const rules = []
+  if (client.module && client.module.rules) {
+    const babelJS = client.module.rules.find(rule => rule.test === /\.js$/)
+    if (!babelJS) {
+      rules.push({
+        test: /\.js$/,
+        loader: 'happypack/loader?id=babel',
+        exclude: /node_modules/
+      })
+    }
+    const babelTS = client.module.rules.find(rule => rule.test === /\.tsx?$/)
+    if (!babelTS) {
+      rules.push({
+        test: /\.tsx?$/,
+        use: [
+          'happypack/loader?id=babel',
+          'happypack/loader?id=ts'
+        ],
+        exclude: /node_modules/
+      })
+    }
+  }
   return (merge as any)(
     getBaseConfig(options),
     {
@@ -19,8 +42,11 @@ function baseGetClientConfig(options: ConfigOptions.options) {
       entry: {
         app: './src/entry-client.js'
       },
+      module: {
+        rules
+      },
       resolve: {
-        alias,
+        alias
       },
       externals,
       output: {
@@ -28,9 +54,7 @@ function baseGetClientConfig(options: ConfigOptions.options) {
       },
       optimization: {
         runtimeChunk: !isProd,
-        minimizer: [
-          new OptimizeCSSAssetsPlugin()
-        ],
+        minimizer: [new OptimizeCSSAssetsPlugin()],
         splitChunks: {
           cacheGroups: {
             styles: {
@@ -49,28 +73,18 @@ function baseGetClientConfig(options: ConfigOptions.options) {
         })
       ]
     },
-    getStyle(options, { isServer: false }),
+    getStyle(options, { isServer: false })
   )
 }
 
 export async function getClientConfig(options: ConfigOptions.options) {
   const client = options.webpack ? options.webpack.client || {} : {}
 
-  return (merge as any)(
-    baseGetClientConfig(options),
-    await getClientDllPlugin(options),
-    client,
-  )
+  return (merge as any)(baseGetClientConfig(options), await getClientDllPlugin(options), client)
 }
-
 
 export function getClientConfigSync(options: ConfigOptions.options) {
   const client = options.webpack ? options.webpack.client || {} : {}
 
-  return (merge as any)(
-    baseGetClientConfig(options),
-    getClientDllPluginSync(options),
-    client,
-  )
-
+  return (merge as any)(baseGetClientConfig(options), getClientDllPluginSync(options), client)
 }

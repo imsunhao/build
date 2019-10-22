@@ -11,9 +11,7 @@ import { getExternals } from 'src/utils/plugins.webpack'
 
 export function getServerConfig(options: ConfigOptions.options) {
   if (!(options.webpack && options.webpack.mode)) {
-    consola.fatal(
-      'getBaseConfig options.babelrc or options.webpack is undefined'
-    )
+    consola.fatal('getBaseConfig options.babelrc or options.webpack is undefined')
     return process.exit(1)
   }
   if (options.webpack.server) {
@@ -21,24 +19,40 @@ export function getServerConfig(options: ConfigOptions.options) {
     const mode = options.webpack.mode || 'production'
     const isProd = mode === 'production'
     const { externals, alias } = getExternals(options, 'server')
-    const whitelist = [/\.css$/, /\?vue&type=style/].concat(options.webpack.server.nodeExternalsWhitelist || []).concat(externals as any)
+    const whitelist = [/\.css$/, /\?vue&type=style/]
+      .concat(options.webpack.server.nodeExternalsWhitelist || [])
+      .concat(externals as any)
     return (merge as any)(
       getBaseConfig(options),
       {
         name: 'server',
         target: 'node',
         entry: './src/entry-server.js',
+        module: {
+          rules: [
+            {
+              test: /\.js$/,
+              loader: 'happypack/loader?id=babel',
+              exclude: /node_modules/
+            },
+            {
+              test: /\.tsx?$/,
+              loader: 'happypack/loader?id=ts',
+              exclude: /node_modules/
+            }
+          ]
+        },
         output: {
           libraryTarget: 'commonjs2'
         },
         resolve: {
-          alias,
+          alias
         },
         externals: [
           nodeExternals({
             // whitelist: /\.css$/
             whitelist
-          }),
+          })
         ],
         performance: {
           maxEntrypointSize: 1024 * 1024 * 6,
@@ -56,9 +70,7 @@ export function getServerConfig(options: ConfigOptions.options) {
       server
     )
   } else {
-    consola.fatal(
-      '[getServerConfig] options.webpack.server is undefined'
-    )
+    consola.fatal('[getServerConfig] options.webpack.server is undefined')
     return process.exit(1)
   }
 }
