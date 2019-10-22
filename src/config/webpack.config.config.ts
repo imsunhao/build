@@ -36,6 +36,11 @@ export function getConfigConfig({ rootDir }: { rootDir: string }): webpack.Confi
     module: {
       rules: [
         {
+          test: /\.babelrc$/,
+          use: 'json-loader',
+          exclude: /node_modules/
+        },
+        {
           test: /\.js$/,
           use: babelLoder,
           exclude: /node_modules/
