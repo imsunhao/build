@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.3](https://github.com/imsunhao/build/compare/v1.8.2...v1.8.3) (2019-10-22)
+
+
+### Features
+
+* 支持 覆盖 client端 js 与 ts loader ([275e826](https://github.com/imsunhao/build/commit/275e826))
+* 添加 babelrc文件解析支持 ([84fb110](https://github.com/imsunhao/build/commit/84fb110))
+
 ### [1.8.2](https://github.com/imsunhao/build/compare/v1.8.1...v1.8.2) (2019-10-17)
 
 
