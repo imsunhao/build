@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.8.5](https://github.com/imsunhao/build/compare/v1.8.4...v1.8.5) (2019-10-25)
+
+
+### Features
+
+* 移除 dll 多余的 rules ([f7f6d65](https://github.com/imsunhao/build/commit/f7f6d65))
+
 ### [1.8.4](https://github.com/imsunhao/build/compare/v1.8.3...v1.8.4) (2019-10-25)
 
 
