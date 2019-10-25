@@ -25,20 +25,6 @@ export function getDllConfig(options: ConfigOptions.options): webpack.Configurat
       name: 'dll',
       mode,
       entry: dll.entry,
-      module: {
-        rules: [
-          {
-            test: /\.js$/,
-            loader: 'happypack/loader?id=babel',
-            exclude: /node_modules/
-          },
-          {
-            test: /\.tsx?$/,
-            use: ['happypack/loader?id=babel', 'happypack/loader?id=ts'],
-            exclude: /node_modules/
-          }
-        ]
-      },
       output: {
         path: dll.path,
         publicPath: dll.publicPath,
