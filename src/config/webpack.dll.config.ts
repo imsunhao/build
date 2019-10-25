@@ -9,9 +9,7 @@ import webpack from 'webpack'
 import { getCommonConfig } from './webpack.common.config'
 import VueSSRClientPlugin from 'vue-server-renderer/client-plugin'
 
-export function getDllConfig(
-  options: ConfigOptions.options
-): webpack.Configuration {
+export function getDllConfig(options: ConfigOptions.options): webpack.Configuration {
   if (!(options.webpack && options.webpack.dll)) {
     consola.fatal('getDllConfig options.webpack.dll is undefined')
     return process.exit(1)
@@ -27,6 +25,20 @@ export function getDllConfig(
       name: 'dll',
       mode,
       entry: dll.entry,
+      module: {
+        rules: [
+          {
+            test: /\.js$/,
+            loader: 'happypack/loader?id=babel',
+            exclude: /node_modules/
+          },
+          {
+            test: /\.tsx?$/,
+            use: ['happypack/loader?id=babel', 'happypack/loader?id=ts'],
+            exclude: /node_modules/
+          }
+        ]
+      },
       output: {
         path: dll.path,
         publicPath: dll.publicPath,
@@ -51,7 +63,7 @@ export function getDllConfig(
       plugins: [
         new VueSSRClientPlugin({
           filename: 'vue-ssr-dll-manifest.json'
-        }),
+        })
       ]
     },
     getDllPlugin(dll),

@@ -6,9 +6,7 @@ import consola from 'consola'
 import { babelLoder } from './webpack.config.config'
 import { getCommonConfig } from './webpack.common.config'
 
-export function getExtensionsConfig(
-  options: ConfigOptions.options
-): webpack.Configuration {
+export function getExtensionsConfig(options: ConfigOptions.options): webpack.Configuration {
   if (
     !(
       options.extensions &&
@@ -19,9 +17,7 @@ export function getExtensionsConfig(
       options.webpack.mode
     )
   ) {
-    consola.fatal(
-      'getExtensionsConfig options.extensions.entry or options.babelrc is undefined'
-    )
+    consola.fatal('getExtensionsConfig options.extensions.entry or options.babelrc is undefined')
     return process.exit(1)
   }
 
@@ -60,7 +56,6 @@ export function getExtensionsConfig(
             exclude: /node_modules/,
             use: ['ts-loader']
           },
-
           {
             test: /\.js$/,
             use: babelLoder,
