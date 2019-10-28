@@ -37,3 +37,5 @@ export function resoveBuildConfig(INJECT_CONTEXT, CONFIG) {
   // console.log('--------------------------')
   return options
 }
+
+export { initConfig } from 'src/utils'

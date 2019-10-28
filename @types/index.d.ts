@@ -343,6 +343,13 @@ declare namespace build {
        * * 路由
        */
       extensions?: options.extensions
+
+      /**
+       * 配套插件
+       * * 与 SSR 无关
+       * * 命令参数
+       */
+      plugins? : Partial<options.plugins>
     }
     namespace options {
       /**
@@ -381,6 +388,23 @@ declare namespace build {
        */
       type customBuild = {
         [key in string]: Configuration
+      }
+
+      /**
+       * 配套插件
+       */
+      type plugins = {
+        /**
+         * custom build element-ui
+         * - 来源 @bestminr/ui-xxx 项目
+         */
+        'build-style': {
+          /**
+           * element-variables.scss 路径
+           */
+          entry: string
+          output: string
+        }
       }
 
       /**
