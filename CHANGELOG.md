@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/imsunhao/build/compare/v1.8.6...v1.9.0) (2019-10-28)
+
+
+### Features
+
+* 调整 server端 style样式加载问题 ([1806ddd](https://github.com/imsunhao/build/commit/1806ddd))
+
 ### [1.8.6](https://github.com/imsunhao/build/compare/v1.8.5...v1.8.6) (2019-10-28)
 
 
