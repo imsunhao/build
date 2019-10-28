@@ -24,15 +24,11 @@ export function getStyle(
         ? [
             {
               test: /\.scss$/,
-              use: !isProd
-                ? ['vue-style-loader', 'css-loader', getSassLoader(sass)]
-                : ['null-loader']
+              use: 'null-loader'
             },
             {
               test: /\.css$/,
-              use: !isProd
-                ? ['vue-style-loader', 'css-loader']
-                : ['null-loader']
+              use: 'null-loader'
             }
           ]
         : [
@@ -46,31 +42,14 @@ export function getStyle(
             },
             {
               test: /\.css$/,
-              use: [
-                isProd ? MiniCssExtractPlugin.loader : 'vue-style-loader',
-                'css-loader'
-              ]
+              use: [isProd ? MiniCssExtractPlugin.loader : 'vue-style-loader', 'css-loader']
             }
           ]
     },
-    optimization: {
-      splitChunks: {
-        cacheGroups: {
-          styles: {
-            name: 'styles',
-            test: /\.css$/,
-            chunks: 'all',
-            enforce: true
-          }
-        }
-      }
-    },
-    plugins: isProd
-      ? [
-          new MiniCssExtractPlugin({
-            filename: '[contenthash].css'
-          })
-        ]
-      : []
+    plugins: [
+      new MiniCssExtractPlugin({
+        filename: '[contenthash].css'
+      })
+    ]
   }
 }
