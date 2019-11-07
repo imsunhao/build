@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --max-old-space-size=4096
+
 process.env.NODE_ENV = process.env.NODE_ENV || 'development'
 process.env.SPRITE = true
 

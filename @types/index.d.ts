@@ -470,6 +470,7 @@ declare namespace build {
        * build 通用 webpack 配置 - sass 配置
        */
       interface sass {
+        file?: string
         data?: string
         sourceMap?: boolean
       }
