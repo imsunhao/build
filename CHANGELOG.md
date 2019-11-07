@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.1](https://github.com/imsunhao/build/compare/v1.9.0...v1.9.1) (2019-11-07)
+
+
+### Features
+
+* 设置 nodejs 最大内存限制 ([803ef33](https://github.com/imsunhao/build/commit/803ef33))
+
 ## [1.9.0](https://github.com/imsunhao/build/compare/v1.8.6...v1.9.0) (2019-10-28)
 
 
