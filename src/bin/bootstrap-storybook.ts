@@ -20,7 +20,7 @@ export function bootstrapStorybook(argv: BuildService.parsedArgs) {
 
   ;(config as any).mode = process.env.NODE_ENV
 
-  const template = `#!/usr/bin/env node
+  const template = `// #!/usr/bin/env node
 const path = require('path')
 const rootDir = '${rootDir}'
 const resolve = function (p) {
