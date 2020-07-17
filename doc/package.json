@@ -32,7 +32,7 @@
     "@bestminr/vuex-utils": "^0.2.1-alpha.0",
     "axios": "^0.17.0",
     "cross-env": "^4.0.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "tslib": "^1.9.3",
     "typescript": "^3.4.5",
     "vue": "^2.6.10",
